@@ -1,0 +1,261 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Untitled Document</title>
+<style type="text/css">
+@font-face {
+  font-family: 'Fredoka One';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Fredoka One'), local('FredokaOne-Regular'), url('font.woff') format('woff');
+}
+body {
+	color: white;
+	background-color: #F15A24;
+	font-family: 'Fredoka One';
+	padding:0;
+	margin:0;
+}
+a.button {
+	position:absolute;
+	height:48px;
+	width:48px;
+	background-repeat:no-repeat;
+	background-position:center center;
+	cursor:pointer;
+}
+a#stop {
+	bottom:180px;
+	left:100px;
+	background-image:url(images/stop.png);
+}
+a#stop:hover {
+	background-image:url(images/stop_hover.png);
+}
+a#sound {
+	bottom:180px;
+	right:170px;
+	background-image:url(images/sound.png);
+}
+a#sound:hover {
+	background-image:url(images/sound_hover.png);
+}
+a#sound.off {
+	background-image:url(images/soundoff.png);
+}
+a#sound.off:hover {
+	background-image:url(images/soundoff_hover.png);
+}
+#panel {
+	position: absolute;
+	background-color: white;
+	border-radius: 15px;
+	top: 20px;
+	left: 20px;
+	right: 90px;
+	bottom: 45px;
+	z-index: -1;
+}
+#minutes {
+	position:absolute;
+	top:0;
+	right:0;
+	color: white;
+	width: 40px;
+	padding: 2px 2px 1px 33px;
+	margin:0;
+}
+li {
+	background-color:white;
+	font-size:12px;
+	border-bottom:1px solid #F15A24;
+	list-style-type:none;
+	list-style-position:outside;
+	width:40px;
+	line-height: 50%;
+	cursor:pointer;
+}
+li:nth-child(10n) {
+	list-style-type:decimal;
+	padding-left: 2px;
+	margin-left: -2px;
+}
+li:nth-child(10n+5) {
+	padding-left: 5px;
+	margin-left: -5px;
+}
+li.included,
+li:hover {
+	background-color:#F30;
+}
+
+
+.counter-up {
+	background-image:url(images/up.png);
+}
+.counter-up:hover {
+	background-image:url(images/up_hover.png);
+}
+.counter-down {
+	background-image:url(images/down.png);
+}
+.counter-down:hover {
+	background-image:url(images/down_hover.png);
+}
+.digit-container {
+	position:absolute;
+	width:80px;
+	height:120px;
+}
+#minute-container {
+	position:absolute;
+	left:0;
+	top:0;
+}
+#second-container {
+	position:absolute;
+	right:0;
+	top:0;
+}
+#minute_up {
+	left:30px;
+	top:0;
+}
+#minute_down {
+	left:30px;
+	bottom:0;
+}
+#second_up {
+	right:30px;
+	top:0;
+}
+#second_down {
+	right:30px;
+	bottom:0;
+}
+#digits{
+	position:absolute;
+	right:130px;
+	left:50px;
+	bottom:0;
+	border:1px solid red;
+	font-size:65px;
+	height:128px;
+	color: #F15A24;
+}
+
+
+
+#logo{
+	position:absolute;
+	top: 70px;
+	left: 50%;
+	margin-left: -100px;
+}
+#logo-caption {
+	position:absolute;
+	color:#F15A24;
+	font-size:27px;
+	text-align:center;
+	display:block;
+	left:0;
+	right:0;
+	top:210px;
+	margin-left: -70px;
+}
+
+
+
+#colon {
+	position:absolute;
+	left:0;
+	right:0;
+	bottom:50px;
+	text-align: center
+}
+</style>
+</head>
+<body>
+<div id="panel"></div>
+<img id="logo" src="images/logo128.png"/>
+<div id="logo-caption">1-click timer</div>
+<a id="stop" class="button"></a>
+<a id="sound" class="button off"></a>
+<div id="digits">
+	<div id="minute-container" class="digit-container">
+    	<a id="minute_up" class="button counter-up"></a>
+        <div id="minute-counter">10</div>
+    	<a id="minute_down" class="button counter-down"></a>
+    </div>
+    <div id="colon">:</div>
+	<div id="second-container" class="digit-container">
+    	<a id="second_up" class="button counter-up"></a>
+        <div id="second-counter">21</div>
+    	<a id="second_down" class="button counter-down"></a>
+    </div>
+</div>
+<ol id="minutes">
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+</ol>
+</body>
+</html>

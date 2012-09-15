@@ -1,0 +1,64 @@
+@font-face {
+  font-family: 'Anton';
+  font-style: normal;
+  font-weight: normal;
+  src: local('Anton'), url('anton.woff') format('woff');
+}
+body{
+	color:white;
+	background-color:#F15A24;
+	padding:0;
+	margin:0;
+	font-family: 'Anton';
+	font-size:14px;
+	padding:0;
+	margin:0;
+	overflow:hidden;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	height: 107px;
+}
+#logo{
+	vertical-align: middle;
+}
+#logo-caption {
+	display: block;
+	cursor: default;
+	font-size: 21px;
+	position: absolute;
+	left: 50px;
+	top: 11px;
+}
+ul {
+	position:absolute;
+	left:0;
+	top:50px;
+	display:inline-block;
+	margin:0;
+	padding:0;
+	list-style:none;
+}
+li {
+	display:inline-block;
+	margin:2px 1px 0 0;
+	padding:0;
+}
+li:first-child {
+	margin-left:4px;
+}
+a {
+	background-color:white;
+	border-radius:2px;
+	color:#F15A24;
+	padding:0 3px;
+	text-decoration:none;
+	cursor:pointer;
+}
+a:hover {
+	color:#29ABE2;
+}
+audio {
+	position:absolute;
+	top:77px;
+	left:0;
+}

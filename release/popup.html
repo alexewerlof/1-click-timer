@@ -1,0 +1,29 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="popup.css"/>
+<title>1-click timer - Popup</title>
+<script type="text/javascript" src="popup.js" defer="defer"></script>
+</head>
+<body>
+    <div id="panel"></div>
+    <img id="logo" src="images/logo128.png"/>
+    <a id="logo-caption" href="https://chrome.google.com/webstore/detail/igloknlllonknnbkfgggfkigmeegmakf" target="_new">1-click timer</a>
+    <img id="madeinsweden" src="images/madeinsweden.png" title="Designer & Programer: Alex Hanif"/>
+
+    <a id="pause-play" class="button play" href="javascript:void(0)" onclick="onPlayPause()"></a>
+    <a id="reset" class="button reset" href="javascript:void(0)" onclick="onReset()"></a>
+    <a id="mute-sound" class="button sound" href="javascript:void(0)" onclick="onMuteSound()"></a>
+    <a id="minute-up" class="button small up" href="javascript:void(0)" onclick="changeCounter(60)"></a>
+    <a id="minute-down" class="button small down" href="javascript:void(0)" onclick="changeCounter(-60)"></a>
+    <a id="second-up" class="button small up" href="javascript:void(0)" onclick="changeCounter(1)"></a>
+    <a id="second-down" class="button small down" href="javascript:void(0)" onclick="changeCounter(-1)"></a>
+    <div id="minute-counter" class="counter" onmousewheel="onMinuteWheel(event)">00</div>
+    <div id="colon">:</div>
+    <div id="second-counter" class="counter" onmousewheel="onSecondWheel(event)">00</div>
+
+    <ol id="minute-selector" onmousewheel="onMinuteWheel(event)">
+    </ol>
+</body>
+</html>
