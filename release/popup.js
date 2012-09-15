@@ -1,7 +1,7 @@
 //called by background to update the counter value
 function updateCounter () {
-	document.getElementById( "minute-counter" ).innerHTML =  timer.mStr ;
-	document.getElementById( "second-counter" ).innerHTML =  timer.sStr ;
+	minuteCounterDigit.innerHTML =  timer.mStr ;
+	secondCounterDigit.innerHTML =  timer.sStr ;
 	
 	// update the #minute-selector
 	var m = timer.m;
@@ -43,8 +43,9 @@ function changeCounter ( offset ) {
 	timer.setTimerOffset( offset );
 	updateCounter();
 }
+
 //** toggles stop status
-function onPlayPause() {
+function onPlayPause ( evt ) {
 	if ( timer.isCounting() ) {
 		timer.stop();
 	} else {
@@ -54,20 +55,20 @@ function onPlayPause() {
 }
 
 //** triggers when user presses the rest button
-function onReset() {
+function onReset ( evt ) {
 	timer.stop();
 	timer.setTimer( 0 );
 }
 
 //** toggles sound
-function onMuteSound() {
+function onMuteSound ( evt ) {
 	timer.setMute( !timer.isMute() );
 	updateMuteButton();
 }
 
 //** fires when the user uses mouse wheel over the minute counter
-function onMinuteWheel( event) {
-	if ( event.wheelDelta > 0 ) {
+function onMinuteWheel ( evt ) {
+	if ( evt.wheelDelta > 0 ) {
 		changeCounter( 60 );
 	} else {
 		changeCounter( -60 );
@@ -76,8 +77,8 @@ function onMinuteWheel( event) {
 }
 
 //** fires when the user uses mouse wheel over the second counter
-function onSecondWheel( event ) {
-	if ( event.wheelDelta > 0 ) {
+function onSecondWheel ( evt ) {
+	if ( evt.wheelDelta > 0 ) {
 		changeCounter( 1 );
 	} else {
 		changeCounter( -1 );
@@ -85,28 +86,83 @@ function onSecondWheel( event ) {
 	return false;
 }
 
-//this code runs when the popup window just opens
-var minuteSelector = document.getElementById( "minute-selector" );
-for ( var i = 60; i >= 1; i-- ) {
-	var li = document.createElement( "li" );
-	li.id = "li-" + i;
-	li.innerHTML = '<span class= "minute-number">' + i + '</span>';
-	(function ( i ) {
-		li.onclick = function () {
-			timer.setTimer( i * 60 );
-			timer.start();
-			updatePlayButton();
-		}
-	})( i, li );
-	if ( i % 10 == 0 ) {
-		li.classList.add( "tio" );
-	}else if ( i % 5 == 0 ) {
-		li.classList.add( "fem" );
-	}
-	minuteSelector.appendChild( li );
+function onMinuteUp ( evt ) {
+	changeCounter( 60 );
 }
 
-var timer = chrome.extension.getBackgroundPage().timer;
-updateCounter();
-updateMuteButton();
-updatePlayButton();
+function onMinuteDown ( evt ) {
+	changeCounter( -60 );
+}
+
+function onSecondUp ( evt ) {
+	changeCounter( 1 );
+}
+
+function onSecondDown ( evt ) {
+	changeCounter( -1 );
+}
+
+var timer;
+var pausePlayBtn;
+var resetBtn;
+var muteSoundBtn;
+var minuteUpBtn;
+var minuteDownBtn;
+var secondUpBtn;
+var secondDownBtn;
+var minuteCounterDigit;
+var secondCounterDigit;
+var minuteSelector;
+
+document.addEventListener('DOMContentLoaded', function () {
+	//the timer from the backgorund page
+	timer = chrome.extension.getBackgroundPage().timer;
+
+	//id assignment
+	pausePlayBtn = document.getElementById( "pause-play" );
+	resetBtn = document.getElementById( "reset" );
+	muteSoundBtn = document.getElementById( "mute-sound" );
+	minuteUpBtn = document.getElementById( "minute-up" );
+	minuteDownBtn = document.getElementById( "minute-down" );
+	secondUpBtn = document.getElementById( "second-up" );
+	secondDownBtn = document.getElementById( "second-down" );
+	minuteCounterDigit = document.getElementById( "minute-counter" );
+	secondCounterDigit = document.getElementById( "second-counter" );
+	minuteSelector = document.getElementById( "minute-selector" );
+
+	//adding event listeners
+	pausePlayBtn.addEventListener( "click", onPlayPause );
+	resetBtn.addEventListener( "click", onReset );
+	muteSoundBtn.addEventListener( "click", onMuteSound );
+	minuteUpBtn.addEventListener( "click", onMinuteUp );
+	minuteDownBtn.addEventListener( "click", onMinuteDown );
+	secondUpBtn.addEventListener( "click", onSecondUp );
+	secondDownBtn.addEventListener( "click", onSecondDown );
+	minuteCounterDigit.addEventListener( "mousewheel", onMinuteWheel );
+	secondCounterDigit.addEventListener( "mousewheel", onSecondWheel );
+	minuteSelector.addEventListener( "mousewheel", onMinuteWheel );
+	
+	//this code runs when the popup window just opens
+	for ( var i = 60; i >= 1; i-- ) {
+		var li = document.createElement( "li" );
+		li.id = "li-" + i;
+		li.innerHTML = '<span class= "minute-number">' + i + '</span>';
+		(function ( i ) {
+			li.onclick = function () {
+				timer.setTimer( i * 60 );
+				timer.start();
+				updatePlayButton();
+			}
+		})( i, li );
+		if ( i % 10 == 0 ) {
+			li.classList.add( "tio" );
+		}else if ( i % 5 == 0 ) {
+			li.classList.add( "fem" );
+		}
+		minuteSelector.appendChild( li );
+	}
+	
+	updateCounter();
+	updateMuteButton();
+	updatePlayButton();
+});

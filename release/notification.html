@@ -9,13 +9,13 @@
 <body>
 <img id="logo" src="images/logoNotification.png" /><div id="logo-caption">1-click timer</div><br />
 <ul>
-    <li><a href="javascript:void(0)" onclick="window.close()">STOP</a></li>
-    <li><a href="javascript:void(0)" onclick="snooze(60)">1 min</a></li>
-    <li><a href="javascript:void(0)" onclick="snooze(120)">2 min</a></li>
-    <li><a href="javascript:void(0)" onclick="snooze(180)">3 min</a></li>
-    <li><a href="javascript:void(0)" onclick="snooze(300)">5 min</a></li>
-    <li><a href="javascript:void(0)" onclick="snooze(600)">10 min</a></li>
-    <li><a href="javascript:void(0)" onclick="snooze(900)">15 min</a></li>
+    <li><a id="close-window">STOP</a></li>
+    <li><a data-sec="60" class="snooze-time">1 min</a></li>
+    <li><a data-sec="120" class="snooze-time">2 min</a></li>
+    <li><a data-sec="180" class="snooze-time">3 min</a></li>
+    <li><a data-sec="300" class="snooze-time">5 min</a></li>
+    <li><a data-sec="600" class="snooze-time">10 min</a></li>
+    <li><a data-sec="900" class="snooze-time">15 min</a></li>
 </ul>
 <audio id="sound" controls="controls" loop="loop">
 <source src="song.ogg" type="audio/ogg" />

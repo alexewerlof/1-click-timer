@@ -48,10 +48,12 @@ Timer = function () {
 		
 		// if popup is open update it
 		var popup = chrome.extension.getViews( { type: "popup" } );
-		if( popup.length == 1 ) {
-			popup[0].updateCounter();
-			popup[0].updateMuteButton();
-			popup[0].updatePlayButton();
+		if( popup.length > 0 ) {
+			console.log( "Popup is open" );
+			var p = popup[0];
+			p.updateCounter();
+			p.updateMuteButton();
+			p.updatePlayButton();
 		}
 	}
 	
