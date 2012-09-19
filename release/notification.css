@@ -1,15 +1,15 @@
 @font-face {
-  font-family: 'Anton';
+  font-family: 'Varela Round';
   font-style: normal;
-  font-weight: normal;
-  src: local('Anton'), url('anton.woff') format('woff');
+  font-weight: 400;
+  src: url('Varela Round.woff') format('woff');
 }
 body{
 	color:white;
 	background-color:#F15A24;
 	padding:0;
 	margin:0;
-	font-family: 'Anton';
+	font-family: 'Varela Round';
 	font-size:14px;
 	padding:0;
 	margin:0;

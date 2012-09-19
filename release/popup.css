@@ -1,17 +1,18 @@
+@font-face {
+  font-family: 'Varela Round';
+  font-style: normal;
+  font-weight: 400;
+  src: url('Varela Round.woff') format('woff');
+}
+
 a {
 	outline:none;
 }
 
-@font-face {
-  font-family: 'Anton';
-  font-style: normal;
-  font-weight: normal;
-  src: local('Anton'), url('anton.woff') format('woff');
-}
 body {
 	color:#F15A24;
 	background-color: #F15A24;
-	font-family: 'Anton';
+	font-family: 'Varela Round';
 	padding:0;
 	margin:0;
 	overflow:hidden;
@@ -37,12 +38,14 @@ body {
 	left: 105px;
 }
 #logo-caption {
-	position:absolute;
-	font-size:27px;
-	left:100px;
-	top:180px;
-	color:inherit;
-	text-decoration:none;
+	position: absolute;
+	font-size: 34px;
+	left: 61px;
+	top: 191px;
+	color: inherit;
+	text-decoration: none;
+	text-align: center;
+	font-weight: bold;
 }
 #logo-caption:hover {
 	color:#29ABE2;
@@ -67,27 +70,27 @@ a.button.small {
 	height:30px;
 }
 a#pause-play {
-	top:250px;
-	left:80px;
+	top:255px;
+	left:68px;
 }
 a#reset {
-	top:250px;
-	left:148px;
+	top:255px;
+	left:142px;
 }
 a#mute-sound {
-	top:250px;
+	top:255px;
 	left:215px;
 }
 a#minute-up {
-	top:332px;
-	left:80px;
+	top:339px;
+	left:68px;
 }
 a#minute-down {
 	top: 447px;
-	left: 80px;
+	left: 68px;
 }
 a#second-up {
-	top:332px;
+	top:339px;
 	left:215px;
 }
 a#second-down {
@@ -141,12 +144,12 @@ a.down:hover {
 #second-counter {
 	position:absolute;
 	font-size:100px;
-	top:328px;
+	top:351px;
 	text-align:center;
 	cursor:default;
 }
 #minute-counter {
-	left:50px;
+	left:30px;
 }
 #colon {
 	position: absolute;
@@ -154,11 +157,10 @@ a.down:hover {
 	top: 352px;
 	text-align: center;
 	cursor: default;
-	left: 146px;
-	font-family: monospace;
+	left: 158px;
 }
 #second-counter {
-	left:190px;
+	left:182px;
 }
 .counter:hover {
 	color:#29ABE2;
@@ -213,6 +215,6 @@ li:hover .minute-number {
 .minute-number {
 	position:relative;
 	left: -17px;
-	top: -11px;
+	top: -7px;
 	font-size: 12px;
 }
