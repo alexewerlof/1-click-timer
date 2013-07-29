@@ -1,0 +1,144 @@
+body {
+    font-family: Arial;
+    background-color: red;
+    padding: 0;
+    margin: 0;
+    width: 250px;
+    height: 250px;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    user-select: none;
+}
+
+#reset-button {
+    position: absolute;
+    right: 0px;
+    top: 0px;
+    background: transparent url('images/reset.svg') no-repeat center center;
+    cursor: pointer;
+    background-size: cover;
+    opacity: 0;
+    left: 0;
+    bottom: 0;
+    transition: opacity .2s;
+}
+
+#minutes:hover #reset-button {
+    opacity: 1;
+}
+
+#face {
+    background-color: white;
+    width: 200px;
+    height: 200px;
+    position: absolute;
+    top: 25px;
+    left: 25px;
+    border-radius: 100px;
+    z-index: 1;
+    cursor: crosshair;
+}
+
+#needle {
+    background-color: red;
+    height: 90px;
+    width: 14px;
+    border-radius: 100px;
+    position: absolute;
+    top: 15px;
+    left: 93px;
+    z-index: 3;
+    -webkit-transform-origin: 8px 83px;
+    -webkit-transform: rotate( 0deg);
+    transition: -webkit-transform 0.2s, opacity .4s;
+    opacity: 1;
+}
+
+#face:hover #needle {
+    opacity: .15;
+}
+
+#digits {
+    color: white;
+    position: fixed;
+    top: 6px;
+    left: 0px;
+    right: 0px;
+    text-align: center;
+    font-size: 14px;
+    z-index: 2;
+    cursor: default;
+}
+
+#minutes {
+    color: white;
+    position: absolute;
+    left: 75px;
+    top: 75px;
+    text-align: center;
+    font-size: 15px;
+    z-index: 3;
+    background-color: red;
+    width: 50px;
+    height: 33px;
+    border-radius: 100px;
+    padding-top: 17px;
+    transition: opacity .4s;
+    opacity: 0;
+    cursor: default;
+}
+
+#face:hover #minutes {
+    opacity: 1;
+}
+
+#logo {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    color: white;
+    text-transform: uppercase;
+    text-align: center;
+    font-size: 8px;
+    padding-bottom: 7px;
+    cursor: default;
+}
+
+#scribble {
+    font-size: 8px;
+    color: #F88;
+    z-index: 3;
+    text-align: center;
+    position: absolute;
+    bottom: 40px;
+    z-index: 1;
+    left: 0;
+    right: 0;
+    line-height: 0px;
+    cursor: inherit;
+    opacity: 1;
+    transition: opacity .4s;
+}
+
+#face:hover #scribble {
+    opacity: 0;
+}
+
+#ringing {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: 0;
+    z-index: 10;
+    background: red url( "images/bell.svg" ) no-repeat center center;
+    cursor: pointer;
+    background-size: 80%;
+    transition: background-color .3s;
+}
+
+#ringing:hover {
+    background-color: white;
+}

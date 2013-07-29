@@ -1,0 +1,11 @@
+Set the timer with one click!
+
+* Quick and easy
+* Beautiful design
+* Light-weight (doesn't consume much memory and processing power)
+* Well-tested program
+* No extra libraries
+* Open source
+* Works offline
+* Safe: does not need any special permission
+* Made in Sweden

@@ -1,0 +1,23 @@
+{
+	"name": "1-click timer",
+	"description": "A Simple, Slick and Practical timer for Chrome",
+	"version": "4.0",
+	"manifest_version": 2,
+	"browser_action": {
+		"default_icon": "images/logo19.png",
+		"default_title": "1-click timer",
+		"default_popup": "popup.html"
+	},
+	"permissions": [
+		"background",
+		"notifications"
+	],
+	"icons":{
+		"16":"images/logo16.png",
+		"48":"images/logo48.png",
+		"128":"images/logo128.png"
+	},
+	"background": {
+		"page": "background.html"
+	}
+}

@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="zepto" type="javaScript">
+    <properties>
+      <sourceFilesUrls>
+        <item url="file://$PROJECT_DIR$/src/js/lib/zepto.js" />
+      </sourceFilesUrls>
+    </properties>
+    <CLASSES>
+      <root url="file://$PROJECT_DIR$/src/js/lib/zepto.js" />
+    </CLASSES>
+    <SOURCES />
+  </library>
+</component>
