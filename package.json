@@ -1,0 +1,34 @@
+{
+  "name": "1-click-timer",
+  "version": "5.0.0",
+  "description": "A simple, slick, and practical countdown timer extension for Google Chrome.",
+  "scripts": {
+    "prebuild": "rm -rf dist/*",
+    "build": "vite build",
+    "test": "echo \"Open test/tests.html in a browser to run QUnit tests.\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alexewerlof/1-click-timer.git"
+  },
+  "keywords": [
+    "chrome-extension",
+    "timer",
+    "countdown"
+  ],
+  "author": "",
+  "license": "GPL-3.0",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/alexewerlof/1-click-timer/issues"
+  },
+  "homepage": "https://github.com/alexewerlof/1-click-timer#readme",
+  "devDependencies": {
+    "@types/chrome": "^0.2.0",
+    "typescript": "^6.0.3",
+    "vite": "^8.1.0"
+  },
+  "dependencies": {
+    "zepto": "^1.2.0"
+  }
+}
