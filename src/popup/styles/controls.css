@@ -1,0 +1,186 @@
+/**
+ * controls.css — Button layout for timer controls
+ * Extracted from popup.css (1-click-timer v8.3.1)
+ */
+
+/* ── Control Buttons Layout ────────────────────────────── */
+
+#show-menu-btn {
+  position: absolute;
+  bottom: 48px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 50%;
+  background: #ddd;
+  color: #666;
+  font-size: 12px;
+  cursor: pointer;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+
+#show-menu-btn:hover {
+  background: #ccc;
+  color: #333;
+}
+
+#full-screen-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: #999;
+  font-size: 12px;
+  cursor: pointer;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+
+#full-screen-btn:hover {
+  color: #333;
+}
+
+/* ── Pause / Resume Button ─────────────────────────────── */
+
+#pause-resume-btn {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 42px;
+  height: 42px;
+  border: none;
+  border-radius: 50%;
+  background: #ff8c00;
+  cursor: pointer;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background 0.2s,
+    transform 0.2s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+#pause-resume-btn:hover {
+  background: #e67e00;
+  transform: translateX(-50%) scale(1.05);
+}
+
+#pause-resume-btn img {
+  width: 20px;
+  height: 20px;
+}
+
+/* ── Repeat Button ─────────────────────────────────────── */
+
+#repeat-btn {
+  position: absolute;
+  bottom: 54px;
+  right: 20px;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 50%;
+  background: #ddd;
+  color: #666;
+  font-size: 12px;
+  cursor: pointer;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+
+#repeat-btn:hover {
+  background: #ccc;
+  color: #333;
+}
+
+/* ── Mute / Unmute Button ──────────────────────────────── */
+
+#mute-unmute-btn {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: #ddd;
+  color: #666;
+  font-size: 14px;
+  cursor: pointer;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+
+#mute-unmute-btn:hover {
+  background: #ccc;
+  color: #333;
+}
+
+/* ── Volume Popup Buttons ──────────────────────────────── */
+
+#volume-mute-btn,
+#volume-low-btn,
+#volume-high-btn {
+  position: absolute;
+  bottom: 12px;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: #eee;
+  color: #666;
+  font-size: 14px;
+  cursor: pointer;
+  z-index: 35;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+
+#volume-mute-btn {
+  right: 52px;
+}
+#volume-low-btn {
+  right: 90px;
+}
+#volume-high-btn {
+  right: 128px;
+}
+
+#volume-mute-btn:hover,
+#volume-low-btn:hover,
+#volume-high-btn:hover {
+  background: #ddd;
+  color: #333;
+}

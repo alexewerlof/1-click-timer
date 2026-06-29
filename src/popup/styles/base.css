@@ -1,0 +1,67 @@
+/**
+ * base.css — Base layout and global styles
+ * Extracted from popup.css (1-click-timer v8.3.1)
+ */
+
+/* ── Reset & Base ─────────────────────────────────────── */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  width: 300px;
+  min-height: 300px;
+  font-size: 16px;
+}
+
+body {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  overflow: hidden;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  background: #e8e8e8 linear-gradient(to bottom, #fff, #e8e8e8);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+main {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* ── Focus ────────────────────────────────────────────── */
+
+button:focus {
+  outline: 0;
+}
+
+/* ── Font Awesome base (if using FA classes inline) ────── */
+
+.fa {
+  display: inline-block;
+  font-style: normal;
+  font-variant: normal;
+  text-rendering: auto;
+  line-height: 1;
+}
+
+/* ── Animate.css compatibility ─────────────────────────── */
+
+.animated {
+  animation-duration: 1s;
+  animation-fill-mode: both;
+}
+
+.animated.infinite {
+  animation-iteration-count: infinite;
+}

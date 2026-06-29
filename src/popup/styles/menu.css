@@ -1,0 +1,108 @@
+/**
+ * menu.css — Slide-up menu panel styling
+ * Extracted from popup.css (1-click-timer v8.3.1)
+ */
+
+/* ── Menu Panel ────────────────────────────────────────── */
+
+#menu {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(255, 255, 255, 0.97);
+  border-top: 1px solid #ddd;
+  padding: 8px 10px;
+  z-index: 50;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.08);
+  animation: slideUp 0.25s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* ── Menu Buttons ──────────────────────────────────────── */
+
+#menu button {
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: #f0f0f0;
+  color: #666;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background 0.2s,
+    color 0.2s,
+    transform 0.15s;
+}
+
+#menu button:hover {
+  background: #ff8c00;
+  color: #fff;
+  transform: scale(1.1);
+}
+
+/* ── Menu Hide Button ──────────────────────────────────── */
+
+#menu-btn-hide {
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 36px !important;
+  height: 20px !important;
+  border-radius: 20px 20px 0 0 !important;
+  background: rgba(255, 255, 255, 0.97) !important;
+  border-top: 1px solid #ddd !important;
+  border-left: 1px solid #ddd !important;
+  border-right: 1px solid #ddd !important;
+}
+
+#menu-btn-hide:hover {
+  background: #ff8c00 !important;
+  color: #fff !important;
+  transform: translateX(-50%) !important;
+}
+
+/* ── Menu Separator ────────────────────────────────────── */
+
+.menu-separator {
+  width: 100%;
+  height: 0;
+  flex-basis: 100%;
+}
+
+/* ── Version Text ──────────────────────────────────────── */
+
+#version {
+  font-size: 10px;
+  color: #999;
+  text-align: center;
+  width: 100%;
+  margin-top: 4px;
+}
+
+/* ── Body state when menu is visible ───────────────────── */
+
+.menu-visible #face {
+  filter: blur(2px);
+  transition: filter 0.2s;
+}

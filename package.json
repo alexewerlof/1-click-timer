@@ -1,0 +1,33 @@
+{
+  "name": "1-click-timer",
+  "version": "9.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "vue-tsc --noEmit",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "vue": "^3.5.0"
+  },
+  "devDependencies": {
+    "@crxjs/vite-plugin": "^2.0.0-beta.28",
+    "@eslint/js": "^10.0.1",
+    "@types/chrome": "^0.0.270",
+    "@vitejs/plugin-vue": "^6.0.7",
+    "eslint": "^10.6.0",
+    "eslint-plugin-vue": "^10.9.2",
+    "globals": "^17.7.0",
+    "typescript": "^5.5.0",
+    "typescript-eslint": "^8.62.0",
+    "vite": "^5.4.0",
+    "vitest": "^4.1.9",
+    "vue-tsc": "^2.0.0"
+  }
+}

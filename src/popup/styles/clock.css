@@ -1,0 +1,168 @@
+/**
+ * clock.css — Clock face, hands, and minute-setting dial
+ * Extracted from popup.css (1-click-timer v8.3.1)
+ */
+
+/* ── Clock Face ────────────────────────────────────────── */
+
+#face {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: url("/img/face.svg") center center / 90% no-repeat;
+  z-index: 0;
+}
+
+/* ── Minute Hand ───────────────────────────────────────── */
+
+#minute {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: url("/img/needle.svg") center center / contain no-repeat;
+  transform-origin: center center;
+  transition: transform 0.1s linear;
+  z-index: 1;
+}
+
+/* ── Second Hand ───────────────────────────────────────── */
+
+#second {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: url("/img/needle-sec.svg") center center / contain no-repeat;
+  transform-origin: center center;
+  transition: transform 0.05s linear;
+  z-index: 2;
+}
+
+/* ── Minute-Set Hand ───────────────────────────────────── */
+
+#minute-set {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: url("/img/needle-set.svg") center center / contain no-repeat;
+  transform-origin: center center;
+  z-index: 3;
+  opacity: 0.7;
+}
+
+/* ── Minute Number Display ─────────────────────────────── */
+
+#minute-number {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 4;
+  pointer-events: none;
+}
+
+#minute-number span {
+  font-size: 48px;
+  font-weight: 300;
+  color: #444;
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 8px;
+  padding: 2px 12px;
+  min-width: 80px;
+  text-align: center;
+}
+
+/* ── Minute-Set Number ─────────────────────────────────── */
+
+#minute-set-number {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 4;
+  pointer-events: none;
+}
+
+#minute-set-number span {
+  font-size: 42px;
+  font-weight: 300;
+  color: #ff8c00;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
+  padding: 2px 12px;
+  min-width: 60px;
+  text-align: center;
+}
+
+/* ── Minute Area (mouse interaction zone) ──────────────── */
+
+#minute-area {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  z-index: 10;
+  cursor: pointer;
+}
+
+/* ── Center Button ─────────────────────────────────────── */
+
+#center-btn {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: #666;
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+#center-btn:hover {
+  background: #888;
+}
+
+#center-btn.minute-set {
+  background: #ff8c00;
+}
+
+/* ── Cog Animation ─────────────────────────────────────── */
+
+.animate-cog {
+  animation: cogSpin 4s linear infinite;
+}
+
+@keyframes cogSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
