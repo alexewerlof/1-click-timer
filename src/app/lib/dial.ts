@@ -9,8 +9,8 @@
  *
  * Coordinates live in a square viewBox. The disc is only part of it: the ticks
  * radiate outward from the rim and the numerals sit outside those, which is what
- * gives the face its precision (MANUAL "Timer face"). The extra height below the
- * numerals carries the "Made in Sweden" caption arc.
+ * gives the face its precision (MANUAL "Timer face"). The numerals are the
+ * outermost element, so they bound the crop on every side.
  */
 
 import { MAX_MINUTES, MAX_SECONDS } from './time'
@@ -21,7 +21,7 @@ export interface Point {
 }
 
 export const DIAL_CENTER_X = 70
-/** Slightly above the middle, because the caption hangs below the numerals. */
+/** The middle of the square crop: the numerals bound it on every side. */
 export const DIAL_CENTER_Y = 62
 
 /** The filled disc. Ticks cross this edge, so everything else reads as outside it. */
@@ -164,26 +164,19 @@ export const NUMERAL_GLYPH_HALF_WIDTH = 5
  */
 export const MIN_TICK_NUMERAL_CLEARANCE = 1.5
 
-/** Bottom of the "Made in Sweden" caption, which hangs below the numerals. */
-const CAPTION_BOTTOM = 123
-
 /**
  * The viewBox is cropped tight around the face rather than fixed. Every unit of
  * empty margin left in here is dial the user does not get, which is why these
  * are derived from the geometry above instead of written as literals. The
- * numerals are the outermost element, so they set the crop.
+ * numerals are the outermost element, so they set the crop on every side — which
+ * is why it is square.
  */
 export const DIAL_VIEWBOX_LEFT = DIAL_CENTER_X - NUMERAL_RADIUS - NUMERAL_GLYPH_HALF_WIDTH
 export const DIAL_VIEWBOX_TOP = DIAL_CENTER_Y - NUMERAL_RADIUS - NUMERAL_GLYPH_HALF_WIDTH
 export const DIAL_VIEWBOX_WIDTH = 2 * (NUMERAL_RADIUS + NUMERAL_GLYPH_HALF_WIDTH)
-export const DIAL_VIEWBOX_HEIGHT = CAPTION_BOTTOM - DIAL_VIEWBOX_TOP
+export const DIAL_VIEWBOX_HEIGHT = DIAL_VIEWBOX_WIDTH
 
 export const DIAL_VIEWBOX = `${DIAL_VIEWBOX_LEFT} ${DIAL_VIEWBOX_TOP} ${DIAL_VIEWBOX_WIDTH} ${DIAL_VIEWBOX_HEIGHT}`
-
-/** Shallow arc below the numerals that the "Made in Sweden" text follows. */
-export const CAPTION_PATH = 'M 34 115 Q 70 125 106 115'
-
-export const CAPTION_PATH_ID = 'made-in-sweden-path'
 
 /** The creator mark returns once the dial is settled (MANUAL "UI elements"). */
 export const SHOW_CREATOR_MARK = false
@@ -210,6 +203,36 @@ export function pointOnDial(minutes: number, radius: number): Point {
         y: round(DIAL_CENTER_Y - Math.cos(radians) * radius),
     }
 }
+
+/**
+ * How far the caption's baseline sits inside the ticks' inner ends. The letters
+ * rise from the baseline towards the centre, so it is the baseline — not the top
+ * of the text — that runs closest to the ticks. Holding it just inside
+ * `TICK_INNER_RADIUS` puts the caption at the very edge of the disc, almost
+ * touching the ticks, and keeps that gap honest if the ticks are tuned.
+ */
+const CAPTION_BASELINE_CLEARANCE = 0.5
+const CAPTION_RADIUS = round(TICK_INNER_RADIUS - CAPTION_BASELINE_CLEARANCE)
+
+/** Half the caption arc's angular span, in dial minutes either side of 6 o'clock. */
+const CAPTION_HALF_SPAN_MINUTES = 3
+
+/**
+ * Circular arc, concentric with the disc, that the "Made in Sweden" text
+ * follows (MANUAL "Caption"). It hugs the bottom rim, centred on 6 o'clock, so
+ * the text reads left to right just inside the ticks.
+ */
+export const CAPTION_PATH = captionArcPath()
+
+function captionArcPath(): string {
+    const bottom = MINUTES_PER_TURN / 2
+    const start = pointOnDial(bottom - CAPTION_HALF_SPAN_MINUTES, CAPTION_RADIUS)
+    const end = pointOnDial(bottom + CAPTION_HALF_SPAN_MINUTES, CAPTION_RADIUS)
+    return `M ${start.x} ${start.y} A ${CAPTION_RADIUS} ${CAPTION_RADIUS} 0 0 0 ${end.x} ${end.y}`
+}
+
+/** Referenced by `Caption`'s `textPath`. */
+export const CAPTION_PATH_ID = 'made-in-sweden-path'
 
 /** Inverse of `pointOnDial`: which minute sits under this point (0..60). */
 export function pointToMinutes(point: Point): number {

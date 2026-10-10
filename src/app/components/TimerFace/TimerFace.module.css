@@ -114,7 +114,9 @@
 }
 
 .caption {
-    fill: var(--ink-soft);
+    /* Same ink as the numerals (`.numeral` above), so recolouring the face
+       recolours the caption with it. */
+    fill: var(--dial-mark);
     font-family: var(--font-ui);
     font-size: var(--size-caption);
     letter-spacing: 0.22em;

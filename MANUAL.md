@@ -41,7 +41,7 @@ change requested with one of these terms maps to one place in the source.
 | **Preview arc**     | The unfilled outline drawn from 12 o'clock to the minute currently under the pointer. It shows what a click would start. |
 | **Readout**         | The digital `M:SS` in the middle of the disc, e.g. `1:05`.                                               |
 | **Readout disc**    | The small circle behind the readout, sitting at the centre of the dial. It is white with a soft shadow, so it reads as a layer above the dial rather than a hole in it. |
-| **Caption**         | The text "Made in Sweden", mapped to a path below the dial.                                              |
+| **Caption**         | The text "Made in Sweden", inscribed inside the disc on a circular path just above the bottom rim.        |
 | **Creator mark**    | The logo plus "Alex Ewerlöf". Currently not drawn.                                                       |
 
 Three related measures, used throughout the geometry:
@@ -86,7 +86,7 @@ At the center of the face there's a circle that's used for showing the number of
 
 Between the central circle and the 0 indicator, there's a logo and my name (Alex Ewerlöf).
 
-Below the watch face, there's a text that's mapped to a path that reads "Made in Sweden".
+Inside the disc, following a circular path just above the bottom rim, there's a text that reads "Made in Sweden".
 
 Since the primary information that we should communicate to the user is the amount of remaining time, we should arrange the numbers in the counter-clockwise direction. This means:
 
