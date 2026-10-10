@@ -48,7 +48,7 @@ src/
   app/                 the React UI
     main.tsx           mounts TimerApp; chooses the runtime + dev harness
     TimerApp.tsx       composition shared by both surfaces
-    components/        TimerFace, PresetBar, TransportControls, ConfirmReplace, DevBar
+    components/        TimerFace, PresetBar, TransportControls, DevBar
     design/            tokens.css (all colours/sizes), global.css
     lib/               dial geometry, time formatting, surface helpers
     runtime/           the TimerRuntime contract and its mock implementation

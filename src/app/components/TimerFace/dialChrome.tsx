@@ -20,7 +20,10 @@ function renderNumerals() {
     return NUMERAL_MINUTES.map((minute) => {
         const position = pointOnDial(minute, NUMERAL_RADIUS)
         return (
-            <text key={minute} className={styles.numeral} x={position.x} y={position.y}>
+            // `data-numeral-minutes` is how a click on this numeral is resolved
+            // to a duration: a numeral sits off the disc, so the pointer's
+            // position cannot tell which one it is (see `TimerFace.handleClick`).
+            <text key={minute} className={styles.numeral} x={position.x} y={position.y} data-numeral-minutes={minute}>
                 {minute}
             </text>
         )
@@ -35,4 +38,8 @@ export const DIAL_TICKS = (
     </g>
 )
 
-export const DIAL_NUMERALS = <g data-dial-numerals>{renderNumerals()}</g>
+export const DIAL_NUMERALS = (
+    <g data-dial-numerals className={styles.numeralRing}>
+        {renderNumerals()}
+    </g>
+)

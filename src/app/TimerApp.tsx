@@ -1,10 +1,7 @@
-import { useState } from 'react'
-import { ConfirmReplace } from './components/ConfirmReplace/ConfirmReplace'
 import { DevBar } from './components/DevBar/DevBar'
 import { PresetBar } from './components/PresetBar/PresetBar'
 import { TimerFace } from './components/TimerFace/TimerFace'
 import { TransportControls } from './components/TransportControls/TransportControls'
-import { SECONDS_PER_MINUTE } from './lib/time'
 import { toggleFullscreenSurface, type Surface } from './lib/surface'
 import type { TimerDevControls, TimerRuntime } from './runtime/types'
 import { useTimerState } from './runtime/useTimerState'
@@ -19,57 +16,44 @@ export interface TimerAppProps {
 
 /**
  * The whole timer: one composition shared by the popup and the fullscreen tab
- * (MANUAL "Interface"). All timing lives behind `runtime`, so this component
- * is pure presentation plus the "replace a running timer?" conversation.
+ * (MANUAL "Interface"). All timing lives behind `runtime`, so this component is
+ * pure presentation.
  */
 export function TimerApp({ surface, runtime, dev }: TimerAppProps) {
     const state = useTimerState(runtime)
-    const [pendingSeconds, setPendingSeconds] = useState<number | null>(null)
 
     const inProgress = state.status === 'running' || state.status === 'paused'
 
-    function requestStart(seconds: number) {
-        if (inProgress) {
-            setPendingSeconds(seconds)
-            return
-        }
+    /**
+     * Setting a timer is always one click, whether or not one is already
+     * running: replacing a timer is low-risk and the worst case is starting
+     * again (MANUAL "Set a custom timer").
+     */
+    function startTimer(seconds: number) {
         runtime.start(seconds)
-    }
-
-    function confirmReplace() {
-        if (pendingSeconds !== null) runtime.start(pendingSeconds)
-        setPendingSeconds(null)
     }
 
     return (
         <div className={styles.app} data-surface={surface}>
             <div className={styles.faceSlot}>
                 <div className={styles.face}>
-                    <TimerFace status={state.status} remainingSeconds={state.remainingSeconds} onPick={requestStart} />
+                    <TimerFace status={state.status} remainingSeconds={state.remainingSeconds} onPick={startTimer} />
                 </div>
             </div>
 
             <div className={styles.controls}>
-                <PresetBar presets={state.presets} activeSeconds={state.durationSeconds} onPick={requestStart} />
-                {pendingSeconds === null ? (
-                    <TransportControls
-                        status={state.status}
-                        muted={state.muted}
-                        canRestart={state.lastDurationSeconds !== null && !inProgress}
-                        surface={surface}
-                        onTogglePause={() => runtime.togglePause()}
-                        onToggleMute={() => runtime.toggleMute()}
-                        onReset={() => runtime.reset()}
-                        onRestart={() => runtime.restart()}
-                        onToggleFullscreen={() => toggleFullscreenSurface(surface)}
-                    />
-                ) : (
-                    <ConfirmReplace
-                        minutes={Math.round(pendingSeconds / SECONDS_PER_MINUTE)}
-                        onConfirm={confirmReplace}
-                        onCancel={() => setPendingSeconds(null)}
-                    />
-                )}
+                <PresetBar presets={state.presets} activeSeconds={state.durationSeconds} onPick={startTimer} />
+                <TransportControls
+                    status={state.status}
+                    muted={state.muted}
+                    canRestart={state.lastDurationSeconds !== null && !inProgress}
+                    surface={surface}
+                    onTogglePause={() => runtime.togglePause()}
+                    onToggleMute={() => runtime.toggleMute()}
+                    onReset={() => runtime.reset()}
+                    onRestart={() => runtime.restart()}
+                    onToggleFullscreen={() => toggleFullscreenSurface(surface)}
+                />
             </div>
 
             {dev ? <DevBar status={state.status} onStatusChange={dev.forceStatus} /> : null}

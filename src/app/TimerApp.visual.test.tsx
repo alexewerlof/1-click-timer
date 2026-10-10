@@ -5,6 +5,7 @@ import type { ReactElement } from 'react'
 import { TimerApp } from './TimerApp'
 import { DIAL_TICKS, DISC_RADIUS, MINUTES_PER_TURN, NUMERAL_RADIUS, pointOnDial } from './lib/dial'
 import './design/global.css'
+import { SECONDS_PER_MINUTE } from './lib/time'
 import { createMockRuntime } from './runtime/mockRuntime'
 import type { TimerStatus } from './runtime/types'
 
@@ -171,4 +172,110 @@ test('draws the previewed minute as the only numeral on the face', async () => {
     // The readout never previews the minute; while idle it is blank, because
     // there is no remaining time to report.
     expect(svg.querySelector('text[class*="readout"]')).toBeNull()
+})
+
+/** The numeral for `minutes`, or a clear failure if the ring does not have one. */
+function numeralElement(svg: SVGSVGElement, minutes: number): SVGTextElement {
+    const numeral = svg.querySelector(`text[data-numeral-minutes="${minutes}"]`)
+    if (!numeral) throw new Error(`the numeral ring has no ${minutes} numeral`)
+    return numeral as SVGTextElement
+}
+
+/**
+ * A numeral is a one-click shortcut to its own duration (MANUAL "Set a custom
+ * timer"). Clicked through the browser at the middle of the glyphs — over the
+ * gap between the digits of "55" — to prove the whole numeral is a hit target
+ * and not just the painted glyphs.
+ */
+test('starts a timer for the clicked numeral', async () => {
+    const runtime = createMockRuntime()
+    runtime.forceStatus('idle')
+    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} />))
+
+    const svg = screen.getByRole('slider').element() as SVGSVGElement
+    await page.elementLocator(numeralElement(svg, 55)).click()
+
+    expect(runtime.getState().status).toBe('running')
+    expect(runtime.getState().durationSeconds).toBe(55 * SECONDS_PER_MINUTE)
+    runtime.reset()
+})
+
+/**
+ * The 0 numeral marks a whole turn — it sits where the preview numeral shows 60
+ * — so clicking it starts 60 minutes rather than the nothing a 0-minute timer
+ * would be.
+ */
+test('starts 60 minutes from the 0 numeral', async () => {
+    const runtime = createMockRuntime()
+    runtime.forceStatus('idle')
+    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} />))
+
+    const svg = screen.getByRole('slider').element() as SVGSVGElement
+    await page.elementLocator(numeralElement(svg, 0)).click()
+
+    expect(runtime.getState().status).toBe('running')
+    expect(runtime.getState().durationSeconds).toBe(60 * SECONDS_PER_MINUTE)
+    runtime.reset()
+})
+
+/**
+ * A numeral is interactive, so hovering one recolours it to the remaining
+ * sector's colour — the same signal the preview arc and preview numeral use.
+ * The colour is read from the sector, so the two cannot drift apart.
+ */
+test('recolours a numeral on hover', async () => {
+    const runtime = createMockRuntime()
+    // Parked at a running timer, which draws the remaining sector.
+    runtime.forceStatus('running')
+    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} />))
+
+    const svg = screen.getByRole('slider').element() as SVGSVGElement
+    const sector = svg.querySelector('[class*="sector"]') as SVGPathElement
+    const remaining = getComputedStyle(sector).fill
+
+    const numeral = numeralElement(svg, 15)
+    expect(getComputedStyle(numeral).fill).not.toBe(remaining)
+
+    await page.elementLocator(numeral).hover()
+
+    await vi.waitFor(() => {
+        expect(getComputedStyle(numeral).fill).toBe(remaining)
+    })
+})
+
+/**
+ * Replacing a running timer is one click, with no confirmation step: the worst
+ * case is simply setting the timer again.
+ */
+test('replaces a running timer from a numeral without confirming', async () => {
+    const runtime = createMockRuntime()
+    runtime.forceStatus('running')
+    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} />))
+
+    const svg = screen.getByRole('slider').element() as SVGSVGElement
+    await page.elementLocator(numeralElement(svg, 10)).click()
+
+    expect(runtime.getState().status).toBe('running')
+    expect(runtime.getState().durationSeconds).toBe(10 * SECONDS_PER_MINUTE)
+    // The transport row is never replaced by a confirmation prompt.
+    expect(screen.container.textContent).not.toContain('already in progress')
+    runtime.reset()
+})
+
+/** The same one-click replacement works through the dial's preview mechanism. */
+test('replaces a running timer from the dial without confirming', async () => {
+    const runtime = createMockRuntime()
+    runtime.forceStatus('running')
+    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} />))
+
+    const svg = screen.getByRole('slider').element() as SVGSVGElement
+    const onDisc = pointOnDial(20, DISC_RADIUS - 2)
+    const matrix = svg.getScreenCTM()
+    if (!matrix) throw new Error('the slider has no screen CTM')
+    const at = new DOMPoint(onDisc.x, onDisc.y).matrixTransform(matrix)
+
+    svg.dispatchEvent(new MouseEvent('click', { clientX: at.x, clientY: at.y, bubbles: true }))
+
+    expect(runtime.getState().durationSeconds).toBe(20 * SECONDS_PER_MINUTE)
+    runtime.reset()
 })

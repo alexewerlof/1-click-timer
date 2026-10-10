@@ -59,7 +59,6 @@ Three related measures, used throughout the geometry:
 | **Face slot**        | The region that holds the face. It takes the room the controls do not.              |
 | **Preset bar**       | The row of pre-configured duration buttons (5m / 10m / 30m).                        |
 | **Transport**        | The row of controls: pause/resume, mute, reset, restart, fullscreen.                |
-| **Confirm replace**  | Shown in place of the transport row when a click would replace a running timer.      |
 | **Dev bar**          | Development-only harness for parking the timer in a given state. Never shipped.     |
 
 Icons come from **Lucide** (`lucide-react`), not hand-drawn SVG, so control
@@ -103,11 +102,11 @@ Since the primary information that we should communicate to the user is the amou
 
 Each minute is represented by a thin line.
 
-The multiplies of 5 have a label: 0, 5, 10, 15, ..., 55 and a slightly thicker indicator.
+The multiplies of 5 have a label: 0, 5, 10, 15, ..., 55 and a slightly thicker indicator. Each label is itself a one-click shortcut: clicking a numeral starts a timer of that many minutes (clicking 55 starts 55 minutes), without touching the dial. The 0 numeral marks a whole turn — it sits where the preview numeral shows 60 — so clicking it starts 60 minutes. Hovering a numeral tints it with the **Remaining sector**'s colour — the same signal the preview arc and the preview numeral use — so it reads as interactive.
 
 When the user hovers over the disc — everywhere except the readout disc at its centre — a preliminary arc is drawn to show what alert will be set if they click. The number of minutes they are selecting is shown as the **preview numeral**: a single numeral drawn on the numeral ring at the end of the arc, in the numerals' style and the remaining sector's colour, so it reads as the arc's own label. The regular numerals are hidden while previewing, and the ticks the arc covers are drawn in that same colour, so the arc, its numeral and the ticks it covers read as one mark. The readout in the centre keeps showing the remaining time; it does not show the previewed duration.
 
-If the user clicks somewhere, the corresponding timer will start. If there's an ongoing timer in progress and isn't over yet, we should ask the user whether they really want to set a new timer or not.
+If the user clicks somewhere, the corresponding timer will start. Setting a timer is always a single click, whether or not one is already in progress: replacing a timer is low-risk, so there is no confirmation step.
 
 When the timer is running, a red area shows exactly how much time is remaining. For example if 3.4 minutes are remaining till the alarm goes off, the arc between 3.5 minutes till 0 and all the way to the center of the screen is red. This makes it super easy to quickly assess how much time is remaining. This area is filled in red whereas the preliminary arc is not filled. When the time is up, there's no arc.
 
@@ -128,6 +127,8 @@ This screen allows the user to configure various aspects of the timer:
 Hover your mouse over the disc — everywhere except the readout disc at its centre — and see how the preliminary indicator arc and the preview numeral at its end show what timer will start if you click.
 
 Once you're happy, just click the screen and the timer starts with the number that's chosen.
+
+To skip the dial, click a numeral on the ring instead: the timer starts at that many minutes. This always works, whether a timer is already running or not.
 
 ## Set a pre-configured timer
 

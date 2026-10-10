@@ -66,6 +66,33 @@
     dominant-baseline: central;
 }
 
+/*
+ * Every numeral is a one-click shortcut to its own duration. `bounding-box`
+ * makes the whole numeral a solid hit target, so the gap between the digits of
+ * "15" does not fall through to the face; the pointer cursor advertises it. The
+ * preview numeral is not part of the ring, so it is left alone.
+ */
+.numeralRing text {
+    pointer-events: bounding-box;
+    cursor: pointer;
+    transition: fill 120ms ease;
+}
+
+/*
+ * Hovering a numeral wears the remaining sector's colour — the same signal the
+ * preview arc and the preview numeral use, since all three read `--remaining` —
+ * so it reads as the one-click shortcut it is.
+ */
+.numeralRing text:hover {
+    fill: var(--remaining);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .numeralRing text {
+        transition: none;
+    }
+}
+
 /* ---- remaining time ---- */
 
 /* Faintly translucent, so the ticks it covers stay just visible underneath. */

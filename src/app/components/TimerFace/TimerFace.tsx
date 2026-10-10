@@ -43,10 +43,11 @@ function clampMinutes(minutes: number): number {
 }
 
 /**
- * The face: hover or click the dial to set a timer (MANUAL "Set a custom
- * timer").
+ * The face: hover or click the dial to set a timer, or click a numeral to start
+ * that many minutes outright — the 0 numeral, which marks a whole turn, starts
+ * 60 (MANUAL "Set a custom timer").
  *
- * Exposed as a slider so the same action is reachable from the keyboard —
+ * Exposed as a slider so the disc action is reachable from the keyboard —
  * arrows move counter-clockwise (more time) and clockwise (less time), shift
  * jumps by five, Enter sets the timer.
  */
@@ -72,6 +73,24 @@ export function TimerFace({ status, remainingSeconds, onPick }: TimerFaceProps) 
         return clampMinutes(Math.round(pointToMinutes(point)))
     }
 
+    /**
+     * The duration in minutes of the numeral a click landed on, or null when it
+     * did not land on one. Read from `data-numeral-minutes` rather than the
+     * pointer's position, because a numeral sits outside the disc (see
+     * `dialChrome`).
+     *
+     * The 0 numeral marks a whole turn: it sits where the preview numeral shows
+     * 60 (MANUAL "Preview numeral"), so it starts 60 minutes rather than the
+     * nothing a 0-minute timer would be.
+     */
+    function numeralDurationAt(target: EventTarget | null): number | null {
+        if (!(target instanceof Element)) return null
+        const label = target.closest('[data-numeral-minutes]')?.getAttribute('data-numeral-minutes')
+        if (label === null || label === undefined) return null
+        const minutes = Number(label)
+        return minutes === 0 ? MINUTES_PER_TURN : minutes
+    }
+
     function handlePointerMove(event: PointerEventType<SVGSVGElement>) {
         setPreviewMinutes(durationAt(pointAt(event.clientX, event.clientY)))
     }
@@ -81,6 +100,12 @@ export function TimerFace({ status, remainingSeconds, onPick }: TimerFaceProps) 
     }
 
     function handleClick(event: ReactMouseEvent<SVGSVGElement>) {
+        const numeral = numeralDurationAt(event.target)
+        if (numeral !== null) {
+            // A numeral is a one-click shortcut to its own duration.
+            pick(numeral)
+            return
+        }
         pick(durationAt(pointAt(event.clientX, event.clientY)))
     }
 

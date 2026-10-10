@@ -20,11 +20,10 @@ one dial face; the multi-variant experiment is over.
 | `popup.html`                        | Popup entry. Sets `data-surface="popup"`.                                                                   |
 | `fullscreen.html`                   | Tab entry for the big view. Sets `data-surface="fullscreen"`.                                               |
 | `app/main.tsx`                      | Mounts `TimerApp`, reads the surface, injects the dev harness in development builds.                        |
-| `app/TimerApp.tsx`                  | Composition shared by both surfaces, plus the "replace a running timer?" flow.                              |
+| `app/TimerApp.tsx`                  | Composition shared by both surfaces.                                                                        |
 | `app/components/TimerFace/`         | The dial. Geometry in `lib/dial.ts`; one component per element (`Disc`, `RemainingTime`, `PreviewArc`, `PreviewTicks`, `PreviewNumeral`, `CenterReadout`, `Caption`, `CreatorMark`); static chrome in `dialChrome.tsx` (`DIAL_TICKS`, `DIAL_NUMERALS`, and the `Tick` both tick groups share). |
 | `app/components/PresetBar/`         | Pre-configured durations (MANUAL "Set a pre-configured timer").                                             |
 | `app/components/TransportControls/` | Pause/resume, mute, reset, restart, fullscreen. Icons from Lucide.                                          |
-| `app/components/ConfirmReplace/`    | Consent before replacing a timer that is still in progress.                                                 |
 | `app/components/DevBar/`            | Design harness (`import.meta.env.DEV` only): parks the timer in a given state.                              |
 | `app/design/tokens.css`             | Every colour, size and stroke weight, in one `:root` block.                                                 |
 | `app/design/global.css`             | Resets, body, and the popup/tab sizing per `[data-surface]`.                                                |
@@ -68,6 +67,15 @@ one dial face; the multi-variant experiment is over.
   chrome are stateful: previewing swaps the numeral ring for the preview numeral
   and redraws the covered ticks in the remaining colour, over the untouched ring
   (MANUAL "Preview numeral", "Preview ticks").
+- **One click sets a timer.** Clicking the disc starts the previewed duration;
+  clicking a numeral starts that many minutes outright (the 0 numeral marks a
+  whole turn, so it starts 60). A numeral carries `data-numeral-minutes`, which
+  is how the click is resolved (`handleClick` in `TimerFace`) — the pointer's
+  position cannot identify a numeral because it sits off the disc.
+  `pointer-events: bounding-box` (see `TimerFace.module.css`) gives each numeral
+  a solid hit area, and hovering one takes `--remaining` — the same interactive
+  signal the preview arc and preview numeral use. Nothing asks for confirmation,
+  even when a timer is already running.
 - **Pointer maths uses `getScreenCTM()`**, so scaling or letterboxing of the
   element cannot skew the selected minute.
 - **Two surfaces, one app.** `popup.html` and `fullscreen.html` mount the same
