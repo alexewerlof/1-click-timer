@@ -59,20 +59,19 @@ export function TimerFace({ status, remainingSeconds, onPick }: TimerFaceProps) 
         return clientPointToDialPoint(svg, clientX, clientY)
     }
 
-    /** The whole minute at a dial-space point, clamped to the dial's range. */
-    function minutesAt(point: Point): number {
+    /**
+     * The whole minute at a dial-space point, clamped to the dial's range — or
+     * null when the point is not on the disc, or sits over the readout disc at
+     * its centre. The readout disc reads as a layer above the dial, so both
+     * hover and click ignore it; off the disc there is nothing to show either.
+     */
+    function durationAt(point: Point | null): number | null {
+        if (!point || !isPointOnDisc(point) || isPointInsideReadoutDisc(point)) return null
         return clampMinutes(Math.round(pointToMinutes(point)))
     }
 
     function handlePointerMove(event: PointerEventType<SVGSVGElement>) {
-        const point = pointAt(event.clientX, event.clientY)
-        // Preview only over the disc, never the readout disc at its centre:
-        // off the disc and over the readout there is nothing to show.
-        if (!point || !isPointOnDisc(point) || isPointInsideReadoutDisc(point)) {
-            setPreviewMinutes(null)
-            return
-        }
-        setPreviewMinutes(minutesAt(point))
+        setPreviewMinutes(durationAt(pointAt(event.clientX, event.clientY)))
     }
 
     function handlePointerLeave() {
@@ -80,9 +79,7 @@ export function TimerFace({ status, remainingSeconds, onPick }: TimerFaceProps) 
     }
 
     function handleClick(event: ReactMouseEvent<SVGSVGElement>) {
-        const point = pointAt(event.clientX, event.clientY)
-        if (!point) return
-        pick(minutesAt(point))
+        pick(durationAt(pointAt(event.clientX, event.clientY)))
     }
 
     function handleKeyDown(event: ReactKeyboardEvent<SVGSVGElement>) {
