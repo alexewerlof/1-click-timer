@@ -44,6 +44,9 @@ for (const status of STATES) {
  */
 test('keeps the readout inside the readout disc', async () => {
     const runtime = createMockRuntime()
+    // Parked at a running timer: the readout is blank while idle, so there would
+    // be no text box to measure.
+    runtime.forceStatus('running')
     const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} />))
 
     const svg = screen.getByRole('slider').element() as SVGSVGElement
@@ -60,8 +63,24 @@ test('keeps the readout inside the readout disc', async () => {
     const offset = Math.hypot(box.x + box.width / 2 - centreX, box.y + box.height / 2 - centreY)
     const halfDiagonal = Math.hypot(box.width / 2, box.height / 2)
 
-    expect(text.textContent).toBe('0:00')
+    expect(text.textContent).toBe('12:30')
     expect(offset + halfDiagonal).toBeLessThanOrEqual(radius)
+})
+
+/**
+ * An idle timer has no remaining time to report, so the readout stays blank
+ * instead of standing at `0:00`. The disc itself stays, so the centre keeps the
+ * layer it reads as.
+ */
+test('leaves the readout blank while the timer is idle', async () => {
+    const runtime = createMockRuntime()
+    runtime.forceStatus('idle')
+    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} />))
+
+    const svg = screen.getByRole('slider').element() as SVGSVGElement
+
+    expect(svg.querySelector('text[class*="readout"]')).toBeNull()
+    expect(svg.querySelector('circle[class*="readoutDisc"]')).not.toBeNull()
 })
 
 /**
@@ -100,7 +119,7 @@ test('previews a full circle at a whole turn', async () => {
  * The previewed minute used to appear in the readout. Now it is drawn as a
  * numeral on the numeral ring, at the end of the arc, and the whole ring steps
  * aside so it is the only number on the face (MANUAL "Preview numeral"). The
- * readout keeps showing the remaining time.
+ * readout keeps showing the remaining time — nothing, while idle.
  */
 test('draws the previewed minute as the only numeral on the face', async () => {
     const runtime = createMockRuntime()
@@ -149,7 +168,7 @@ test('draws the previewed minute as the only numeral on the face', async () => {
     expect(dialTicks).toHaveLength(DIAL_TICKS.length)
     for (const tick of dialTicks) expect(getComputedStyle(tick).stroke).not.toBe(remaining)
 
-    // The readout keeps the remaining time; it no longer previews the minute.
-    const readout = svg.querySelector('text[class*="readout"]') as SVGTextElement
-    expect(readout.textContent).toBe('0:00')
+    // The readout never previews the minute; while idle it is blank, because
+    // there is no remaining time to report.
+    expect(svg.querySelector('text[class*="readout"]')).toBeNull()
 })

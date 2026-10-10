@@ -168,7 +168,7 @@ export function TimerFace({ status, remainingSeconds, onPick }: TimerFaceProps) 
              */}
             <RemainingTime seconds={remainingSeconds} active={status === 'running'} />
             <PreviewArc previewMinutes={previewMinutes} />
-            <CenterReadout remainingSeconds={remainingSeconds} />
+            <CenterReadout status={status} remainingSeconds={remainingSeconds} />
             {SHOW_CREATOR_MARK ? <CreatorMark /> : null}
             <Caption />
         </svg>

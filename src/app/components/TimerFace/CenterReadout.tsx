@@ -7,9 +7,11 @@ import {
     READOUT_SHADOW_ID,
 } from '../../lib/dial'
 import { formatClock } from '../../lib/time'
+import type { TimerStatus } from '../../runtime/types'
 import styles from './TimerFace.module.css'
 
 interface CenterReadoutProps {
+    status: TimerStatus
     remainingSeconds: number
 }
 
@@ -17,10 +19,15 @@ interface CenterReadoutProps {
  * The readout, centred in the readout disc. The size is derived from the disc
  * radius, so the text cannot grow past the circle it sits in.
  *
- * It always shows the real remaining time: the previewed duration is drawn as a
- * numeral at the end of the preview arc instead (MANUAL "Preview numeral").
+ * An idle timer has no remaining time to report, so the text is left blank
+ * rather than standing at `0:00`. The disc stays, so the centre keeps its
+ * layer.
+ *
+ * Otherwise it shows the real remaining time: the previewed duration is drawn
+ * as a numeral at the end of the preview arc instead (MANUAL "Preview
+ * numeral").
  */
-export function CenterReadout({ remainingSeconds }: CenterReadoutProps) {
+export function CenterReadout({ status, remainingSeconds }: CenterReadoutProps) {
     return (
         <g>
             <defs>
@@ -43,14 +50,16 @@ export function CenterReadout({ remainingSeconds }: CenterReadoutProps) {
                 r={READOUT_DISC_RADIUS}
                 filter={`url(#${READOUT_SHADOW_ID})`}
             />
-            <text
-                className={styles.readout}
-                style={{ fontSize: READOUT_FONT_SIZE }}
-                x={DIAL_CENTER_X}
-                y={DIAL_CENTER_Y}
-            >
-                {formatClock(remainingSeconds)}
-            </text>
+            {status === 'idle' ? null : (
+                <text
+                    className={styles.readout}
+                    style={{ fontSize: READOUT_FONT_SIZE }}
+                    x={DIAL_CENTER_X}
+                    y={DIAL_CENTER_Y}
+                >
+                    {formatClock(remainingSeconds)}
+                </text>
+            )}
         </g>
     )
 }

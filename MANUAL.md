@@ -41,7 +41,7 @@ change requested with one of these terms maps to one place in the source.
 | **Preview arc**     | The unfilled outline drawn from 12 o'clock to the minute currently under the pointer. It shows what a click would start. |
 | **Preview ticks**   | The ticks inside the preview arc's span, drawn in the **Remaining sector**'s colour so the arc, its numeral and the ticks it covers read as one mark. The rest of the ring keeps the dial's ink. |
 | **Preview numeral** | The single numeral shown while previewing. It sits on the numeral ring at the end of the preview arc, in the numerals' style and in the **Remaining sector**'s colour, and replaces the whole numeral ring so it is the only number on the face. A whole turn (60) is labelled where the 0 numeral sits. |
-| **Readout**         | The digital `M:SS` in the middle of the disc, e.g. `1:05`. It always shows the remaining time.            |
+| **Readout**         | The digital `M:SS` in the middle of the disc, e.g. `1:05`. It always shows the remaining time — except while the timer is idle, when it is left blank, because there is nothing to report and a standing `0:00` only adds noise. |
 | **Readout disc**    | The small circle behind the readout, sitting at the centre of the dial. It is white with a soft shadow, so it reads as a layer above the dial rather than a hole in it. |
 | **Caption**         | The text "Made in Sweden", inscribed inside the disc on a circular path just above the bottom rim.        |
 | **Creator mark**    | The logo plus "Alex Ewerlöf". Currently not drawn.                                                       |
