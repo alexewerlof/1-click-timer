@@ -70,11 +70,12 @@
 
 /* ---- preview arc ---- */
 
+/* Same colour as the remaining sector it previews, so the two cannot drift. */
 .previewArc {
     fill: none;
-    stroke: var(--preview);
+    stroke: var(--remaining);
     stroke-width: var(--stroke-tick-major);
-    stroke-dasharray: 2 1.6;
+    stroke-opacity: var(--remaining-alpha);
 }
 
 /* ---- centre readout ---- */

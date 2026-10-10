@@ -1,8 +1,9 @@
 import { page } from 'vitest/browser'
-import { expect, test } from 'vitest'
+import { expect, test, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import type { ReactElement } from 'react'
 import { TimerApp } from './TimerApp'
+import { DISC_RADIUS, MINUTES_PER_TURN, pointOnDial } from './lib/dial'
 import './design/global.css'
 import { createMockRuntime } from './runtime/mockRuntime'
 import type { TimerStatus } from './runtime/types'
@@ -61,4 +62,36 @@ test('keeps the readout inside the readout disc', async () => {
 
     expect(text.textContent).toBe('0:00')
     expect(offset + halfDiagonal).toBeLessThanOrEqual(radius)
+})
+
+/**
+ * The preview arc regressed at a whole turn: `remainingArcPath` returns '' when
+ * the arc would close on itself, so the sliver of dial just clockwise of 12
+ * o'clock previewed nothing — even though a click there starts the whole turn.
+ * The preview has to be driven through the DOM because the minute comes from
+ * the pointer's position in the SVG's own coordinate space.
+ */
+test('previews a full circle at a whole turn', async () => {
+    const runtime = createMockRuntime()
+    runtime.forceStatus('idle')
+    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} />))
+
+    const svg = screen.getByRole('slider').element() as SVGSVGElement
+    // The point a hair clockwise of 12 o'clock, whose minute rounds up to 60.
+    // Slightly inside the rim so rounding through the screen matrix cannot land
+    // it a hair outside the disc.
+    const onDisc = pointOnDial(MINUTES_PER_TURN - 0.1, DISC_RADIUS - 1)
+    const matrix = svg.getScreenCTM()
+    if (!matrix) throw new Error('the slider has no screen CTM')
+    const at = new DOMPoint(onDisc.x, onDisc.y).matrixTransform(matrix)
+
+    svg.dispatchEvent(new PointerEvent('pointermove', { clientX: at.x, clientY: at.y, bubbles: true }))
+
+    // Polled, because React flushes a pointermove update asynchronously.
+    const preview = await vi.waitFor(() => {
+        const circle = svg.querySelector('circle[class*="previewArc"]')
+        if (!circle) throw new Error('the whole turn has not previewed a full circle yet')
+        return circle
+    })
+    await expect.element(page.elementLocator(preview)).toBeVisible()
 })
