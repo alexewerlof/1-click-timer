@@ -1,4 +1,4 @@
-import { Expand, Maximize, Pause, Play, RotateCcw, RotateCw, Volume2, VolumeX } from 'lucide-react'
+import { Expand, Maximize, Pause, Play, TimerOff, TimerReset, Volume2, VolumeX } from 'lucide-react'
 import type { Surface } from '../../lib/surface'
 import type { TimerStatus } from '../../runtime/types'
 import styles from './TransportControls.module.css'
@@ -67,7 +67,7 @@ export function TransportControls({
                 aria-label="Reset"
                 title="Reset"
             >
-                <RotateCcw size={ICON_SIZE} />
+                <TimerOff size={ICON_SIZE} />
             </button>
 
             <button
@@ -78,7 +78,7 @@ export function TransportControls({
                 aria-label="Restart last timer"
                 title="Restart last timer"
             >
-                <RotateCw size={ICON_SIZE} />
+                <TimerReset size={ICON_SIZE} />
             </button>
 
             <button
