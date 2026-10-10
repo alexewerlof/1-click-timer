@@ -97,19 +97,57 @@ export const READOUT_PREVIEW_FONT_SIZE = readoutFontSizeFor(READOUT_DISC_RADIUS,
 /** Referenced by the readout disc's `filter` attribute. */
 export const READOUT_SHADOW_ID = 'readout-disc-shadow'
 
+/** Referenced by the disc's inner-shadow `filter` attribute. */
+export const DISC_INNER_SHADOW_ID = 'disc-inner-shadow'
+
+export interface DialShadow {
+    /** Downwards, because the light is above the dial. */
+    offsetY: number
+    blur: number
+}
+
+/** Offset and blur as fractions of the shadowed radius. */
+interface ShadowRatios {
+    offset: number
+    blur: number
+}
+
+/** Scaled off the radius, so a shadow stays in proportion if the dial is resized. */
+function shadowFor(radius: number, ratios: ShadowRatios): DialShadow {
+    return {
+        offsetY: round(radius * ratios.offset),
+        blur: round(radius * ratios.blur),
+    }
+}
+
+/**
+ * Kept together because a blur tighter than the offset turns a soft halo into a
+ * detached crescent.
+ */
+const READOUT_SHADOW_RATIOS: ShadowRatios = { offset: 0.05, blur: 0.08 }
+
+/**
+ * The disc is six times the readout disc's radius, so the readout's proportions
+ * would spread a grey wash across the whole face. The rim keeps the same light —
+ * offset downwards, in the colour of `--disc-inner-shadow` — in a much tighter
+ * and shallower band: just enough to suggest where the disc ends, so the face
+ * stays white.
+ */
+const DISC_INNER_SHADOW_RATIOS: ShadowRatios = { offset: 0.01, blur: 0.02 }
+
 /**
  * Soft drop shadow under the readout disc, so it reads as a layer above the dial
- * rather than a hole in it. Scaled off the disc radius like everything else, so
- * it stays in proportion if the disc is resized. The colour is a translucent
- * dark blue, set by `--readout-shadow` in `design/tokens.css`.
- *
- * Offset and blur are scaled together: a blur tighter than the offset turns the
- * soft halo into a detached crescent.
+ * rather than a hole in it. The colour is a translucent dark blue, set by
+ * `--readout-shadow` in `design/tokens.css`.
  */
-export const READOUT_SHADOW = {
-    offsetY: round(READOUT_DISC_RADIUS * 0.05),
-    blur: round(READOUT_DISC_RADIUS * 0.08),
-}
+export const READOUT_SHADOW = shadowFor(READOUT_DISC_RADIUS, READOUT_SHADOW_RATIOS)
+
+/**
+ * Shadow cast *inwards* from the disc's rim, so the disc reads as a shallow
+ * recess in the face rather than a circle drawn on it: what the readout disc's
+ * shadow is to the dial, an inner shadow is to the rim.
+ */
+export const DISC_INNER_SHADOW = shadowFor(DISC_RADIUS, DISC_INNER_SHADOW_RATIOS)
 
 /**
  * Half the footprint of the widest numeral (a bold two-digit number such as

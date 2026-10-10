@@ -43,7 +43,6 @@
     --surface: #ffffff;
     /* The face is the page background; only the disc is drawn. */
     --face: transparent;
-    --disc-edge: rgb(20 24 31 / 10%);
 
     --ink: #14181f;
     --ink-soft: rgb(20 24 31 / 55%);
@@ -58,6 +57,10 @@
     /* Soft drop shadow under the readout disc: translucent black-blue, like a
        CSS box-shadow. */
     --readout-shadow: rgb(15 23 42 / 30%);
+    /* Cast inwards from the disc's rim, so the disc reads as a recess that the
+       ticks and the readout gather around. Deliberately the same shadow as the
+       readout disc's: one light, two directions. */
+    --disc-inner-shadow: var(--readout-shadow);
 
     --chrome-ink: #14181f;
     --chrome-border: rgb(20 24 31 / 12%);

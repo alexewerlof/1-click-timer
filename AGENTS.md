@@ -92,11 +92,15 @@ termination. The UI never accumulates time.
 - Colours, sizes and dial weights are **tokens** in `design/tokens.css`. Change
   them there, never in a component. The exceptions are all **derived** from the
   geometry in `lib/dial.ts` rather than picked by eye: the readout font size
-  (`readoutFontSizeFor`) and the readout disc's shadow (`READOUT_SHADOW`). Hand
-  picked values drift the moment the geometry is tuned, and did.
-- The readout disc shadow is an inline SVG `feDropShadow` filter, because SVG has
-  no `box-shadow`. See `src/AGENTS.md` for the two settings that are easy to get
-  wrong (`sRGB` interpolation, and a filter region wide enough not to clip).
+  (`readoutFontSizeFor`) and the two shadows (`READOUT_SHADOW`,
+  `DISC_INNER_SHADOW`, both from `shadowFor`). Hand picked values drift the
+  moment the geometry is tuned, and did.
+- The shadows are inline SVG filters, because SVG has no `box-shadow`: the
+  readout disc's `feDropShadow`, and the disc's own inner shadow, which
+  subtracts an offset copy of the disc from itself. See `src/AGENTS.md` for the
+  two settings that are easy to get wrong (`sRGB` interpolation, and a filter
+  region wide enough not to clip). The disc has no outline — the inner shadow is
+  what draws its edge.
 - `images/bell.svg` and `images/reset.svg` are currently **unreferenced** — they
   belonged to the pre-React popup. They are kept deliberately: the ringing
   overlay (MANUAL) is expected to want the bell. The `logo*.png` files are live

@@ -15,10 +15,17 @@
 }
 
 .disc {
+    /* No rim: the inner shadow below sets the disc's edge. */
     fill: var(--face);
-    /* Hairline rim: the ticks cross it, so it reads as the dial edge. */
-    stroke: var(--disc-edge);
-    stroke-width: var(--stroke-tick-minor);
+}
+
+/*
+ * Source for the disc's inner shadow. The filter replaces this paint with the
+ * shadow, so only the circle's alpha is ever seen — but it has to be opaque for
+ * the filter to have something to work with.
+ */
+.discInnerShadow {
+    fill: var(--surface);
 }
 
 /* ---- dial chrome (static) ---- */

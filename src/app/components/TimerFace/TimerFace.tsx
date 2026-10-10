@@ -5,9 +5,6 @@ import type {
     PointerEvent as PointerEventType,
 } from 'react'
 import {
-    DIAL_CENTER_X,
-    DIAL_CENTER_Y,
-    DISC_RADIUS,
     DIAL_VIEWBOX,
     MINUTES_PER_TURN,
     SHOW_CREATOR_MARK,
@@ -22,6 +19,7 @@ import type { TimerStatus } from '../../runtime/types'
 import { Caption } from './Caption'
 import { CenterReadout } from './CenterReadout'
 import { CreatorMark } from './CreatorMark'
+import { DISC } from './Disc'
 import { PreviewArc } from './PreviewArc'
 import { RemainingTime } from './RemainingTime'
 import { DIAL_CHROME } from './dialChrome'
@@ -139,7 +137,7 @@ export function TimerFace({ status, remainingSeconds, onPick }: TimerFaceProps) 
             onClick={handleClick}
             onKeyDown={handleKeyDown}
         >
-            <circle className={styles.disc} cx={DIAL_CENTER_X} cy={DIAL_CENTER_Y} r={DISC_RADIUS} />
+            {DISC}
             {DIAL_CHROME}
             {/*
              * The remaining sector sits *over* the chrome and is slightly
