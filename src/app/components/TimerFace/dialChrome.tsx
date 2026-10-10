@@ -1,26 +1,20 @@
 /**
- * The static dial chrome: every tick and every numeral.
+ * The dial's static chrome: every tick, and the numeral ring that a preview
+ * replaces.
  *
  * The dial re-renders several times a second while running, but none of this
  * depends on state — so it is built once at module load and reused
  * (`rendering-hoist-jsx`, `js-cache-function-results`).
+ *
+ * Ticks and numerals are separate exports because the face shows either the
+ * whole numeral ring or the single preview numeral, never both. The tick
+ * element itself lives in `Tick.tsx`, so `PreviewTicks` can redraw the covered
+ * ticks without duplicating it.
  */
 
-import { DIAL_TICKS, NUMERAL_MINUTES, NUMERAL_RADIUS, pointOnDial } from '../../lib/dial'
+import { DIAL_TICKS as TICK_GEOMETRY, NUMERAL_MINUTES, NUMERAL_RADIUS, pointOnDial } from '../../lib/dial'
+import { Tick } from './Tick'
 import styles from './TimerFace.module.css'
-
-function renderTicks() {
-    return DIAL_TICKS.map((tick) => (
-        <line
-            key={tick.minute}
-            className={tick.major ? styles.tickMajor : styles.tickMinor}
-            x1={tick.inner.x}
-            y1={tick.inner.y}
-            x2={tick.outer.x}
-            y2={tick.outer.y}
-        />
-    ))
-}
 
 function renderNumerals() {
     return NUMERAL_MINUTES.map((minute) => {
@@ -33,9 +27,12 @@ function renderNumerals() {
     })
 }
 
-export const DIAL_CHROME = (
-    <g data-dial-chrome>
-        {renderTicks()}
-        {renderNumerals()}
+export const DIAL_TICKS = (
+    <g data-dial-ticks>
+        {TICK_GEOMETRY.map((tick) => (
+            <Tick key={tick.minute} tick={tick} />
+        ))}
     </g>
 )
+
+export const DIAL_NUMERALS = <g data-dial-numerals>{renderNumerals()}</g>

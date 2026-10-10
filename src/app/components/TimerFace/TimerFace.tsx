@@ -21,8 +21,10 @@ import { CenterReadout } from './CenterReadout'
 import { CreatorMark } from './CreatorMark'
 import { DISC } from './Disc'
 import { PreviewArc } from './PreviewArc'
+import { PreviewNumeral } from './PreviewNumeral'
+import { PreviewTicks } from './PreviewTicks'
 import { RemainingTime } from './RemainingTime'
-import { DIAL_CHROME } from './dialChrome'
+import { DIAL_NUMERALS, DIAL_TICKS } from './dialChrome'
 import styles from './TimerFace.module.css'
 
 /** One-minute steps; hold shift for a five-minute jump. */
@@ -117,6 +119,14 @@ export function TimerFace({ status, remainingSeconds, onPick }: TimerFaceProps) 
         onPick(minutes * SECONDS_PER_MINUTE)
     }
 
+    /**
+     * The minute the preview numeral shows, or null when no arc is drawn:
+     * 0 minutes draws no arc, so the face stays in its normal state there.
+     * While previewing, the numeral ring gives way to this single numeral
+     * (MANUAL "Preview numeral").
+     */
+    const previewNumeral = previewMinutes !== null && previewMinutes > 0 ? previewMinutes : null
+
     return (
         <svg
             ref={svgRef}
@@ -135,7 +145,22 @@ export function TimerFace({ status, remainingSeconds, onPick }: TimerFaceProps) 
             onKeyDown={handleKeyDown}
         >
             {DISC}
-            {DIAL_CHROME}
+            {DIAL_TICKS}
+            {/*
+             * The numeral ring and the preview's own chrome are mutually
+             * exclusive: while previewing, the ring is swapped for the single
+             * numeral the arc points at, and the ticks the arc covers are
+             * redrawn in the remaining colour — so the arc, its numeral and
+             * those ticks read as one mark.
+             */}
+            {previewNumeral === null ? (
+                DIAL_NUMERALS
+            ) : (
+                <>
+                    <PreviewTicks minutes={previewNumeral} />
+                    <PreviewNumeral minutes={previewNumeral} />
+                </>
+            )}
             {/*
              * The remaining sector sits *over* the chrome and is slightly
              * translucent, so it tints the ticks it swallows — the way the
@@ -143,7 +168,7 @@ export function TimerFace({ status, remainingSeconds, onPick }: TimerFaceProps) 
              */}
             <RemainingTime seconds={remainingSeconds} active={status === 'running'} />
             <PreviewArc previewMinutes={previewMinutes} />
-            <CenterReadout status={status} remainingSeconds={remainingSeconds} hoverMinutes={previewMinutes} />
+            <CenterReadout remainingSeconds={remainingSeconds} />
             {SHOW_CREATOR_MARK ? <CreatorMark /> : null}
             <Caption />
         </svg>

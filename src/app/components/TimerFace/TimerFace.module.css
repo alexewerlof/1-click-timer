@@ -78,6 +78,24 @@
     stroke-opacity: var(--remaining-alpha);
 }
 
+/*
+ * The preview numeral wears the same colour as the arc and the sector it
+ * previews — the `--remaining` token, which the settings screen will write to.
+ * Solid rather than the sector's `--remaining-alpha`: that alpha is for a
+ * translucent overlay on the dial, and this numeral sits on the plain face.
+ */
+.previewNumeral {
+    fill: var(--remaining);
+}
+
+/*
+ * A preview tick keeps the ticks' geometry and takes the remaining colour, like
+ * the arc and the preview numeral it belongs to.
+ */
+.tickPreview {
+    stroke: var(--remaining);
+}
+
 /* ---- centre readout ---- */
 
 .readoutDisc {

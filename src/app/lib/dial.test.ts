@@ -17,6 +17,7 @@ import {
     pointToMinutes,
     remainingArcPath,
     remainingSectorPath,
+    ticksWithinPreview,
 } from './dial'
 import { MAX_SECONDS, SECONDS_PER_MINUTE } from './time'
 
@@ -104,6 +105,17 @@ describe('remainingArcPath', () => {
         const path = remainingArcPath(15 * SECONDS_PER_MINUTE)
         expect(path.startsWith(`M ${top.x} ${top.y} A `)).toBe(true)
         expect(path.endsWith('Z')).toBe(false)
+    })
+})
+
+describe('ticksWithinPreview', () => {
+    it('covers the span from 12 o’clock to the previewed minute, both ends included', () => {
+        const expected = Array.from({ length: 16 }, (_, index) => index)
+        expect(ticksWithinPreview(15).map((tick) => tick.minute)).toEqual(expected)
+    })
+
+    it('covers every tick for a whole turn', () => {
+        expect(ticksWithinPreview(MINUTES_PER_TURN)).toHaveLength(DIAL_TICKS.length)
     })
 })
 

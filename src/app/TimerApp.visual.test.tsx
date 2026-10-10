@@ -3,7 +3,7 @@ import { expect, test, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import type { ReactElement } from 'react'
 import { TimerApp } from './TimerApp'
-import { DISC_RADIUS, MINUTES_PER_TURN, pointOnDial } from './lib/dial'
+import { DIAL_TICKS, DISC_RADIUS, MINUTES_PER_TURN, NUMERAL_RADIUS, pointOnDial } from './lib/dial'
 import './design/global.css'
 import { createMockRuntime } from './runtime/mockRuntime'
 import type { TimerStatus } from './runtime/types'
@@ -94,4 +94,62 @@ test('previews a full circle at a whole turn', async () => {
         return circle
     })
     await expect.element(page.elementLocator(preview)).toBeVisible()
+})
+
+/**
+ * The previewed minute used to appear in the readout. Now it is drawn as a
+ * numeral on the numeral ring, at the end of the arc, and the whole ring steps
+ * aside so it is the only number on the face (MANUAL "Preview numeral"). The
+ * readout keeps showing the remaining time.
+ */
+test('draws the previewed minute as the only numeral on the face', async () => {
+    const runtime = createMockRuntime()
+    runtime.forceStatus('idle')
+    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} />))
+
+    const svg = screen.getByRole('slider').element() as SVGSVGElement
+    // Exactly on the 15-minute mark, slightly inside the rim so rounding through
+    // the screen matrix cannot land the point off the disc.
+    const onDisc = pointOnDial(15, DISC_RADIUS - 2)
+    const matrix = svg.getScreenCTM()
+    if (!matrix) throw new Error('the slider has no screen CTM')
+    const at = new DOMPoint(onDisc.x, onDisc.y).matrixTransform(matrix)
+
+    svg.dispatchEvent(new PointerEvent('pointermove', { clientX: at.x, clientY: at.y, bubbles: true }))
+
+    const numeral = await vi.waitFor(() => {
+        const numerals = svg.querySelectorAll('text[class*="numeral"]')
+        const only = numerals.length === 1 ? numerals[0] : undefined
+        if (!only) throw new Error('the numeral ring has not stepped aside yet')
+        return only
+    })
+
+    expect(numeral.textContent).toBe('15')
+    // It takes the 15 numeral's own place on the ring, so it reads as that numeral.
+    const expected = pointOnDial(15, NUMERAL_RADIUS)
+    expect(Number(numeral.getAttribute('x'))).toBeCloseTo(expected.x, 3)
+    expect(Number(numeral.getAttribute('y'))).toBeCloseTo(expected.y, 3)
+
+    // It wears the remaining sector's colour — the shared `--remaining` token —
+    // rather than the numerals' ink. The arc reads the same token, so comparing
+    // the two keeps them from drifting apart.
+    const arc = svg.querySelector('[class*="previewArc"]') as SVGPathElement
+    const remaining = getComputedStyle(arc).stroke
+    expect(getComputedStyle(numeral).fill).toBe(remaining)
+
+    // The ticks the arc covers are redrawn in that colour too — and only those.
+    // The span is closed, so it runs through the 15-minute tick inclusive.
+    const previewTicks = Array.from(svg.querySelectorAll('line[class*="tickPreview"]'))
+    expect(previewTicks).toHaveLength(16)
+    for (const tick of previewTicks) expect(getComputedStyle(tick).stroke).toBe(remaining)
+
+    const dialTicks = Array.from(svg.querySelectorAll('line')).filter(
+        (line) => !(line.getAttribute('class') ?? '').includes('tickPreview'),
+    )
+    expect(dialTicks).toHaveLength(DIAL_TICKS.length)
+    for (const tick of dialTicks) expect(getComputedStyle(tick).stroke).not.toBe(remaining)
+
+    // The readout keeps the remaining time; it no longer previews the minute.
+    const readout = svg.querySelector('text[class*="readout"]') as SVGTextElement
+    expect(readout.textContent).toBe('0:00')
 })

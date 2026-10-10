@@ -39,7 +39,9 @@ change requested with one of these terms maps to one place in the source.
 | **Numeral ring**    | The circle that the numerals sit on, just outside the ticks.                                             |
 | **Remaining sector**| The filled red wedge. It runs from 12 o'clock counter-clockwise to the current remaining time, and reaches the centre, so its size is the time left. |
 | **Preview arc**     | The unfilled outline drawn from 12 o'clock to the minute currently under the pointer. It shows what a click would start. |
-| **Readout**         | The digital `M:SS` in the middle of the disc, e.g. `1:05`.                                               |
+| **Preview ticks**   | The ticks inside the preview arc's span, drawn in the **Remaining sector**'s colour so the arc, its numeral and the ticks it covers read as one mark. The rest of the ring keeps the dial's ink. |
+| **Preview numeral** | The single numeral shown while previewing. It sits on the numeral ring at the end of the preview arc, in the numerals' style and in the **Remaining sector**'s colour, and replaces the whole numeral ring so it is the only number on the face. A whole turn (60) is labelled where the 0 numeral sits. |
+| **Readout**         | The digital `M:SS` in the middle of the disc, e.g. `1:05`. It always shows the remaining time.            |
 | **Readout disc**    | The small circle behind the readout, sitting at the centre of the dial. It is white with a soft shadow, so it reads as a layer above the dial rather than a hole in it. |
 | **Caption**         | The text "Made in Sweden", inscribed inside the disc on a circular path just above the bottom rim.        |
 | **Creator mark**    | The logo plus "Alex Ewerlöf". Currently not drawn.                                                       |
@@ -103,7 +105,7 @@ Each minute is represented by a thin line.
 
 The multiplies of 5 have a label: 0, 5, 10, 15, ..., 55 and a slightly thicker indicator.
 
-When the user hovers over the disc — everywhere except the readout disc at its centre — a preliminary arc is drawn to show what alert will be set if they click. The actual number of minutes that they are selecting is shown in the circular center of the screen.
+When the user hovers over the disc — everywhere except the readout disc at its centre — a preliminary arc is drawn to show what alert will be set if they click. The number of minutes they are selecting is shown as the **preview numeral**: a single numeral drawn on the numeral ring at the end of the arc, in the numerals' style and the remaining sector's colour, so it reads as the arc's own label. The regular numerals are hidden while previewing, and the ticks the arc covers are drawn in that same colour, so the arc, its numeral and the ticks it covers read as one mark. The readout in the centre keeps showing the remaining time; it does not show the previewed duration.
 
 If the user clicks somewhere, the corresponding timer will start. If there's an ongoing timer in progress and isn't over yet, we should ask the user whether they really want to set a new timer or not.
 
@@ -123,7 +125,7 @@ This screen allows the user to configure various aspects of the timer:
 
 ## Set a custom timer
 
-Hover your mouse over the disc — everywhere except the readout disc at its centre — and see how the preliminary indicator arc and the number on the central circle show what timer will start if you click.
+Hover your mouse over the disc — everywhere except the readout disc at its centre — and see how the preliminary indicator arc and the preview numeral at its end show what timer will start if you click.
 
 Once you're happy, just click the screen and the timer starts with the number that's chosen.
 

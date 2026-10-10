@@ -90,10 +90,6 @@ export function readoutFontSizeFor(discRadius: number, digits: number): number {
 /** The `M:SS` countdown, e.g. "60:00" — the widest thing the readout shows. */
 export const READOUT_FONT_SIZE = readoutFontSizeFor(READOUT_DISC_RADIUS, READOUT_MAX_DIGITS)
 
-/** The bare minute count shown while previewing, e.g. "35". */
-export const READOUT_PREVIEW_DIGITS = 2
-export const READOUT_PREVIEW_FONT_SIZE = readoutFontSizeFor(READOUT_DISC_RADIUS, READOUT_PREVIEW_DIGITS)
-
 /** Referenced by the readout disc's `filter` attribute. */
 export const READOUT_SHADOW_ID = 'readout-disc-shadow'
 
@@ -341,3 +337,13 @@ function buildTicks(): readonly DialTick[] {
 export const DIAL_TICKS: readonly DialTick[] = buildTicks()
 
 export const DIAL_MAJOR_TICKS: readonly DialTick[] = DIAL_TICKS.filter((tick) => tick.major)
+
+/**
+ * The ticks a preview of `minutes` covers: every tick whose angle falls inside
+ * the arc's span, which runs counter-clockwise from 12 o'clock (minute 0) to
+ * `minutes`. The span is closed at both ends, so the two ticks bounding the arc
+ * light up with it — and a whole turn covers every tick.
+ */
+export function ticksWithinPreview(minutes: number): readonly DialTick[] {
+    return DIAL_TICKS.filter((tick) => tick.minute <= minutes)
+}

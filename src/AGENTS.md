@@ -21,7 +21,7 @@ one dial face; the multi-variant experiment is over.
 | `fullscreen.html`                   | Tab entry for the big view. Sets `data-surface="fullscreen"`.                                               |
 | `app/main.tsx`                      | Mounts `TimerApp`, reads the surface, injects the dev harness in development builds.                        |
 | `app/TimerApp.tsx`                  | Composition shared by both surfaces, plus the "replace a running timer?" flow.                              |
-| `app/components/TimerFace/`         | The dial. Geometry in `lib/dial.ts`; one component per element (`Disc`, `RemainingTime`, `PreviewArc`, `CenterReadout`, `Caption`, `CreatorMark`); static chrome in `dialChrome.tsx`. |
+| `app/components/TimerFace/`         | The dial. Geometry in `lib/dial.ts`; one component per element (`Disc`, `RemainingTime`, `PreviewArc`, `PreviewTicks`, `PreviewNumeral`, `CenterReadout`, `Caption`, `CreatorMark`); static chrome in `dialChrome.tsx` (`DIAL_TICKS`, `DIAL_NUMERALS`, and the `Tick` both tick groups share). |
 | `app/components/PresetBar/`         | Pre-configured durations (MANUAL "Set a pre-configured timer").                                             |
 | `app/components/TransportControls/` | Pause/resume, mute, reset, restart, fullscreen. Icons from Lucide.                                          |
 | `app/components/ConfirmReplace/`    | Consent before replacing a timer that is still in progress.                                                 |
@@ -63,8 +63,11 @@ one dial face; the multi-variant experiment is over.
   (`linearRGB`) renders the shadow far lighter than the token looks. The colour
   reaches each filter through `style={{ floodColor: 'var(--…)' }}`, which does
   resolve custom properties on presentation attributes.
-- **Static SVG is hoisted.** Tick and numeral geometry is built once at module
-  load (`DIAL_TICKS`, `DIAL_CHROME`); only the sector and preview arc are stateful.
+- **Static SVG is hoisted.** The tick and numeral rings are built once at
+  module load (`DIAL_TICKS`, `DIAL_NUMERALS`). Only the sector and the preview
+  chrome are stateful: previewing swaps the numeral ring for the preview numeral
+  and redraws the covered ticks in the remaining colour, over the untouched ring
+  (MANUAL "Preview numeral", "Preview ticks").
 - **Pointer maths uses `getScreenCTM()`**, so scaling or letterboxing of the
   element cannot skew the selected minute.
 - **Two surfaces, one app.** `popup.html` and `fullscreen.html` mount the same
