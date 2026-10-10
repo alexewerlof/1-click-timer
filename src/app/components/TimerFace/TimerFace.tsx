@@ -120,18 +120,28 @@ export function TimerFace({ status, remainingSeconds, onPick }: TimerFaceProps) 
     }
 
     /**
+     * True while a duration is previewed — for the pointer that is exactly the
+     * region a click would pick (MANUAL "Set a custom timer"), so it also drives
+     * the cursor (see `TimerFace.module.css`). A keyboard preview sets it with
+     * the pointer elsewhere, which only affects the cursor until the pointer
+     * next moves.
+     */
+    const previewing = previewMinutes !== null
+
+    /**
      * The minute the preview numeral shows, or null when no arc is drawn:
      * 0 minutes draws no arc, so the face stays in its normal state there.
      * While previewing, the numeral ring gives way to this single numeral
      * (MANUAL "Preview numeral").
      */
-    const previewNumeral = previewMinutes !== null && previewMinutes > 0 ? previewMinutes : null
+    const previewNumeral = previewing && previewMinutes > 0 ? previewMinutes : null
 
     return (
         <svg
             ref={svgRef}
             className={styles.face}
             viewBox={DIAL_VIEWBOX}
+            data-pickable={previewing}
             role="slider"
             tabIndex={0}
             aria-label="Timer duration"

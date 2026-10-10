@@ -5,6 +5,17 @@
     width: 100%;
     height: 100%;
     touch-action: none;
+    /*
+     * Only the disc — minus the readout disc at its centre — starts a timer, so
+     * the crosshair is reserved for it and the rest of the face keeps the
+     * pointer's default arrow. `data-pickable` comes from the same check that
+     * decides hover and click (see `durationAt` in `TimerFace.tsx`), so the
+     * cursor cannot disagree with what a click actually does.
+     */
+    cursor: default;
+}
+
+.face[data-pickable='true'] {
     cursor: crosshair;
 }
 
