@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.agents/
+dashboard/
+snapshots/
+vector/
+**/*.md
+**/*.html
+package-lock.json

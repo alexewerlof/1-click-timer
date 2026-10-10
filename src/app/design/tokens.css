@@ -1,0 +1,70 @@
+/**
+ * Design tokens.
+ *
+ * Every colour and size the UI uses resolves through a custom property. The
+ * "colour of the face / remaining time / ticks" settings from MANUAL land here
+ * later, so components never name a colour directly.
+ */
+
+:root {
+    /* ---- typography ---- */
+    --font-ui: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --font-numeric: var(--font-ui);
+
+    /* ---- shape ---- */
+    --radius-control: 8px;
+    --radius-pill: 999px;
+    --tap-target: 34px;
+    --gap-row: 10px;
+    --pad: 14px;
+    /* Ticks are short hairlines; the strokes shrink with their length so they
+       don't read as dots. */
+    --stroke-tick-minor: 0.35;
+    --stroke-tick-major: 0.8;
+    /* Slight transparency lets the ticks show through the remaining sector. */
+    --remaining-alpha: 0.9;
+    /* Halo behind the creator mark so it survives the red area. */
+    --halo-width: 1.1;
+
+    /* ---- dial typography (px here means SVG user units) ---- */
+    --size-numeral: 8px;
+    --weight-numeral: 700;
+    --tracking-numeral: -0.03em;
+    --size-creator: 3.2px;
+    /* Was 4.4px in a 106-unit-tall viewBox; the viewBox is now taller, so this
+       is a shade over four times smaller on screen than it used to be. */
+    --size-caption: 1.4px;
+    /* Readout sizes are not tokens: they are derived from the readout disc
+       radius in `lib/dial.ts`, so the text always fits its circle. */
+    --weight-readout: 700;
+    --tracking-readout: 0;
+
+    /* ---- palette ---- */
+    --surface: #ffffff;
+    /* The face is the page background; only the disc is drawn. */
+    --face: transparent;
+    --disc-edge: rgb(20 24 31 / 10%);
+
+    --ink: #14181f;
+    --ink-soft: rgb(20 24 31 / 55%);
+    /* Ticks and numerals: one solid ink, no graduated greys. */
+    --dial-mark: #000000;
+
+    --remaining: #e0201b;
+    --preview: rgb(224 32 27 / 22%);
+    /* Solid ink, like the numerals. */
+    --readout: #000000;
+    --readout-surface: #ffffff;
+    /* Soft drop shadow under the readout disc: translucent black-blue, like a
+       CSS box-shadow. */
+    --readout-shadow: rgb(15 23 42 / 30%);
+
+    --chrome-ink: #14181f;
+    --chrome-border: rgb(20 24 31 / 12%);
+
+    --accent: #e0201b;
+    --accent-ink: #ffffff;
+    --control-ink: #14181f;
+    --control-border: rgb(20 24 31 / 16%);
+    --control-surface: transparent;
+}

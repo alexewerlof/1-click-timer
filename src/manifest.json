@@ -1,27 +1,27 @@
 {
-  "name": "1-click timer",
-  "description": "A Simple, Slick and Practical timer for Chrome",
-  "version": "5.0",
-  "manifest_version": 3,
-  "action": {
-    "default_icon": {
-      "16": "images/logo16.png",
-      "19": "images/logo19.png",
-      "32": "images/logo48.png",
-      "48": "images/logo48.png",
-      "128": "images/logo128.png"
+    "name": "1-click timer",
+    "description": "A Simple, Slick and Practical timer for Chrome",
+    "version": "5.0",
+    "manifest_version": 3,
+    "action": {
+        "default_icon": {
+            "16": "images/logo16.png",
+            "19": "images/logo19.png",
+            "32": "images/logo48.png",
+            "48": "images/logo48.png",
+            "128": "images/logo128.png"
+        },
+        "default_title": "1-click timer",
+        "default_popup": "popup.html"
     },
-    "default_title": "1-click timer",
-    "default_popup": "popup.html"
-  },
-  "permissions": ["alarms", "notifications", "storage"],
-  "icons": {
-    "16": "images/logo16.png",
-    "48": "images/logo48.png",
-    "128": "images/logo128.png"
-  },
-  "background": {
-    "service_worker": "js/background.js",
-    "type": "module"
-  }
+    "permissions": ["alarms", "notifications", "storage"],
+    "icons": {
+        "16": "images/logo16.png",
+        "48": "images/logo48.png",
+        "128": "images/logo128.png"
+    },
+    "background": {
+        "service_worker": "js/background.js",
+        "type": "module"
+    }
 }

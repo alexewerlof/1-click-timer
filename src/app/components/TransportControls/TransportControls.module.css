@@ -1,0 +1,49 @@
+.bar {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+.button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--tap-target);
+    height: var(--tap-target);
+    border: 1px solid transparent;
+    border-radius: var(--radius-control);
+    color: var(--control-ink);
+    transition:
+        background-color 160ms ease,
+        border-color 160ms ease,
+        color 160ms ease,
+        opacity 160ms ease;
+}
+
+.button:hover:not(:disabled) {
+    border-color: var(--control-border);
+}
+
+.button[aria-pressed='true'] {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.button:disabled {
+    opacity: 0.3;
+    cursor: default;
+}
+
+/* Primary transport action (pause / resume) carries more weight. */
+.primary {
+    background: var(--accent);
+    color: var(--accent-ink);
+    border-color: var(--accent);
+}
+
+.primary:hover:not(:disabled) {
+    border-color: var(--accent);
+    filter: brightness(1.05);
+}

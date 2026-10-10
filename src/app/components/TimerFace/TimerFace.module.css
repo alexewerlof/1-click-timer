@@ -1,0 +1,115 @@
+/* The face fills the space it is given; the aspect ratio keeps the dial square. */
+
+.face {
+    display: block;
+    width: 100%;
+    height: 100%;
+    touch-action: none;
+    cursor: crosshair;
+}
+
+.face:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 4px;
+    border-radius: 12px;
+}
+
+.disc {
+    fill: var(--face);
+    /* Hairline rim: the ticks cross it, so it reads as the dial edge. */
+    stroke: var(--disc-edge);
+    stroke-width: var(--stroke-tick-minor);
+}
+
+/* ---- dial chrome (static) ---- */
+
+.tickMinor {
+    stroke: var(--dial-mark);
+    stroke-width: var(--stroke-tick-minor);
+    stroke-linecap: round;
+}
+
+.tickMajor {
+    stroke: var(--dial-mark);
+    stroke-width: var(--stroke-tick-major);
+    stroke-linecap: round;
+}
+
+.numeral {
+    fill: var(--dial-mark);
+    font-family: var(--font-ui);
+    font-size: var(--size-numeral);
+    font-weight: var(--weight-numeral);
+    /* Tighten the pair of digits in "10", "15", ... into one mark. */
+    font-kerning: normal;
+    letter-spacing: var(--tracking-numeral);
+    font-variant-numeric: tabular-nums;
+    text-anchor: middle;
+    dominant-baseline: central;
+}
+
+/* ---- remaining time ---- */
+
+/* Faintly translucent, so the ticks it covers stay just visible underneath. */
+.sector {
+    fill: var(--remaining);
+    fill-opacity: var(--remaining-alpha);
+}
+
+/* A paused timer keeps its shape but recedes. */
+.sector[data-active='false'] {
+    opacity: 0.45;
+}
+
+/* ---- preview arc ---- */
+
+.previewArc {
+    fill: none;
+    stroke: var(--preview);
+    stroke-width: var(--stroke-tick-major);
+    stroke-dasharray: 2 1.6;
+}
+
+/* ---- centre readout ---- */
+
+.readoutDisc {
+    fill: var(--readout-surface);
+}
+
+/* Size is set inline from `dial.ts`, derived from the disc radius. */
+.readout {
+    fill: var(--readout);
+    font-family: var(--font-numeric);
+    font-weight: var(--weight-readout);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: var(--tracking-readout);
+    text-anchor: middle;
+    dominant-baseline: central;
+}
+
+/* ---- branding ---- */
+
+.creatorMark {
+    opacity: 0.85;
+}
+
+.creatorName {
+    fill: var(--ink-soft);
+    stroke: var(--surface);
+    stroke-width: var(--halo-width);
+    stroke-linejoin: round;
+    paint-order: stroke fill;
+    font-family: var(--font-ui);
+    font-size: var(--size-creator);
+    letter-spacing: 0.04em;
+    text-anchor: middle;
+    dominant-baseline: central;
+}
+
+.caption {
+    fill: var(--ink-soft);
+    font-family: var(--font-ui);
+    font-size: var(--size-caption);
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+}

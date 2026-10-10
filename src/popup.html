@@ -1,21 +1,14 @@
 <!doctype html>
-<html>
-  <head>
-    <link rel="stylesheet" href="popup.css" />
-  </head>
-  <body>
-    <div id="face">
-      <div id="needle"></div>
-      <!-- shows the minute that corresponds to cursor position -->
-      <div id="minutes">
-        <span id="minutes-value"></span>
-        <div id="reset-button" title="Reset"></div>
-      </div>
-      <div id="scribble">Made in Sweden</div>
-    </div>
-    <!-- shows the remaining time -->
-    <div id="digits"></div>
-    <div id="ringing"></div>
-    <script type="module" src="js/popup.ts"></script>
-  </body>
+<html lang="en" data-surface="popup">
+
+<head>
+  <meta charset="utf-8" />
+  <title>1-click timer</title>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="./app/main.tsx"></script>
+</body>
+
 </html>

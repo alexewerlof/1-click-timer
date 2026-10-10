@@ -1,0 +1,38 @@
+.bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: center;
+    width: 100%;
+}
+
+.preset {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 68px;
+    min-height: var(--tap-target);
+    padding: 4px 14px;
+    border: 1px solid var(--control-border);
+    border-radius: var(--radius-control);
+    background: var(--control-surface);
+    color: var(--control-ink);
+    font-size: 13px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    transition:
+        border-color 160ms ease,
+        background-color 160ms ease,
+        color 160ms ease,
+        opacity 160ms ease;
+}
+
+.preset:hover:not([data-active='true']) {
+    border-color: var(--control-ink);
+}
+
+.preset[data-active='true'] {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: var(--accent-ink);
+}

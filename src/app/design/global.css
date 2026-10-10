@@ -1,0 +1,65 @@
+/**
+ * Page-level setup shared by both surfaces (popup and fullscreen tab).
+ *
+ * `[data-surface]` is set on `<html>` by each HTML entry and decides how much
+ * room the app gets: a fixed popup panel, or the whole tab.
+ */
+
+@import './tokens.css';
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background: var(--surface);
+    color: var(--ink);
+    font-family: var(--font-ui);
+    overflow: hidden;
+    transition: background-color 240ms ease;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+button {
+    margin: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+}
+
+:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+#root {
+    height: 100%;
+}
+
+[data-surface='popup'] #root {
+    width: 380px;
+    height: 420px;
+}
+
+[data-surface='fullscreen'] #root {
+    width: 100vw;
+    height: 100vh;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body {
+        transition: none;
+    }
+}
