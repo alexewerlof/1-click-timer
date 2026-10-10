@@ -103,7 +103,7 @@ Each minute is represented by a thin line.
 
 The multiplies of 5 have a label: 0, 5, 10, 15, ..., 55 and a slightly thicker indicator.
 
-When the user hovers over the clock interface with their mouse, a preliminary arc is drawn to show what alert will be set if they click. The actual number of minutes that they are selecting is shown in the circular center of the screen.
+When the user hovers over the disc — everywhere except the readout disc at its centre — a preliminary arc is drawn to show what alert will be set if they click. The actual number of minutes that they are selecting is shown in the circular center of the screen.
 
 If the user clicks somewhere, the corresponding timer will start. If there's an ongoing timer in progress and isn't over yet, we should ask the user whether they really want to set a new timer or not.
 
@@ -123,7 +123,7 @@ This screen allows the user to configure various aspects of the timer:
 
 ## Set a custom timer
 
-Hover your mouse over the timer face and see how the preliminary indicator arc and the number on the central circle show what timer will start if you click.
+Hover your mouse over the disc — everywhere except the readout disc at its centre — and see how the preliminary indicator arc and the number on the central circle show what timer will start if you click.
 
 Once you're happy, just click the screen and the timer starts with the number that's chosen.
 

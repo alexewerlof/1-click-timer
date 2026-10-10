@@ -183,14 +183,34 @@ export function pointToMinutes(point: Point): number {
 }
 
 /**
- * The minute under a pointer. Uses the SVG's own screen matrix, so scaling or
- * letterboxing of the element cannot skew the result.
+ * The dial-space point under a client coordinate. Uses the SVG's own screen
+ * matrix, so scaling or letterboxing of the element cannot skew the result.
+ * Null before the element has a layout, when the matrix is unavailable.
  */
-export function clientPointToMinutes(svg: SVGSVGElement, clientX: number, clientY: number): number {
+export function clientPointToDialPoint(svg: SVGSVGElement, clientX: number, clientY: number): Point | null {
     const matrix = svg.getScreenCTM()
-    if (!matrix) return 0
+    if (!matrix) return null
     const point = new DOMPoint(clientX, clientY).matrixTransform(matrix.inverse())
-    return pointToMinutes({ x: point.x, y: point.y })
+    return { x: point.x, y: point.y }
+}
+
+/** Distance of a dial point from the centre. */
+export function dialRadiusOf(point: Point): number {
+    return Math.hypot(point.x - DIAL_CENTER_X, point.y - DIAL_CENTER_Y)
+}
+
+/** Whether a dial point lies on the disc (MANUAL "UI elements"). */
+export function isPointOnDisc(point: Point): boolean {
+    return dialRadiusOf(point) <= DISC_RADIUS
+}
+
+/**
+ * Whether a dial point lies inside the readout disc at the centre of the disc.
+ * The readout disc reads as a layer above the dial, so the pointer does not
+ * preview a duration over it.
+ */
+export function isPointInsideReadoutDisc(point: Point): boolean {
+    return dialRadiusOf(point) < READOUT_DISC_RADIUS
 }
 
 function minutesOfSeconds(seconds: number): number {

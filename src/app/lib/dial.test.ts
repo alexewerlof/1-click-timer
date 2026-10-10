@@ -3,12 +3,16 @@ import {
     DIAL_CENTER_X,
     DIAL_CENTER_Y,
     DISC_RADIUS,
+    READOUT_DISC_RADIUS,
     DIAL_TICKS,
     NUMERAL_GLYPH_HALF_WIDTH,
     NUMERAL_RADIUS,
     MINUTES_PER_TURN,
     MIN_TICK_NUMERAL_CLEARANCE,
     TICK_INNER_RADIUS,
+    dialRadiusOf,
+    isPointInsideReadoutDisc,
+    isPointOnDisc,
     pointOnDial,
     pointToMinutes,
     remainingArcPath,
@@ -100,6 +104,33 @@ describe('remainingArcPath', () => {
         const path = remainingArcPath(15 * SECONDS_PER_MINUTE)
         expect(path.startsWith(`M ${top.x} ${top.y} A `)).toBe(true)
         expect(path.endsWith('Z')).toBe(false)
+    })
+})
+
+describe('dial pointer regions', () => {
+    it('measures the radius from the dial centre', () => {
+        expect(dialRadiusOf({ x: DIAL_CENTER_X, y: DIAL_CENTER_Y })).toBe(0)
+        expect(dialRadiusOf(pointOnDial(20, DISC_RADIUS))).toBeCloseTo(DISC_RADIUS, 2)
+    })
+
+    it('treats the disc rim as on the disc and the numerals as off it', () => {
+        expect(isPointOnDisc(pointOnDial(0, DISC_RADIUS))).toBe(true)
+        expect(isPointOnDisc(pointOnDial(0, NUMERAL_RADIUS))).toBe(false)
+    })
+
+    it('treats the readout disc’s centre as inside it', () => {
+        expect(isPointInsideReadoutDisc({ x: DIAL_CENTER_X, y: DIAL_CENTER_Y })).toBe(true)
+    })
+
+    it('treats the readout disc’s rim as outside it, where the ring begins', () => {
+        const onReadoutRim = pointOnDial(0, READOUT_DISC_RADIUS)
+        expect(isPointInsideReadoutDisc(onReadoutRim)).toBe(false)
+        expect(isPointOnDisc(onReadoutRim)).toBe(true)
+    })
+
+    it('treats the space beyond the disc as outside it', () => {
+        expect(isPointInsideReadoutDisc(pointOnDial(0, NUMERAL_RADIUS))).toBe(false)
+        expect(isPointOnDisc(pointOnDial(0, NUMERAL_RADIUS + 1))).toBe(false)
     })
 })
 

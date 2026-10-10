@@ -11,8 +11,12 @@ import {
     DIAL_VIEWBOX,
     MINUTES_PER_TURN,
     SHOW_CREATOR_MARK,
-    clientPointToMinutes,
+    clientPointToDialPoint,
+    isPointInsideReadoutDisc,
+    isPointOnDisc,
+    pointToMinutes,
 } from '../../lib/dial'
+import type { Point } from '../../lib/dial'
 import { SECONDS_PER_MINUTE } from '../../lib/time'
 import type { TimerStatus } from '../../runtime/types'
 import { Caption } from './Caption'
@@ -50,14 +54,27 @@ export function TimerFace({ status, remainingSeconds, onPick }: TimerFaceProps) 
     const svgRef = useRef<SVGSVGElement>(null)
     const [previewMinutes, setPreviewMinutes] = useState<number | null>(null)
 
-    function minutesAt(clientX: number, clientY: number): number | null {
+    /** The dial-space point under a client coordinate, or null before layout. */
+    function pointAt(clientX: number, clientY: number): Point | null {
         const svg = svgRef.current
         if (!svg) return null
-        return clampMinutes(Math.round(clientPointToMinutes(svg, clientX, clientY)))
+        return clientPointToDialPoint(svg, clientX, clientY)
+    }
+
+    /** The whole minute at a dial-space point, clamped to the dial's range. */
+    function minutesAt(point: Point): number {
+        return clampMinutes(Math.round(pointToMinutes(point)))
     }
 
     function handlePointerMove(event: PointerEventType<SVGSVGElement>) {
-        setPreviewMinutes(minutesAt(event.clientX, event.clientY))
+        const point = pointAt(event.clientX, event.clientY)
+        // Preview only over the disc, never the readout disc at its centre:
+        // off the disc and over the readout there is nothing to show.
+        if (!point || !isPointOnDisc(point) || isPointInsideReadoutDisc(point)) {
+            setPreviewMinutes(null)
+            return
+        }
+        setPreviewMinutes(minutesAt(point))
     }
 
     function handlePointerLeave() {
@@ -65,7 +82,9 @@ export function TimerFace({ status, remainingSeconds, onPick }: TimerFaceProps) 
     }
 
     function handleClick(event: ReactMouseEvent<SVGSVGElement>) {
-        pick(minutesAt(event.clientX, event.clientY))
+        const point = pointAt(event.clientX, event.clientY)
+        if (!point) return
+        pick(minutesAt(point))
     }
 
     function handleKeyDown(event: ReactKeyboardEvent<SVGSVGElement>) {

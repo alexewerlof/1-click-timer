@@ -28,7 +28,7 @@ one dial face; the multi-variant experiment is over.
 | `app/components/DevBar/`            | Design harness (`import.meta.env.DEV` only): parks the timer in a given state.                              |
 | `app/design/tokens.css`             | Every colour, size and stroke weight, in one `:root` block.                                                 |
 | `app/design/global.css`             | Resets, body, and the popup/tab sizing per `[data-surface]`.                                                |
-| `app/lib/dial.ts`                   | Dial geometry: counter-clockwise mapping, sector/arc paths, pointer → minute, and the derived readout size. |
+| `app/lib/dial.ts`                   | Dial geometry: counter-clockwise mapping, sector/arc paths, pointer → dial point/minute, disc/readout-disc regions, and the derived readout size. |
 | `app/lib/time.ts`                   | `MAX_MINUTES` clamp, `formatClock`, `toWholeMinutes`.                                                       |
 | `app/lib/surface.ts`                | Surface type, `readSurface`, and the fullscreen button behaviour.                                           |
 | `app/runtime/types.ts`              | `TimerState` / `TimerRuntime` contract. **The seam Phase 3 implements.**                                    |
