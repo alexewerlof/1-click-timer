@@ -93,6 +93,12 @@ termination. The UI never accumulates time.
 
 ## Gotchas
 
+- **The badge counts whole minutes, never seconds.** The MV3 worker is woken
+  about once a minute at best, so a per-second badge would drift. The text is
+  `floor(remaining / 60)` with no `m` suffix, and its colour is the fraction of
+  the *running* timer that is left (green → orange → red), computed in
+  `background/badge.ts`. While `expired` the badge is cleared and the bell icon
+  rings instead.
 - The dial counts **counter-clockwise**: 0 at 12 o'clock, 5 at 11, 55 at 1, and
   half the dial at the bottom. `MANUAL.md` says 40 sits at the bottom, which
   contradicts its own 5/55 statements; the uniform 0–60 mapping puts 30 there.

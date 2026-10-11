@@ -15,7 +15,7 @@ A simple and solid timer extension for Chrome.
 - The general look and functionality should match that of common 60m timers that is used in schools already.
 - The ability to set a custom timer in a single click: hover the dial to preview a duration and click to start it, or click a numeral to start that many minutes.
 - Resilient: if the user restarts Chrome (e.g. for updating, or even accidentally), the timer should survive this even and keep counting
-- Show the number of remaining minutes as a colored badge. Considering limitations of Chrome environment (timed events trigger every minute or so) we should still do our best to show the remaining time as accurately as possible.
+- Show the number of remaining minutes as a colored badge. Chrome wakes the service worker about once a minute at best, so the badge counts whole minutes (a timer with 1:05 left shows `1`) and never seconds. Its colour sweeps from green when the timer starts, through orange at the halfway point, to red as the time runs out — relative to the running timer, so a 3-minute and a 30-minute timer both start green and both end red. Once the time is up the badge is cleared and the bell icon rings.
 - Full screen tab view as well as popup view (both show the same functionality).
 - Light and dark appearance, following the system by default.
 - Notification popup when the time is up (shows the period).

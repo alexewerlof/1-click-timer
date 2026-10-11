@@ -37,6 +37,7 @@ one dial face; the multi-variant experiment is over.
 | `app/runtime/runtime.ts`            | Picks the chrome runtime in the extension, the mock in a plain browser.                                                                         |
 | `app/runtime/useTimerState.ts`      | `useSyncExternalStore` binding.                                                                                           |
 | `background/index.ts`               | Service worker: the single writer of the timer record, alarms, badge/icon, notifications, messages.          |
+| `background/badge.ts`               | The toolbar badge: whole minutes left as text, and the green→orange→red colour for the fraction of the running timer that is left. Pure (no `chrome.*`), so `npm test` covers it; the worker only applies the plan. |
 | `images/`                           | Extension icons (toolbar/store). Copied verbatim into `dist/`.                                              |
 
 ### Added in Phase 3

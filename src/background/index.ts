@@ -18,6 +18,7 @@ import {
     type TimerRequest,
     type TimerResponse,
 } from '../shared/timer'
+import { badgePlanFor } from './badge'
 
 const LOG_PREFIX = '[1-click-timer:sw]'
 
@@ -107,44 +108,33 @@ function describeDuration(seconds: number): string {
     return rest === 0 ? minuteLabel : `${minuteLabel} ${rest} seconds`
 }
 
+/**
+ * Paints the toolbar badge — text and colour from `badge.ts` — and the icon and
+ * title that go with it.
+ */
 function describeBadge(record: TimerRecord, remaining: number): void {
+    const badge = badgePlanFor(record, remaining)
+    setBadge(badge.text)
+    setBadgeColor(badge.color)
+
     switch (record.status) {
-        case 'running': {
-            const minutes = Math.floor(remaining / 60)
-            if (remaining > 60) {
-                setBadge(`${minutes}m`)
-                setBadgeColor(`rgb(${Math.floor(((60 - minutes) * 255) / 60)}, 128, 0)`)
-                setIcon('logo19')
-            } else {
-                const seconds = Math.ceil(remaining % 60)
-                if (seconds > 0) {
-                    setBadge(String(seconds))
-                    setBadgeColor('#e0201b')
-                    setIcon(seconds % 2 ? 'logo19_inverse' : 'logo19')
-                } else {
-                    setBadge('')
-                    setIcon('logo19')
-                }
-            }
+        case 'running':
+            setIcon('logo19')
             setTitle(formatMMSS(remaining))
             return
-        }
 
         case 'paused':
-            setBadge(`${Math.max(1, Math.ceil(remaining / 60))}m`)
-            setBadgeColor('#6b7280')
             setIcon('logo19')
             setTitle(`Paused · ${formatMMSS(remaining)}`)
             return
 
         case 'expired':
-            setBadge('')
+            // The bell is the "time is up" signal; the badge itself is cleared.
             startBell()
             setTitle('Time is up')
             return
 
         default:
-            setBadge('')
             setIcon('logo19')
             setTitle(BASE_TITLE)
     }
