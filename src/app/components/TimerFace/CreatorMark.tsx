@@ -8,7 +8,7 @@ import {
 import styles from './TimerFace.module.css'
 
 /**
- * The creator mark (MANUAL "Creator mark"): the Alex Ewerlöf wordmark, sitting in
+ * The creator mark (AGENTS.md "Creator mark"): the Alex Ewerlöf wordmark, sitting in
  * the band between the readout disc and the 0 numeral, where a watch carries its
  * maker's name.
  *

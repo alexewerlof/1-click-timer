@@ -15,7 +15,7 @@ export interface TransportControlsProps {
     onToggleMute: () => void
     onReset: () => void
     onToggleFullscreen: () => void
-    /** Opens the settings screen (MANUAL "Settings"). */
+    /** Opens the settings screen (AGENTS.md "Settings"). */
     onOpenSettings: () => void
 }
 
@@ -38,7 +38,7 @@ interface FullscreenAction {
 /**
  * What the fullscreen control offers right now. In the popup it opens the timer
  * in a tab; in the tab it toggles fullscreen, and it shows the way it will go —
- * expand on the way in, shrink on the way back (MANUAL "Full screen").
+ * expand on the way in, shrink on the way back (AGENTS.md "Full screen").
  */
 function fullscreenAction(surface: Surface, nativeFullscreen: boolean): FullscreenAction {
     if (surface === 'popup') return { label: 'Open in a tab', Icon: Maximize }
@@ -65,7 +65,7 @@ function CornerButton({ corner, label, onClick, pressed, disabled, children }: C
 }
 
 /**
- * The four corner controls (MANUAL "Transport"), one per corner of the dial's
+ * The four corner controls (AGENTS.md "Transport"), one per corner of the dial's
  * square: mute (top left), fullscreen (top right), reset (bottom left) and info
  * (bottom right).
  *
@@ -99,7 +99,7 @@ export function TransportControls({
                 <TimerOff />
             </CornerButton>
 
-            {/* Settings (MANUAL "Settings"). */}
+            {/* Settings (AGENTS.md "Settings"). */}
             <CornerButton corner="bottom-right" label="Settings" onClick={onOpenSettings}>
                 <Settings />
             </CornerButton>

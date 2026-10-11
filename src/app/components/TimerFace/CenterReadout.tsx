@@ -24,7 +24,7 @@ interface CenterReadoutProps {
  * layer.
  *
  * Otherwise it shows the real remaining time: the previewed duration is drawn
- * as a numeral at the end of the preview arc instead (MANUAL "Preview
+ * as a numeral at the end of the preview arc instead (AGENTS.md "Preview
  * numeral").
  */
 export function CenterReadout({ status, remainingSeconds }: CenterReadoutProps) {

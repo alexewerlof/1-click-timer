@@ -1,5 +1,5 @@
 /**
- * The toolbar badge (MANUAL "Features").
+ * The toolbar badge (AGENTS.md "Features").
  *
  * Chrome wakes an MV3 service worker about once a minute at best, so a badge
  * that counted seconds would drift and flicker; the badge therefore shows whole
@@ -40,7 +40,7 @@ export interface BadgePlan {
     color: string
 }
 
-/** Whole minutes left, floored: 1:05 left shows as `1` (MANUAL "Features"). */
+/** Whole minutes left, floored: 1:05 left shows as `1` (AGENTS.md "Features"). */
 export function badgeMinutesFor(remainingSeconds: number): number {
     return Math.floor(Math.max(0, remainingSeconds) / SECONDS_PER_MINUTE)
 }

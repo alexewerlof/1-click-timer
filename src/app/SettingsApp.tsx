@@ -1,8 +1,8 @@
-import type { CSSProperties } from 'react'
-import { X } from 'lucide-react'
+import type { CSSProperties, ReactNode } from 'react'
+import { Bug, RotateCcw, SquareCode, User, X } from 'lucide-react'
 import { SLOT_LABELS, SWATCHES, type Swatch } from './design/palette'
 import { CHIME_OPTIONS, previewChime, primeAudio, type ChimeId } from './lib/chimes'
-import { AUTHOR_SITE_URL, openTab } from './lib/links'
+import { AUTHOR_SITE_URL, ISSUES_URL, REPOSITORY_URL, openTab } from './lib/links'
 import {
     COLOR_SLOTS,
     THEME_MODES,
@@ -29,9 +29,10 @@ function isChimeId(value: string): value is ChimeId {
 }
 
 /**
- * The settings screen (MANUAL "Settings"): appearance, the alarm, and the three
- * colour slots, plus reset-to-defaults and the author's link. It runs on its own
- * surface (`settings.html`) opened from the face's gear control.
+ * The settings screen (AGENTS.md "Settings"): appearance, the alarm, and the three
+ * colour slots, closing with a footer of actions — reset to defaults, and the
+ * three ways out (the author's site, the source code and the bug tracker). It
+ * runs on its own surface (`settings.html`) opened from the face's gear control.
  */
 export function SettingsApp({ settingsStore }: SettingsAppProps) {
     const settings = useSettings(settingsStore)
@@ -164,14 +165,41 @@ export function SettingsApp({ settingsStore }: SettingsAppProps) {
             </section>
 
             <footer className={styles.footer}>
-                <button type="button" className={styles.button} onClick={() => settingsStore.reset()}>
-                    Reset to defaults
-                </button>
-                <button type="button" className={styles.button} onClick={() => openTab(AUTHOR_SITE_URL)}>
-                    About the author
-                </button>
+                <FooterButton
+                    icon={<RotateCcw aria-hidden />}
+                    label="Reset to defaults"
+                    onClick={() => settingsStore.reset()}
+                />
+                <FooterButton
+                    icon={<User aria-hidden />}
+                    label="About the author"
+                    onClick={() => openTab(AUTHOR_SITE_URL)}
+                />
+                <FooterButton
+                    icon={<SquareCode aria-hidden />}
+                    label="Source code"
+                    onClick={() => openTab(REPOSITORY_URL)}
+                />
+                <FooterButton icon={<Bug aria-hidden />} label="Report a bug" onClick={() => openTab(ISSUES_URL)} />
             </footer>
         </main>
+    )
+}
+
+interface FooterButtonProps {
+    /** The glyph, always decorative: the label carries the meaning. */
+    icon: ReactNode
+    label: string
+    onClick: () => void
+}
+
+/** One footer action: a Lucide glyph and its label, side by side. */
+function FooterButton({ icon, label, onClick }: FooterButtonProps) {
+    return (
+        <button type="button" className={styles.button} onClick={onClick}>
+            {icon}
+            {label}
+        </button>
     )
 }
 

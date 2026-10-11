@@ -6,7 +6,7 @@ import { useSettings } from './useSettings'
 import { useTimerState } from './useTimerState'
 
 /**
- * Rings the chosen chime while the timer is ringing (MANUAL "Notification"):
+ * Rings the chosen chime while the timer is ringing (AGENTS.md "Notification"):
  * from the moment the status becomes `expired` until it leaves that state
  * (restart, reset or pause). Muted and the Silent chime both ring nothing.
  */

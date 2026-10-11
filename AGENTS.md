@@ -9,7 +9,6 @@ A Chrome extension that provides a one-click countdown timer with a visual dial 
 > browser (`npm run dev`) falls back to the in-memory mock. A settings screen
 > (`settings.html`) covers appearance (light/dark/auto), the alarm chime, the
 > three colours and reset.
-> `MANUAL.md` is the product spec and the source of truth for behaviour.
 
 ## Tech stack
 
@@ -21,55 +20,55 @@ A Chrome extension that provides a one-click countdown timer with a visual dial 
 - **Manifest V3** with an ES module service worker
 - **Vitest** — node unit tests plus browser-mode visual (screenshot) tests
 
-## Commands
+## The other docs
 
-| Command                      | What it does                                       |
-| ---------------------------- | -------------------------------------------------- |
-| `npm install`                | install dependencies                               |
-| `npm run dev`                | Vite dev server → `/popup.html`, `/fullscreen.html`, `/settings.html` |
-| `npm run build`              | build the unpacked extension into `dist/`          |
-| `npm run lint`               | ESLint (flat config)                               |
-| `npm run lint:fix`           | ESLint with `--fix`                                |
-| `npm run typecheck`          | `tsc --noEmit`                                     |
-| `npm test`                   | unit tests (node)                                  |
-| `npm run test:visual`        | browser-mode visual tests (screenshot diff)         |
-| `npm run test:visual:update` | rewrite the screenshot baselines                   |
-| `npm run format`             | Prettier write                                     |
-| `npm run format:check`       | Prettier check                                     |
+| File                | For        | Holds                                                                                                         |
+| ------------------- | ---------- | ------------------------------------------------------------------------------------------------------------- |
+| `README.md`         | users      | what it is, who it is for, installing it, the how-tos, privacy and links                                       |
+| `CONTRIBUTING.md`   | developers | setup, every command, the layout, testing, conventions and the release process                                 |
+| `CHROMEWEBSTORE.md` | releasing  | the store listing copy, the per-permission justifications, the privacy disclosure and the submission checklist |
+| `PRIVACY.md`        | users      | the privacy policy the store listing links to                                                                  |
+| `src/AGENTS.md`     | developers | the file-by-file map of `src/`, and its key patterns                                                           |
 
-Run `lint`, `typecheck` and `test` before considering a change done. Visual
-tests need a browser once per machine: `npx playwright install chromium`.
-
-## Layout
-
-```
-src/
-  manifest.json        MV3 manifest
-  popup.html           popup entry      (data-surface="popup")
-  fullscreen.html      tab entry        (data-surface="fullscreen")
-  settings.html        settings entry   (data-surface="settings")
-  app/                 the React UI
-    main.tsx           mounts App
-    App.tsx            picks the screen from the surface
-    TimerApp.tsx       the timer composition shared by popup + tab
-    TimerSurface.tsx   wires the alarm/audio + theme around TimerApp
-    SettingsApp.tsx    the settings screen
-    components/        TimerFace, TransportControls
-    design/            tokens.css (colours/sizes + themes), global.css, palette.ts (swatches)
-    lib/               dial geometry, time, surface, links, chimes, fullscreen
-    runtime/           TimerRuntime + SettingsStore contracts, mock/chrome impls, hooks
-  shared/              timer protocol shared by the UI and the worker
-  background/index.ts  service worker (framework-free TypeScript)
-  images/              toolbar/store icons
-```
+Setup, commands, testing and the release process live in `CONTRIBUTING.md`, the
+single source for them — they are not repeated here.
 
 ## UI vocabulary
 
-`MANUAL.md` → **UI elements** is the canonical list of names for the interface
-(face, dial, disc, tick, major tick, numeral, remaining sector, preview arc,
-readout, readout disc, readout control, caption). The code uses the same words —
-see `src/app/lib/dial.ts` and `src/app/components/TimerFace/` — so feedback in one
-of those terms maps to one place in the source. There is a single dial face.
+This is the canonical list of names for the interface, and the code uses the same
+words — see `src/app/lib/dial.ts` and `src/app/components/TimerFace/` — so feedback
+given in one of these terms maps to one place in the source. There is a single dial
+face.
+
+| Term                 | What it is                                                                                                                                                                    |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Face**             | The square SVG surface that holds everything below. It fills the space it is given.                                                                                             |
+| **Dial**             | The circular instrument as a whole: the disc, its ticks and its numerals.                                                                                                       |
+| **Disc**             | The circle at the centre of the dial. The ticks straddle its edge, and the remaining sector fills it.                                                                           |
+| **Tick**             | A short line marking a single minute.                                                                                                                                          |
+| **Minor tick**       | A tick on a minute that is not a multiple of five.                                                                                                                             |
+| **Major tick**       | The thicker tick on each multiple of five (0, 5, 10, … 55).                                                                                                                    |
+| **Numeral**          | The number printed beside a major tick: 0, 5, 10, … 55. Each is itself a one-click shortcut to its own duration.                                                                 |
+| **Numeral ring**     | The circle the numerals sit on, just outside the ticks.                                                                                                                        |
+| **Remaining sector** | The filled wedge. It runs from 12 o'clock counter-clockwise to the current remaining time and reaches the centre, so its size is the time left.                                 |
+| **Preview arc**      | The unfilled outline from 12 o'clock to the minute under the pointer. It shows what a click would start.                                                                        |
+| **Preview ticks**    | The ticks inside the preview arc's span, drawn in the **Remaining sector**'s colour so the arc, its numeral and the ticks it covers read as one mark. The rest of the ring keeps the dial's ink. |
+| **Preview numeral**  | The single numeral shown while previewing, on the numeral ring at the end of the preview arc, in the numerals' style and the remaining sector's colour. It replaces the whole numeral ring, so it is the only number on the face. A whole turn (60) is labelled where the 0 numeral sits. |
+| **Readout**          | The digital `M:SS` in the middle of the disc, e.g. `1:05`. It always shows the remaining time, except while the timer is idle — when it is left blank, because a standing `0:00` only adds noise — and while the **Readout control** replaces it. |
+| **Readout disc**     | The small circle behind the readout, at the centre of the dial. White with a soft shadow, so it reads as a layer above the dial rather than a hole in it.                       |
+| **Readout control**  | The round button on the readout disc, whose click surface is the whole disc. Pause while the timer runs, resume while it is paused, restart while the alarm is ringing. Revealed on hover or focus, and always shown where there is no hover. |
+| **Caption**          | The text "Made in Sweden", inscribed inside the disc on a circular path just above the bottom rim.                                                                             |
+| **Creator mark**     | The "Alex Ewerlöf" wordmark, drawn in the dial's ink, in the band between the readout disc and the 0 numeral.                                                                  |
+| **Face slot**        | The region that holds the face. The **Transport** controls overlay it, so the face gets the whole slot.                                                                         |
+| **Transport**        | The four corner controls, one per corner of the dial's square: mute (top left), fullscreen (top right), reset (bottom left) and settings (bottom right). Ghost glyphs, black by default and red on hover, fading out while the dial is previewed. Pause/resume and restart live on the **Readout control**. |
+| **Settings control** | The bottom-right corner control: a gear that opens the settings screen in a tab of its own.                                                                                     |
+
+Three measures run through the geometry: **disc radius**, **tick length** (how far
+a tick extends across the disc edge) and **numeral radius**.
+
+Behaviour cited in code comments — "Set a custom timer", "Stop a timer", "Restart
+the timer", "Full screen", "Settings", "Notification", "Features" — is described
+for users in `README.md`, under "How to use" and "Features".
 
 ## Architecture
 
@@ -100,8 +99,9 @@ termination. The UI never accumulates time.
   `background/badge.ts`. While `expired` the badge is cleared and the bell icon
   rings instead.
 - The dial counts **counter-clockwise**: 0 at 12 o'clock, 5 at 11, 55 at 1, and
-  half the dial at the bottom. `MANUAL.md` says 40 sits at the bottom, which
-  contradicts its own 5/55 statements; the uniform 0–60 mapping puts 30 there.
+  half the dial at the bottom. The uniform 0–60 mapping puts **30** there — not 40,
+  which an earlier draft of the spec claimed while contradicting its own 5/55
+  statements.
 - Never rely on the rendered box matching the viewBox. Pointer positions are
   converted with `SVGElement.getScreenCTM()` (see `lib/dial.ts`).
 - Colours, sizes and dial weights are **tokens** in `design/tokens.css`. Change
@@ -128,9 +128,10 @@ termination. The UI never accumulates time.
   sizes are `cqmin` tokens so they scale with the dial. While the dial is
   previewed they fade out with the numerals, keyed off the face's `data-pickable`
   signal, and fade back when the pointer leaves the disc. The settings control
-  (bottom right) opens `settings.html` in a new tab; the About-the-author link
-  inside that screen opens the author's site. The URL and the tab-opening
-  primitive live in `app/lib/links.ts`, which is the only place that opens a tab.
+  (bottom right) opens `settings.html` in a new tab. That screen's footer holds
+  the only three ways out — the author's site, the source code and the issue
+  tracker. The URLs and the tab-opening primitive live in `app/lib/links.ts`,
+  which is the only place that opens a tab.
 - **Two runtimes behind one seam.** `runtime.ts` picks `createChromeRuntime()`
   when `isExtension()` (see `app/runtime/platform.ts`) and the mock otherwise;
   `settingsRuntime.ts` does the same for settings. Build the chrome runtimes
@@ -162,25 +163,61 @@ real `chrome.storage` + `chrome.alarms` runtime. What is next:
 
 1. Small UI tweaks (see the loose ends below).
 2. A ringing overlay for the UI (use the Lucide `Bell` icon).
-3. Refresh the Chrome Web Store listing copy in `dashboard/`.
+3. Capture the store screenshots and promo tiles (see `CHROMEWEBSTORE.md`). The v4
+   set was deleted on 2026-10-11: it showed the pre-React interface.
 
 Known loose ends, none blocking:
 
 - The counter-clockwise staging puts numerals under the remaining sector's
   translucent fill, so covered numerals read dark-red. Per-numeral staging would
   fix it.
-- `MANUAL.md` says 40 sits at the bottom of the dial, which contradicts its own
-  5/55 statements. The implemented mapping (uniform 0–60) puts 30 there.
+- An earlier version of the spec said 40 sits at the bottom of the dial, while
+  contradicting its own 5/55 statements. The implemented mapping (uniform 0–60)
+  puts 30 there.
 - The alarm rings only while a timer surface is open (audio is played in the UI,
   not the worker); with the popup closed only the notification fires.
+
+Decisions still open, none blocking:
+
+- **The store link.** `README.md` says to install from the Chrome Web Store but
+  carries no URL: the listing was never recorded in the repo, and 5.0.0 is not
+  published yet. Add the link once it is.
+- **`vector/` still holds pre-v5 art** (`bell.svg`, `reset.svg`, `prototype.ai`).
+  The ringing overlay will use the Lucide `Bell` and the hand-drawn controls are
+  gone, so these are probably dead — but `vector/logo.ai` is the only editable
+  source of the live logo, so the folder was left alone.
+- **`dashboard/` is now empty** apart from the gitignored `package/` folder that
+  `npm run deploy` writes. Either keep it (the v4 convention) or move the release
+  ZIPs to a root `packages/`.
+- **The settings footer uses `<button>` + `openTab`**, not anchors, so users lose
+  right-click → "Copy link address" and middle-click. Real `<a>`s would be more
+  semantic, but they would break the "`app/lib/links.ts` is the only place that
+  opens a tab" rule and its tests.
+- **The `AGENTS.md "Term"` citations in ~25 source files** could be dropped in
+  favour of the single statement in "UI vocabulary"; they couple code comments to
+  doc headings.
+- **No visual test covers the settings screen** — `TimerApp.visual.test.tsx` is
+  the only browser project, so a footer change is invisible to the screenshot
+  suite.
 
 ## Deployment
 
 ```bash
-npm run build
+npm run build     # unpacked extension → dist/
+npm run deploy    # lint + typecheck + test + build, then ZIP the release
 ```
 
-Then load `dist/` as an unpacked extension at `chrome://extensions` (Developer
-mode). Debug logs are prefixed `[1-click-timer:sw]` (view them from the
-service-worker inspector). The store listing copy still describes the v5
-behaviour — refresh it before publishing.
+Load `dist/` as an unpacked extension at `chrome://extensions` (Developer mode).
+Debug logs are prefixed `[1-click-timer:sw]` (view them from the
+service-worker inspector).
+
+`npm run deploy` ends in `scripts/package.sh`, which writes
+`dashboard/package/1-click-timer-<version>.zip` holding the *contents* of `dist/`
+so `manifest.json` sits at the archive root. It prefers `zip(1)` and falls back to
+`python3` — this machine has no `zip`, so it uses Python. The output folder is
+gitignored.
+
+`CHROMEWEBSTORE.md` is the copy-paste source for the listing, the permission
+justifications and the privacy disclosure; `PRIVACY.md` is the policy that listing
+links to. The old `dashboard/` store copy and the v4 screenshots were removed on
+2026-10-11 — that folder now holds only release artifacts.

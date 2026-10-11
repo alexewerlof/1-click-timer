@@ -30,7 +30,7 @@ export interface TimerRuntime {
     start(seconds: number): void
     pause(): void
     resume(): void
-    /** Stop and resume are the same control (see MANUAL "Stop a timer"). */
+    /** Stop and resume are the same control (see AGENTS.md "Stop a timer"). */
     togglePause(): void
     /** Stops ticking, zeroes the remaining time and forgets the last duration. */
     reset(): void

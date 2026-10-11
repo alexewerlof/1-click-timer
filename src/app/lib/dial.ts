@@ -9,7 +9,7 @@
  *
  * Coordinates live in a square viewBox. The disc is only part of it: the ticks
  * radiate outward from the rim and the numerals sit outside those, which is what
- * gives the face its precision (MANUAL "Timer face"). The numerals are the
+ * gives the face its precision (AGENTS.md "Face"). The numerals are the
  * outermost element, so they bound the crop on every side.
  */
 
@@ -187,7 +187,7 @@ export const READOUT_DISC_DIAMETER_RATIO = (2 * READOUT_DISC_RADIUS) / DIAL_VIEW
 
 /**
  * The creator mark: the Alex Ewerlöf wordmark, inlined in `CreatorMark` and
- * filled with the dial's ink — the numerals' and ticks' colour (MANUAL "Creator
+ * filled with the dial's ink — the numerals' and ticks' colour (AGENTS.md "Creator
  * mark"). It sits in the band between the readout disc and the 0 numeral, where
  * a watch carries its maker's name.
  *
@@ -258,7 +258,7 @@ const CAPTION_HALF_SPAN_MINUTES = 3
 
 /**
  * Circular arc, concentric with the disc, that the "Made in Sweden" text
- * follows (MANUAL "Caption"). It hugs the bottom rim, centred on 6 o'clock, so
+ * follows (AGENTS.md "Caption"). It hugs the bottom rim, centred on 6 o'clock, so
  * the text reads left to right just inside the ticks.
  */
 export const CAPTION_PATH = captionArcPath()
@@ -299,7 +299,7 @@ export function dialRadiusOf(point: Point): number {
     return Math.hypot(point.x - DIAL_CENTER_X, point.y - DIAL_CENTER_Y)
 }
 
-/** Whether a dial point lies on the disc (MANUAL "UI elements"). */
+/** Whether a dial point lies on the disc (AGENTS.md "UI vocabulary"). */
 export function isPointOnDisc(point: Point): boolean {
     return dialRadiusOf(point) <= DISC_RADIUS
 }

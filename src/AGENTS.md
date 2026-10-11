@@ -8,10 +8,10 @@ Layers, deliberately separate:
 3. **`app/runtime/`** — the contracts the UI talks to (time, and settings).
 4. **`app/`** — the React UI. Presentation only; it never keeps time itself.
 
-**Names come from the spec.** `MANUAL.md` → "UI elements" defines the vocabu-
-lary (face, dial, disc, tick, major tick, numeral, remaining sector, preview
-arc, readout, readout disc, caption). Code identifiers use those exact words, so
-a change asked for in one term maps to one place in the source. There is exactly
+**Names come from the vocabulary.** `AGENTS.md` → UI vocabulary defines the terms
+(face, dial, disc, tick, major tick, numeral, remaining sector, preview arc,
+readout, readout disc, caption). Code identifiers use those exact words, so a
+change asked for in one term maps to one place in the source. There is exactly
 one dial face; the multi-variant experiment is over.
 
 ## Files
@@ -24,13 +24,13 @@ one dial face; the multi-variant experiment is over.
 | `app/main.tsx`                      | Mounts `App`; imports the global CSS.                                                 |
 | `app/TimerApp.tsx`                  | The timer composition shared by the popup and the tab.                                                      |
 | `app/components/TimerFace/`         | The dial. Geometry in `lib/dial.ts`; one component per element (`Disc`, `RemainingTime`, `PreviewArc`, `PreviewTicks`, `PreviewNumeral`, `CenterReadout`, `ReadoutControl`, `Caption`, `CreatorMark`); static chrome in `dialChrome.tsx` (`DIAL_TICKS`, `DIAL_NUMERALS`, and the `Tick` both tick groups share). `ReadoutControl` is the one non-SVG element — an HTML `<button>` overlaid on the face. |
-| `app/components/TransportControls/` | The four corner controls (mute, fullscreen, reset, and settings), ghost glyphs pinned to the corners of the dial's square. Icons from Lucide. The fullscreen control shows expand or shrink with the document's own fullscreen state. The settings control opens `settings.html` in a new tab (`openSettings` in `app/lib/surface.ts`); the About-the-author link inside that screen opens the author's site (`AUTHOR_SITE_URL` + `openTab`, both from `app/lib/links.ts`). The group fades out while the dial is previewed, so nothing competes with the choice being made. Pause/resume and restart are the `ReadoutControl` on the readout disc. |
+| `app/components/TransportControls/` | The four corner controls (mute, fullscreen, reset, and settings), ghost glyphs pinned to the corners of the dial's square. Icons from Lucide. The fullscreen control shows expand or shrink with the document's own fullscreen state. The settings control opens `settings.html` in a new tab (`openSettings` in `app/lib/surface.ts`); that screen's footer holds the only three ways out — the author's site, the source code and the issue tracker (`*_URL` + `openTab`, both from `app/lib/links.ts`). The group fades out while the dial is previewed, so nothing competes with the choice being made. Pause/resume and restart are the `ReadoutControl` on the readout disc. |
 | `app/design/tokens.css`             | Every colour, size and stroke weight. The light palette is `:root`; `[data-theme='dark']` overrides it.      |
 | `app/design/global.css`             | Resets, body, and the popup/tab/settings sizing per `[data-surface]`.                                                |
 | `app/lib/dial.ts`                   | Dial geometry: counter-clockwise mapping, sector/arc paths, pointer → dial point/minute, disc/readout-disc regions, and the derived readout size. |
 | `app/lib/time.ts`                   | `MAX_MINUTES` clamp and `formatClock`.                                                                     |
 | `app/lib/surface.ts`                | Surface type, `readSurface`, `openSettings`, and the fullscreen button behaviour.                                           |
-| `app/lib/links.ts`                  | Outbound destinations (`AUTHOR_SITE_URL`) and `openTab`, the one way the app opens a new tab: `chrome.tabs` in the extension, `window.open` in the design preview. |
+| `app/lib/links.ts`                  | Outbound destinations (`AUTHOR_SITE_URL`, `REPOSITORY_URL`, `ISSUES_URL`) and `openTab`, the one way the app opens a new tab: `chrome.tabs` in the extension, `window.open` in the design preview. |
 | `app/lib/useDocumentFullscreen.ts`  | `useSyncExternalStore` binding to the Fullscreen API's `fullscreenchange` event.                            |
 | `app/runtime/types.ts`              | `TimerState` / `TimerRuntime` contract (the timer seam).                                                     |
 | `app/runtime/mockRuntime.ts`        | In-memory implementation (interval-driven) + `forceStatus`, the mock-only parking helper (`MockRuntime`) the visual tests use to freeze a state.                                              |
@@ -47,7 +47,7 @@ one dial face; the multi-variant experiment is over.
 | `settings.html`                               | Settings-screen entry. Sets `data-surface="settings"`.                     |
 | `app/App.tsx`                                 | Picks `SettingsApp` or `TimerSurface`; applies the theme.                  |
 | `app/TimerSurface.tsx`                        | Wires `useAlarmSound` + audio priming + theme around `TimerApp`.           |
-| `app/SettingsApp.tsx`                         | The settings screen (appearance, volume, chime, colours, reset, about).    |
+| `app/SettingsApp.tsx`                         | The settings screen (appearance, volume, chime, colours) and its icon footer: reset to defaults, plus the three ways out (the author, the source code, the bug tracker). |
 | `app/design/palette.ts`                       | The colour swatches and the custom properties each slot drives.            |
 | `app/lib/chimes.ts`                           | Synthesised chimes (`Chime`/`Beep`/`Bell`/`Silent`) and audio priming.      |
 | `app/runtime/settings.ts`                     | `TimerSettings` / `SettingsStore` contract, defaults, normalization.       |
@@ -90,7 +90,7 @@ one dial face; the multi-variant experiment is over.
   module load (`DIAL_TICKS`, `DIAL_NUMERALS`). Only the sector and the preview
   chrome are stateful: previewing swaps the numeral ring for the preview numeral
   and redraws the covered ticks in the remaining colour, over the untouched ring
-  (MANUAL "Preview numeral", "Preview ticks").
+  (AGENTS.md "Preview numeral", "Preview ticks").
 - **One click sets a timer.** Clicking the disc starts the previewed duration;
   clicking a numeral starts that many minutes outright (the 0 numeral marks a
   whole turn, so it starts 60). A numeral carries `data-numeral-minutes`, which
@@ -127,7 +127,8 @@ one dial face; the multi-variant experiment is over.
 - **Two surfaces, one app.** `popup.html` and `fullscreen.html` mount the same
   `TimerApp`; only `data-surface` changes the sizing.
 - **Icons are Lucide**, not hand-drawn SVG — conventional glyphs and one source
-  of truth for stroke weight.
+  of truth for stroke weight. Lucide carries no brand marks, so the source-code
+  button uses `SquareCode`: there is no `Github` icon to reach for.
 - **The creator mark is inlined art.** `CreatorMark` embeds the Alex Ewerlöf
   wordmark's paths (from the old `alexewerlof-logo.svg`, now deleted) and fills
   them with `--dial-mark`, so it recolours with the numerals and ticks. Filled,
@@ -155,7 +156,11 @@ one dial face; the multi-variant experiment is over.
 
 ## Tests
 
-- `app/lib/*.test.ts`, `app/runtime/*.test.ts` — node project (`npm test`).
+- `app/lib/*.test.ts`, `app/runtime/*.test.ts`, `background/badge.test.ts` — node
+  project (`npm test`).
+- `manifest.test.ts` — the metadata guard: `manifest.json` and `package.json` must
+  agree on the name, the version and the description, and the description must
+  fit the Web Store's 132-character limit. Fix the divergence, not the test.
 - `app/TimerApp.visual.test.tsx` — browser project; baselines live in
   `app/__screenshots__/` (`npm run test:visual`, `test:visual:update` to rewrite).
   It also measures the rendered readout with `getBBox()` and asserts it fits

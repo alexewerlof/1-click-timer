@@ -1,96 +1,98 @@
 # 1-click timer
 
-A simple, slick, and practical countdown timer extension for Google Chrome.
+A countdown timer for Chrome that you set in a single click. Hover the dial, click,
+and it starts — no typing and no numbers to enter.
 
-Licensed under GPL. Originally developed using WebStorm.
+It keeps counting when you close the popup and when you restart Chrome. The minutes
+left stay on the toolbar badge, and a notification tells you when the time is up.
 
-## Status: Phase 3 — the real runtime
+## Who it is for
 
-The extension is usable. The timer is owned by the service worker in
-`chrome.storage.local` as an absolute end time, so it survives closing the popup
-and restarting Chrome; the toolbar badge counts down, `chrome.alarms` raise the
-"time is up" notification, and the alarm sound plays in the UI. The popup, the
-full-tab view and the settings screen are all live.
+- Teachers, running a timed activity on the classroom projector
+- Presenters and conference hosts, timing breaks and sessions
+- Anyone using a Pomodoro-style focus timer who does not want another app open
+- Anywhere a desktop timer helps and a whole application would not
 
-The React interface still runs in a plain browser for fast iteration:
+## Install
 
-```bash
-npm install
-npm run dev     # → http://localhost:5173/popup.html, /fullscreen.html, /settings.html
-```
+Install it from the Chrome Web Store. The store version is still v4; the interface
+in this repository (v5) is on its way.
 
-(Vite prints the actual port; it moves to the next free one if 5173 is taken.)
+To run the current source instead, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
-In a plain browser the `chrome.*` APIs are absent, so `src/app/runtime/` falls
-back to the in-memory mock (`mockRuntime.ts`) and settings fall back to
-`localStorage` (`mockSettings.ts`); the layout, the themes and the settings screen
-behave the same. `MANUAL.md` describes the product and is the source of truth for
-behaviour.
+## How to use
 
-### The dial
+### Set a timer
 
-Hover the dial to preview a duration and click to start it, or click a numeral to
-start that many minutes. There is a single dial face; an earlier experiment with
-alternative dial directions was removed once "Classic dial" was chosen.
+Move the pointer over the dial — anywhere except the small readout disc in the
+middle. The face draws a preview arc showing the duration you are choosing, with
+its numeral at the end of the arc. Click to start it.
 
-Icons are [Lucide](https://lucide.dev) (`lucide-react`), not hand-drawn SVG.
-`MANUAL.md` → **UI elements** is the vocabulary the code and the spec share, so
-feedback in one of those terms maps to one place in the source.
+To skip the dial, click a numeral on the ring and the timer starts at that many
+minutes. The 0 marks a whole turn, so it starts 60 minutes.
 
-## Manifest V3 architecture
+Setting a timer is always one click, even while another timer is already running.
 
-- **Service worker** (`src/background/index.ts`): the single writer of timer
-  state in `chrome.storage.local`. It schedules `chrome.alarms` for the timeup
-  event and periodic badge updates, updates the toolbar icon/badge via
-  `chrome.action`, and raises the notification via `chrome.notifications`.
-- **UI** (`src/app/`): React. One composition (`TimerApp`) serves the popup and
-  the full-tab view, and a settings screen (`SettingsApp`) covers appearance,
-  alarm and colours. It reads time through `TimerRuntime` and never keeps time
-  itself.
-- **Runtime** (`src/app/runtime/`): the contracts the UI depends on. The
-  extension uses `chromeRuntime` (`chrome.storage` + messaging); a plain browser
-  falls back to the in-memory mock. Settings follow the same pattern with
-  `chromeSettings` / `mockSettings`.
-- **Countdown**: state holds an absolute `endTime`, and remaining seconds are
-  computed as `max(0, (endTime - Date.now()) / 1000)`. This is what survives
-  service-worker termination.
+### Stop and resume
 
-### Key changes from v4 (MV2)
+Hover the readout disc in the centre and a control appears: a pause glyph while the
+timer runs, a play glyph while it is paused. Clicking it stops or resumes.
 
-| MV2 (v4)                                       | MV3 (v5)                                              |
-| ---------------------------------------------- | ----------------------------------------------------- |
-| Persistent background page (`background.html`) | Ephemeral service worker (`background.js`)            |
-| `setInterval` countdown (decremental)          | Timestamp-based (`endTime - Date.now()`)              |
-| `chrome.extension.getBackgroundPage().timer`   | `chrome.runtime.sendMessage`                          |
-| `chrome.browserAction`                         | `chrome.action`                                       |
-| Timer state in DOM input `.value`              | Timer state in `chrome.storage.local`                 |
-| Audio played in background page                | Audio played in popup; SW uses `chrome.notifications` |
+### Restart
 
-## Development
+While the alarm is ringing, the same disc offers a restart glyph, which runs the
+last duration again. Once you reset the timer there is nothing to restart, so the
+control is disabled.
 
-```bash
-npm run dev          # design loop against live pages in the browser
-npm run lint         # ESLint
-npm run lint:fix     # ESLint with --fix
-npm run typecheck    # tsc --noEmit
-npm test             # unit tests
-npm run test:visual  # browser screenshot tests (needs: npx playwright install chromium)
-npm run format       # Prettier write
-npm run format:check # Prettier check
-npm run build        # unpacked extension → dist/
-```
+### Mute, reset and full screen
 
-Run `lint`, `typecheck` and `test` before considering a change done.
+The corners of the dial's square hold four controls: mute (top left), fullscreen
+(top right), reset (bottom left) and settings (bottom right). Reset stops the timer
+and clears the remaining time.
 
-Load `dist/` as an unpacked extension via `chrome://extensions` (Developer
-mode) to try it inside Chrome.
+The fullscreen control opens the same timer in a tab, and pressed again in that
+tab it goes full screen. Its glyph shows which way it will go.
 
-Debug logs are prefixed with `[1-click-timer:sw]` (service worker). View them in
-`chrome://extensions` → "Service Worker".
+### Settings
 
-## Next steps
+The gear opens the settings screen in a new tab:
 
-- UI tweaks (see the loose ends in `AGENTS.md`).
-- A ringing overlay for the UI (Lucide `Bell`).
-- Refresh the Chrome Web Store listing copy in `dashboard/`.
+- **Appearance** — light, dark, or auto, which follows your system and is the default
+- **Alarm** — the volume, and a choice of chime (Chime, Beep, Bell or Silent) with a preview button
+- **Colours** — the face, the ticks and the remaining indicator, each with a small set of swatches plus Auto
+- **Reset to defaults**
 
+Your settings sync across your own Chrome profiles.
+
+## Features
+
+- One click to start: hover the dial to preview a duration, click to set it
+- Or click a numeral to start that many minutes
+- Keeps counting when you close the popup or restart Chrome
+- Remaining minutes on the toolbar badge, moving from green through orange to red as time runs out
+- A notification when the time is up, and the alarm chime while a timer is on screen
+- Light and dark appearance, following your system by default
+- A full-screen view for a timer you can watch from across the room
+
+The badge counts whole minutes and never seconds, because Chrome only wakes a
+background extension about once a minute.
+
+## Privacy
+
+No account, no sign-in, no analytics and no network requests. The timer and your
+preferences stay on your device, and preferences sync through your own Chrome
+profile.
+
+The extension asks for three permissions, and for no access to the pages you visit:
+`alarms` to fire the alert at the right moment, `notifications` for the "time is
+up" alert, and `storage` to remember the timer and your settings.
+
+See [PRIVACY.md](PRIVACY.md).
+
+## Links
+
+- [Report a bug or ask for a feature](https://github.com/alexewerlof/1-click-timer/issues)
+- [Source code](https://github.com/alexewerlof/1-click-timer)
+- [The author](https://www.alexewerlof.com/)
+
+Licensed under the GPL-3.0. Made in Sweden.

@@ -12,7 +12,7 @@ export interface TimerAppProps {
 
 /**
  * The whole timer: one composition shared by the popup and the fullscreen tab
- * (MANUAL "Interface"). All timing lives behind `runtime`, so this component is
+ * (AGENTS.md "UI vocabulary"). All timing lives behind `runtime`, so this component is
  * pure presentation.
  */
 export function TimerApp({ surface, runtime }: TimerAppProps) {
@@ -21,7 +21,7 @@ export function TimerApp({ surface, runtime }: TimerAppProps) {
     /**
      * Setting a timer is always one click, whether or not one is already
      * running: replacing a timer is low-risk and the worst case is starting
-     * again (MANUAL "Set a custom timer").
+     * again (AGENTS.md "Set a custom timer").
      */
     function startTimer(seconds: number) {
         runtime.start(seconds)
@@ -31,7 +31,7 @@ export function TimerApp({ surface, runtime }: TimerAppProps) {
         <div className={styles.app} data-surface={surface}>
             {/*
              * The corner controls overlay the face rather than taking a row of
-             * their own, so the dial gets the whole slot (MANUAL "Transport").
+             * their own, so the dial gets the whole slot (AGENTS.md "Transport").
              */}
             <div className={styles.faceSlot}>
                 <div className={styles.face}>

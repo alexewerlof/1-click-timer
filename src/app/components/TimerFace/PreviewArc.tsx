@@ -9,7 +9,7 @@ interface PreviewArcProps {
 /**
  * The preview arc: an unfilled outline from 12 o'clock to the minute currently
  * under the pointer, showing what a click would start. Unfilled, unlike the
- * remaining sector (MANUAL "UI elements").
+ * remaining sector (AGENTS.md "UI vocabulary").
  */
 export function PreviewArc({ previewMinutes }: PreviewArcProps) {
     if (previewMinutes === null || previewMinutes <= 0) return null

@@ -2,8 +2,8 @@
  * Which surface the app is rendered in, and how the fullscreen button behaves.
  *
  * The popup and the tab render the same timer; the fullscreen button opens the
- * tab from the popup, and goes fullscreen when already in the tab (MANUAL
- * "Full screen"). The settings screen is a third surface of its own (MANUAL
+ * tab from the popup, and goes fullscreen when already in the tab (AGENTS.md
+ * "Full screen"). The settings screen is a third surface of its own (AGENTS.md
  * "Settings"), opened from the face's gear control.
  */
 
@@ -20,7 +20,7 @@ export function readSurface(): Surface {
     return 'fullscreen'
 }
 
-/** Opens the settings screen in a new tab (MANUAL "Settings"). */
+/** Opens the settings screen in a new tab (AGENTS.md "Settings"). */
 export function openSettings(): void {
     openExtensionTab(SETTINGS_PAGE)
 }

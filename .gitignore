@@ -1,3 +1,7 @@
 node_modules/
 dist/
 .vitest/
+
+# Release artifacts (`npm run deploy`). The ZIP is uploaded to the Chrome Web
+# Store, never committed.
+dashboard/package/

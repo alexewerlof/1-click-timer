@@ -1,11 +1,12 @@
 {
     "name": "1-click-timer",
     "version": "5.0.0",
-    "description": "A simple, slick, and practical countdown timer extension for Google Chrome.",
+    "description": "One-click countdown timer: click the dial to start, watch the minutes left on the toolbar badge, and get notified when time is up.",
     "scripts": {
         "dev": "vite",
         "build": "vite build",
         "preview": "vite preview",
+        "deploy": "npm run lint && npm run typecheck && npm test && npm run build && bash scripts/package.sh",
         "lint": "eslint .",
         "lint:fix": "eslint . --fix",
         "format": "prettier --write .",
@@ -25,7 +26,7 @@
         "timer",
         "countdown"
     ],
-    "author": "",
+    "author": "Alex Ewerlöf",
     "license": "GPL-3.0",
     "type": "module",
     "engines": {

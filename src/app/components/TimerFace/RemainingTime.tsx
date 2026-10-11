@@ -11,7 +11,7 @@ interface RemainingTimeProps {
 /**
  * The remaining sector: the filled wedge from 12 o'clock counter-clockwise to
  * the current remaining time, reaching the centre. Its size is the time left.
- * Nothing is drawn once the time is up (MANUAL "UI elements").
+ * Nothing is drawn once the time is up (AGENTS.md "UI vocabulary").
  */
 export function RemainingTime({ seconds, active }: RemainingTimeProps) {
     // A whole turn is a full disc — an arc cannot close on itself.

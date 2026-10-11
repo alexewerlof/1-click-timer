@@ -6,9 +6,9 @@ import styles from './TimerFace.module.css'
 
 interface ReadoutControlProps {
     status: TimerStatus
-    /** Stop or resume the running timer (MANUAL "Stop a timer"). */
+    /** Stop or resume the running timer (AGENTS.md "Stop a timer"). */
     onTogglePause: () => void
-    /** Re-run the last duration while the alarm is ringing (MANUAL "Restart the timer"). */
+    /** Re-run the last duration while the alarm is ringing (AGENTS.md "Restart the timer"). */
     onRestart: () => void
 }
 
@@ -20,9 +20,9 @@ interface ReadoutAction {
 
 /**
  * What the control offers in a given state, or null when it has nothing to
- * offer. Stop and resume are the same thing, so one control serves both (MANUAL
+ * offer. Stop and resume are the same thing, so one control serves both (AGENTS.md
  * "Stop a timer"); an idle timer has none, and the ringing state offers a
- * restart instead (MANUAL "Restart the timer").
+ * restart instead (AGENTS.md "Restart the timer").
  */
 function actionFor(status: TimerStatus, onTogglePause: () => void, onRestart: () => void): ReadoutAction | null {
     switch (status) {

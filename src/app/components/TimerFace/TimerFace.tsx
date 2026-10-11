@@ -49,7 +49,7 @@ function clampMinutes(minutes: number): number {
 /**
  * The face: hover or click the dial to set a timer, or click a numeral to start
  * that many minutes outright — the 0 numeral, which marks a whole turn, starts
- * 60 (MANUAL "Set a custom timer").
+ * 60 (AGENTS.md "Set a custom timer").
  *
  * Exposed as a slider so the disc action is reachable from the keyboard —
  * arrows move counter-clockwise (more time) and clockwise (less time), shift
@@ -87,7 +87,7 @@ export function TimerFace({ status, remainingSeconds, onPick, onTogglePause, onR
      * `dialChrome`).
      *
      * The 0 numeral marks a whole turn: it sits where the preview numeral shows
-     * 60 (MANUAL "Preview numeral"), so it starts 60 minutes rather than the
+     * 60 (AGENTS.md "Preview numeral"), so it starts 60 minutes rather than the
      * nothing a 0-minute timer would be.
      */
     function numeralDurationAt(target: EventTarget | null): number | null {
@@ -153,7 +153,7 @@ export function TimerFace({ status, remainingSeconds, onPick, onTogglePause, onR
 
     /**
      * True while a duration is previewed — for the pointer that is exactly the
-     * region a click would pick (MANUAL "Set a custom timer"), so it also drives
+     * region a click would pick (AGENTS.md "Set a custom timer"), so it also drives
      * the cursor (see `TimerFace.module.css`). A keyboard preview sets it with
      * the pointer elsewhere, which only affects the cursor until the pointer
      * next moves.
@@ -164,7 +164,7 @@ export function TimerFace({ status, remainingSeconds, onPick, onTogglePause, onR
      * The minute the preview numeral shows, or null when no arc is drawn:
      * 0 minutes draws no arc, so the face stays in its normal state there.
      * While previewing, the numeral ring gives way to this single numeral
-     * (MANUAL "Preview numeral").
+     * (AGENTS.md "Preview numeral").
      */
     const previewNumeral = previewing && previewMinutes > 0 ? previewMinutes : null
 

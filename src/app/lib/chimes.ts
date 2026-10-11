@@ -2,7 +2,7 @@
  * The alarm chimes, synthesised with the Web Audio API.
  *
  * There are no audio files: each chime is a short motif of oscillators, played
- * on a loop while the timer rings (MANUAL "Settings" — choosing a chime,
+ * on a loop while the timer rings (AGENTS.md "Settings" — choosing a chime,
  * including silent). The volume setting scales the whole motif.
  */
 

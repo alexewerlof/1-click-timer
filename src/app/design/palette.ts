@@ -1,5 +1,5 @@
 /**
- * The colour choices the settings screen offers for the three slots from MANUAL
+ * The colour choices the settings screen offers for the three slots from AGENTS.md
  * "Settings": the face, the ticks (the dial's ink), and the remaining time.
  *
  * This is the only place the swatch colours live. `Auto` is `null`: it leaves

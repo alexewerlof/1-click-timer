@@ -1,5 +1,5 @@
 /**
- * The settings the user can change (MANUAL "Settings"), and the contract the UI
+ * The settings the user can change (AGENTS.md "Settings"), and the contract the UI
  * talks to about them.
  *
  * The store is deliberately separate from `TimerRuntime`: settings are user
@@ -15,13 +15,13 @@ export type ThemeMode = 'auto' | 'light' | 'dark'
 
 export const THEME_MODES: readonly ThemeMode[] = ['auto', 'light', 'dark']
 
-/** The three colour slots, matching MANUAL "Settings". */
+/** The three colour slots, matching AGENTS.md "Settings". */
 export const COLOR_SLOTS = ['face', 'ticks', 'remaining'] as const
 export type ColorSlot = (typeof COLOR_SLOTS)[number]
 
 export interface TimerSettings {
     mode: ThemeMode
-    /** Alarm volume, 0..1. Maxed by default (MANUAL "Settings"). */
+    /** Alarm volume, 0..1. Maxed by default (AGENTS.md "Settings"). */
     volume: number
     chime: ChimeId
     /** A hex colour for the face, or `null` to follow the theme (Auto). */
@@ -52,7 +52,7 @@ export interface SettingsStore {
     /** Returns an unsubscribe function. */
     subscribe(listener: SettingsListener): () => void
     update(patch: Partial<TimerSettings>): void
-    /** Restores the factory settings (MANUAL "Set to default"). */
+    /** Restores the factory settings (AGENTS.md "Settings"). */
     reset(): void
 }
 

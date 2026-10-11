@@ -3,7 +3,7 @@
  *
  * Every colour and size the UI uses resolves through a custom property.
  * Components never name a colour directly. The light palette is the `:root`
- * default; `[data-theme='dark']` overrides it (MANUAL "Settings" — Appearance).
+ * default; `[data-theme='dark']` overrides it (AGENTS.md "Settings" — Appearance).
  * The colour-slot settings (face / ticks / remaining) write over these custom
  * properties at runtime, so `design/palette.ts` and the theme here are the only
  * sources of colour.
@@ -29,6 +29,9 @@
     --corner-inset: 1.14cqmin;
     --gap-row: 10px;
     --pad: 14px;
+    /* The glyph inside a settings-screen button. A plain size, not `cqmin`: the
+       settings screen is an ordinary page, not a dial container. */
+    --size-settings-icon: 16px;
     /* Ticks are short hairlines; the strokes shrink with their length so they
        don't read as dots. */
     --stroke-tick-minor: 0.35;
@@ -86,7 +89,7 @@
 }
 
 /*
- * Dark theme (MANUAL "Settings" — Appearance). Set from `data-theme` on <html>,
+ * Dark theme (AGENTS.md "Settings" — Appearance). Set from `data-theme` on <html>,
  * which `useSettingsTheme` resolves from the mode; Auto follows the OS
  * `prefers-color-scheme`. Only the palette flips — every size stays put.
  */

@@ -13,7 +13,7 @@ interface PreviewNumeralProps {
  *
  * While previewing it is the *only* numeral on the face: the whole ring is
  * hidden, because showing 0, 5, … 55 beside it would compete with the one number
- * that matters (MANUAL "Preview numeral").
+ * that matters (AGENTS.md "Preview numeral").
  *
  * `pointOnDial` maps 60 back onto 12 o'clock, so a whole turn is labelled where
  * the 0 numeral sits.

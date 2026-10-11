@@ -118,7 +118,7 @@ test('previews a full circle at a whole turn', async () => {
 /**
  * The previewed minute used to appear in the readout. Now it is drawn as a
  * numeral on the numeral ring, at the end of the arc, and the whole ring steps
- * aside so it is the only number on the face (MANUAL "Preview numeral"). The
+ * aside so it is the only number on the face (AGENTS.md "Preview numeral"). The
  * readout keeps showing the remaining time — nothing, while idle.
  */
 test('draws the previewed minute as the only numeral on the face', async () => {
@@ -181,7 +181,7 @@ function numeralElement(svg: SVGSVGElement, minutes: number): SVGTextElement {
 }
 
 /**
- * A numeral is a one-click shortcut to its own duration (MANUAL "Set a custom
+ * A numeral is a one-click shortcut to its own duration (AGENTS.md "Set a custom
  * timer"). Clicked through the browser at the middle of the glyphs — over the
  * gap between the digits of "55" — to prove the whole numeral is a hit target
  * and not just the painted glyphs.
@@ -280,7 +280,7 @@ test('replaces a running timer from the dial without confirming', async () => {
 })
 
 /**
- * The readout control (MANUAL "Readout control"): pause/resume — and restart
+ * The readout control (AGENTS.md "Readout control"): pause/resume — and restart
  * while ringing — on the readout disc, revealed on hover. It is a real
  * `<button>` overlaid on the face, whose click surface is the whole disc.
  */
@@ -309,7 +309,7 @@ test('leaves pause/resume and restart out of the corner controls', async () => {
  * The corner controls sit on the dial's square, so they would sit in the way of
  * the choice being made. While the dial is previewed they fade out with the
  * numeral ring, and come straight back when the pointer leaves the disc — which
- * it must do to reach a control (MANUAL "Set a custom timer"). The fade keys off
+ * it must do to reach a control (AGENTS.md "Set a custom timer"). The fade keys off
  * the same `data-pickable` signal the face sets, so the two cannot disagree.
  */
 test('fades the corner controls out while the dial is previewed', async () => {
@@ -368,7 +368,7 @@ test('shows the volume-off glyph while the timer is muted', async () => {
 /**
  * The fullscreen control says what pressing it will do: it offers fullscreen
  * while the page is normal, and swaps to the shrink glyph and the matching label
- * once the document *is* fullscreen (MANUAL "Full screen"). The real Fullscreen
+ * once the document *is* fullscreen (AGENTS.md "Full screen"). The real Fullscreen
  * API needs a user gesture, so `fullscreenElement` is stood in for; the event
  * fired here is the one the browser fires.
  */
@@ -401,7 +401,7 @@ test('flips the fullscreen control with the document fullscreen state', async ()
 
 /**
  * The four controls are pinned to the corners of the dial's square rather than to
- * a row of their own (MANUAL "Transport"), and none of them reaches the dial, so
+ * a row of their own (AGENTS.md "Transport"), and none of them reaches the dial, so
  * the face keeps its whole surface. The square is the letterboxed SVG (a square
  * viewBox), so its centre is the element's centre and its side is the smaller of
  * the element's two sides.
@@ -538,7 +538,7 @@ test('restarts the last timer from the readout control while ringing', async () 
 
 /**
  * The creator mark wears the dial's ink — the same `--dial-mark` the numerals and
- * ticks use (MANUAL "Creator mark") — so the Settings screen's tick colour
+ * ticks use (AGENTS.md "Creator mark") — so the Settings screen's tick colour
  * recolours all three together. Read from a numeral, so the mark cannot drift from
  * them.
  */

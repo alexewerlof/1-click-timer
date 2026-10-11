@@ -98,7 +98,7 @@ function formatMMSS(seconds: number): string {
     return `${minutes}:${String(rest).padStart(2, '0')}`
 }
 
-/** The elapsed period, phrased for the notification (MANUAL "Notification"). */
+/** The elapsed period, phrased for the notification (AGENTS.md "Notification"). */
 function describeDuration(seconds: number): string {
     const total = Math.max(0, Math.round(seconds))
     if (total < 60) return `${total} seconds`

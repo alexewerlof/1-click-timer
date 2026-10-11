@@ -1,7 +1,7 @@
 import { CAPTION_PATH, CAPTION_PATH_ID } from '../../lib/dial'
 import styles from './TimerFace.module.css'
 
-/** "Made in Sweden", inscribed inside the disc on a circular path (MANUAL "Caption"). */
+/** "Made in Sweden", inscribed inside the disc on a circular path (AGENTS.md "Caption"). */
 export function Caption() {
     return (
         <g>

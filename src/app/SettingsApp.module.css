@@ -146,6 +146,10 @@
 }
 
 .button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
     padding: 8px 14px;
     border-radius: 8px;
     border: 1px solid var(--panel-border);
@@ -154,6 +158,13 @@
     transition:
         color 160ms ease,
         border-color 160ms ease;
+}
+
+/* The glyph keeps its weight whatever the label length. */
+.button svg {
+    flex: none;
+    inline-size: var(--size-settings-icon);
+    block-size: var(--size-settings-icon);
 }
 
 .button:hover:not(:disabled) {
@@ -173,8 +184,10 @@
 }
 
 .footer {
-    display: flex;
-    justify-content: space-between;
+    /* Four actions, so a two-column grid: one row cannot hold them all inside
+       the page's width, and a wrapped flex row would break the alignment. */
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px;
 }
 

@@ -1,7 +1,7 @@
 {
     "name": "1-click timer",
-    "description": "A Simple, Slick and Practical timer for Chrome",
-    "version": "5.0",
+    "description": "One-click countdown timer: click the dial to start, watch the minutes left on the toolbar badge, and get notified when time is up.",
+    "version": "5.0.0",
     "manifest_version": 3,
     "action": {
         "default_icon": {
