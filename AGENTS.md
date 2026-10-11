@@ -142,8 +142,6 @@ product spec implies:
 
 Known loose ends, none blocking:
 
-- The creator mark (logo + "Alex Ewerlöf") is off via `SHOW_CREATOR_MARK` in
-  `lib/dial.ts`; the component and its styles are still there.
 - The counter-clockwise staging puts numerals under the remaining sector's
   translucent fill, so covered numerals read dark-red. Per-numeral staging would
   fix it.

@@ -185,8 +185,40 @@ export const DIAL_VIEWBOX = `${DIAL_VIEWBOX_LEFT} ${DIAL_VIEWBOX_TOP} ${DIAL_VIE
  */
 export const READOUT_DISC_DIAMETER_RATIO = (2 * READOUT_DISC_RADIUS) / DIAL_VIEWBOX_WIDTH
 
-/** The creator mark returns once the dial is settled (MANUAL "UI elements"). */
-export const SHOW_CREATOR_MARK = false
+/**
+ * The creator mark: the Alex Ewerlöf wordmark, inlined in `CreatorMark` and
+ * filled with the dial's ink — the numerals' and ticks' colour (MANUAL "Creator
+ * mark"). It sits in the band between the readout disc and the 0 numeral, where
+ * a watch carries its maker's name.
+ *
+ * Its box is the source art's own canvas, and the art is centred in that canvas,
+ * so the box's centre is the mark's centre.
+ */
+export const CREATOR_MARK_VIEWBOX = '0 0 500 250'
+
+/** The canvas is 2:1, so the box is as well. */
+const CREATOR_MARK_ASPECT = 250 / 500
+
+/**
+ * Kept deliberately small: the mark introduces the maker without competing with
+ * the readout. The ratio is its width as a multiple of the readout disc's
+ * diameter, so it keeps its proportion if the disc is resized.
+ */
+export const CREATOR_MARK_WIDTH_RATIO = 1.15
+export const CREATOR_MARK_WIDTH = CREATOR_MARK_WIDTH_RATIO * 2 * READOUT_DISC_RADIUS
+export const CREATOR_MARK_HEIGHT = CREATOR_MARK_WIDTH * CREATOR_MARK_ASPECT
+
+/**
+ * Where the mark sits across the band, 0 at the readout disc's rim and 1 at the
+ * numeral ring. Held below halfway so the mark hugs the disc — a watch sets its
+ * maker's name just above the centre rather than floating mid-band.
+ */
+const CREATOR_MARK_BAND_POSITION = 0.35
+
+export const CREATOR_MARK_CENTER_Y =
+    DIAL_CENTER_Y - (READOUT_DISC_RADIUS + CREATOR_MARK_BAND_POSITION * (NUMERAL_RADIUS - READOUT_DISC_RADIUS))
+export const CREATOR_MARK_X = DIAL_CENTER_X - CREATOR_MARK_WIDTH / 2
+export const CREATOR_MARK_Y = CREATOR_MARK_CENTER_Y - CREATOR_MARK_HEIGHT / 2
 
 export const MINUTES_PER_TURN = MAX_MINUTES
 

@@ -7,6 +7,11 @@ import {
     READOUT_DISC_DIAMETER_RATIO,
     DIAL_VIEWBOX_WIDTH,
     DIAL_TICKS,
+    CREATOR_MARK_HEIGHT,
+    CREATOR_MARK_WIDTH,
+    CREATOR_MARK_WIDTH_RATIO,
+    CREATOR_MARK_X,
+    CREATOR_MARK_Y,
     NUMERAL_GLYPH_HALF_WIDTH,
     NUMERAL_RADIUS,
     MINUTES_PER_TURN,
@@ -176,5 +181,29 @@ describe('dial geometry constants', () => {
         expect(READOUT_DISC_DIAMETER_RATIO * DIAL_VIEWBOX_WIDTH).toBeCloseTo(2 * READOUT_DISC_RADIUS, 10)
         expect(READOUT_DISC_DIAMETER_RATIO).toBeGreaterThan(0)
         expect(READOUT_DISC_DIAMETER_RATIO).toBeLessThan(1)
+    })
+})
+
+describe('creator mark', () => {
+    it('sits in the band between the readout disc and the 0 numeral', () => {
+        // Below the 0 numeral's anchor, and above the readout disc's rim.
+        expect(CREATOR_MARK_Y).toBeGreaterThan(DIAL_CENTER_Y - NUMERAL_RADIUS)
+        expect(CREATOR_MARK_Y + CREATOR_MARK_HEIGHT).toBeLessThan(DIAL_CENTER_Y - READOUT_DISC_RADIUS)
+    })
+
+    it('keeps every corner of the mark inside the disc', () => {
+        const corners = [
+            { x: CREATOR_MARK_X, y: CREATOR_MARK_Y },
+            { x: CREATOR_MARK_X + CREATOR_MARK_WIDTH, y: CREATOR_MARK_Y },
+            { x: CREATOR_MARK_X, y: CREATOR_MARK_Y + CREATOR_MARK_HEIGHT },
+            { x: CREATOR_MARK_X + CREATOR_MARK_WIDTH, y: CREATOR_MARK_Y + CREATOR_MARK_HEIGHT },
+        ]
+        for (const corner of corners) expect(radiusOf(corner)).toBeLessThan(DISC_RADIUS)
+    })
+
+    it('is a shade wider than the readout disc, and no more', () => {
+        expect(CREATOR_MARK_WIDTH).toBeCloseTo(CREATOR_MARK_WIDTH_RATIO * 2 * READOUT_DISC_RADIUS, 10)
+        expect(CREATOR_MARK_WIDTH_RATIO).toBeGreaterThan(1)
+        expect(CREATOR_MARK_WIDTH_RATIO).toBeLessThan(1.2)
     })
 })

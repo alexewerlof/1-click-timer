@@ -100,6 +100,12 @@ one dial face; the multi-variant experiment is over.
   `TimerApp`; only `data-surface` changes the sizing.
 - **Icons are Lucide**, not hand-drawn SVG — conventional glyphs and one source
   of truth for stroke weight.
+- **The creator mark is inlined art.** `CreatorMark` embeds the Alex Ewerlöf
+  wordmark's paths (from the old `alexewerlof-logo.svg`, now deleted) and fills
+  them with `--dial-mark`, so it recolours with the numerals and ticks. Filled,
+  not stroked: the source is a hairline outline that would vanish on the popup.
+  It is placed by `CREATOR_MARK_*` in `lib/dial.ts`, in the band between the
+  readout disc and the 0 numeral.
 - **Service worker logs** are prefixed `[1-click-timer:sw]`.
 
 ## Tests

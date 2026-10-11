@@ -224,21 +224,14 @@
 
 /* ---- branding ---- */
 
+/*
+ * The creator mark: the wordmark, filled in the dial's ink so it recolours with
+ * the numerals and ticks (see `CreatorMark`). `pointer-events: none` keeps the
+ * mark from becoming a hit target on the disc underneath it.
+ */
 .creatorMark {
-    opacity: 0.85;
-}
-
-.creatorName {
-    fill: var(--ink-soft);
-    stroke: var(--surface);
-    stroke-width: var(--halo-width);
-    stroke-linejoin: round;
-    paint-order: stroke fill;
-    font-family: var(--font-ui);
-    font-size: var(--size-creator);
-    letter-spacing: 0.04em;
-    text-anchor: middle;
-    dominant-baseline: central;
+    fill: var(--dial-mark);
+    pointer-events: none;
 }
 
 .caption {

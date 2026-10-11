@@ -502,3 +502,23 @@ test('restarts the last timer from the readout control while ringing', async () 
     expect(runtime.getState().durationSeconds).toBe(7 * SECONDS_PER_MINUTE)
     runtime.reset()
 })
+
+/**
+ * The creator mark wears the dial's ink — the same `--dial-mark` the numerals and
+ * ticks use (MANUAL "Creator mark") — so the Settings screen's tick colour
+ * recolours all three together. Read from a numeral, so the mark cannot drift from
+ * them.
+ */
+test('draws the creator mark in the numerals’ ink', async () => {
+    const runtime = createMockRuntime()
+    runtime.forceStatus('idle')
+    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} />))
+
+    const svg = screen.getByRole('slider').element() as SVGSVGElement
+    const mark = svg.querySelector('[class*="creatorMark"]')
+    if (!mark) throw new Error('the creator mark is not on the face')
+    const art = mark.querySelector('path')
+    if (!art) throw new Error('the creator mark has no art')
+
+    expect(getComputedStyle(art).fill).toBe(getComputedStyle(numeralElement(svg, 15)).fill)
+})

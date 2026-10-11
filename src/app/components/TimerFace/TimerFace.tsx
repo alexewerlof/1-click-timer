@@ -7,7 +7,6 @@ import type {
 import {
     DIAL_VIEWBOX,
     MINUTES_PER_TURN,
-    SHOW_CREATOR_MARK,
     clientPointToDialPoint,
     isPointInsideReadoutDisc,
     isPointOnDisc,
@@ -213,7 +212,7 @@ export function TimerFace({ status, remainingSeconds, onPick, onTogglePause, onR
                 <RemainingTime seconds={remainingSeconds} active={status === 'running'} />
                 <PreviewArc previewMinutes={previewMinutes} />
                 <CenterReadout status={status} remainingSeconds={remainingSeconds} />
-                {SHOW_CREATOR_MARK ? <CreatorMark /> : null}
+                <CreatorMark />
                 <Caption />
             </svg>
             <ReadoutControl status={status} onTogglePause={onTogglePause} onRestart={onRestart} />

@@ -45,7 +45,7 @@ change requested with one of these terms maps to one place in the source.
 | **Readout disc**    | The small circle behind the readout, sitting at the centre of the dial. It is white with a soft shadow, so it reads as a layer above the dial rather than a hole in it. |
 | **Readout control** | The round button on the **Readout disc**, whose click surface is the whole disc. It is revealed when the disc is hovered (or the button has keyboard focus), and always shown where the device has no hover. It offers pause while the timer runs, resume while it is paused, and restart while the alarm is ringing, and it wears the **Remaining sector**'s colour. While it shows it replaces the readout. |
 | **Caption**         | The text "Made in Sweden", inscribed inside the disc on a circular path just above the bottom rim.        |
-| **Creator mark**    | The logo plus "Alex Ewerlöf". Currently not drawn.                                                       |
+| **Creator mark**    | The "Alex Ewerlöf" wordmark, drawn in the dial's ink (the numerals' and ticks' colour), sitting in the band between the readout disc and the 0 numeral. |
 
 Three related measures, used throughout the geometry:
 
@@ -66,13 +66,10 @@ labels and glyphs stay conventional.
 
 ### Implementation status
 
-Names above are implemented as written. Four deliberate deviations:
+Names above are implemented as written. Three deliberate deviations:
 
 - **One dial only.** Alternatives that were explored during the React rewrite
   have been removed; the classic face is the only one.
-- **The creator mark is currently hidden** (logo + "Alex Ewerlöf"). It is still
-  part of this spec, gated by `SHOW_CREATOR_MARK` in `src/app/lib/dial.ts`; the
-  band between the readout disc and the 0 numeral is left clear for it.
 - **The break button is a placeholder.** The bottom-right corner control is
   placed with its coffee glyph, but its behaviour is not defined yet.
 - **The bottom numeral is 30, not 40.** The list below says 40 sits at the
@@ -87,7 +84,9 @@ The interface shows a circular analog timer for 60 minutes.
 
 At the center of the face there's a circle that's used for showing the number of remaining minutes in digital format. For example if it's 1 minute and 5 seconds remaining till the alarm goes off, it shows 1:05.
 
-Between the central circle and the 0 indicator, there's a logo and my name (Alex Ewerlöf).
+Between the central circle and the 0 indicator sits the creator mark: my "Alex
+Ewerlöf" wordmark, filled in the same ink as the numerals and ticks and sized
+just a little wider than the central circle.
 
 Inside the disc, following a circular path just above the bottom rim, there's a text that reads "Made in Sweden".
 

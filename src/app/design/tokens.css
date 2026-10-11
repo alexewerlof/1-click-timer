@@ -32,14 +32,11 @@
     --stroke-tick-major: 0.8;
     /* Slight transparency lets the ticks show through the remaining sector. */
     --remaining-alpha: 0.9;
-    /* Halo behind the creator mark so it survives the red area. */
-    --halo-width: 1.1;
 
     /* ---- dial typography (px here means SVG user units) ---- */
     --size-numeral: 8px;
     --weight-numeral: 700;
     --tracking-numeral: -0.03em;
-    --size-creator: 3.2px;
     /* Was 4.4px in a 106-unit-tall viewBox; the viewBox is now taller, so this
        is a shade over four times smaller on screen than it used to be. */
     --size-caption: 1.4px;
