@@ -46,9 +46,9 @@ src/
   popup.html           popup entry      (data-surface="popup")
   fullscreen.html      tab entry        (data-surface="fullscreen")
   app/                 the React UI
-    main.tsx           mounts TimerApp; chooses the runtime + dev harness
+    main.tsx           mounts TimerApp; chooses the runtime
     TimerApp.tsx       composition shared by both surfaces
-    components/        TimerFace, TransportControls, DevBar
+    components/        TimerFace, TransportControls
     design/            tokens.css (all colours/sizes), global.css
     lib/               dial geometry, time formatting, surface helpers, links
     runtime/           the TimerRuntime contract and its mock implementation
@@ -127,16 +127,11 @@ termination. The UI never accumulates time.
 Phase 1 (the interface, in a browser) is done. What is next, in the order the
 product spec implies:
 
-1. Remove the **dev bar** (the `State: idle/running/paused/expired` row,
-   `components/DevBar/`) from the demo page. It is also the only way to park a
-   state for a deterministic screenshot, so the visual test needs another route
-   to the same states before it goes — otherwise it will start capturing
-   whatever the mock happens to be doing.
-2. **Settings screen** — MANUAL "Settings": alarm volume, chime selection
+1. **Settings screen** — MANUAL "Settings": alarm volume, chime selection
    including silent, and the face / remaining / tick colours. Those colours are
    already tokens, so this is wiring a write to the same custom properties.
-3. Small UI tweaks.
-4. **Phase 3** — the real runtime: a `chrome.storage`-backed implementation of
+2. Small UI tweaks.
+3. **Phase 3** — the real runtime: a `chrome.storage`-backed implementation of
    `TimerRuntime` behind `runtime/runtime.ts`, plus the service worker's alarms,
    badge, notifications and audio. Nothing in `app/` needs to change shape for
    this; `runtime/mockRuntime.ts` is the reference implementation.

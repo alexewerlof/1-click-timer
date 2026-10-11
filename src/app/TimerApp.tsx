@@ -1,17 +1,14 @@
-import { DevBar } from './components/DevBar/DevBar'
 import { TimerFace } from './components/TimerFace/TimerFace'
 import { TransportControls } from './components/TransportControls/TransportControls'
 import { AUTHOR_SITE_URL, openTab } from './lib/links'
 import { toggleFullscreenSurface, type Surface } from './lib/surface'
-import type { TimerDevControls, TimerRuntime } from './runtime/types'
+import type { TimerRuntime } from './runtime/types'
 import { useTimerState } from './runtime/useTimerState'
 import styles from './TimerApp.module.css'
 
 export interface TimerAppProps {
     surface: Surface
     runtime: TimerRuntime
-    /** Design harness; only ever passed in development. */
-    dev?: TimerDevControls
 }
 
 /**
@@ -19,7 +16,7 @@ export interface TimerAppProps {
  * (MANUAL "Interface"). All timing lives behind `runtime`, so this component is
  * pure presentation.
  */
-export function TimerApp({ surface, runtime, dev }: TimerAppProps) {
+export function TimerApp({ surface, runtime }: TimerAppProps) {
     const state = useTimerState(runtime)
 
     /**
@@ -58,8 +55,6 @@ export function TimerApp({ surface, runtime, dev }: TimerAppProps) {
                     onOpenAbout={() => openTab(AUTHOR_SITE_URL)}
                 />
             </div>
-
-            {dev ? <DevBar status={state.status} onStatusChange={dev.forceStatus} /> : null}
         </div>
     )
 }

@@ -7,13 +7,13 @@
  */
 
 import { clampSeconds, MAX_SECONDS, SECONDS_PER_MINUTE } from '../lib/time'
-import type { TimerDevControls, TimerRuntime, TimerState, TimerStateListener, TimerStatus } from './types'
+import type { TimerRuntime, TimerState, TimerStateListener, TimerStatus } from './types'
 
 /** 4 Hz keeps the dial smooth without thrashing React. */
 const TICK_MS = 250
 
-/** Representative parking states for the design harness. */
-const DEV_STATES: Record<TimerStatus, Partial<TimerState>> = {
+/** Representative parking states for the visual tests. */
+const PARKED_STATES: Record<TimerStatus, Partial<TimerState>> = {
     idle: {
         status: 'idle',
         remainingSeconds: 0,
@@ -48,7 +48,19 @@ const INITIAL_STATE: TimerState = {
     lastDurationSeconds: null,
 }
 
-function createMockRuntime(): TimerRuntime & TimerDevControls {
+/**
+ * The mock runtime the design preview and the visual tests use.
+ *
+ * `forceStatus` is its one extra: it parks the timer in a representative state
+ * so a screenshot — or a styled-attribute assertion — is deterministic. It is
+ * deliberately *not* part of `TimerRuntime`, because the Chrome runtime cannot
+ * be parked.
+ */
+export interface MockRuntime extends TimerRuntime {
+    forceStatus(status: TimerStatus): void
+}
+
+function createMockRuntime(): MockRuntime {
     let state: TimerState = INITIAL_STATE
     const listeners = new Set<TimerStateListener>()
     let tickId: ReturnType<typeof setInterval> | null = null
@@ -150,10 +162,10 @@ function createMockRuntime(): TimerRuntime & TimerDevControls {
         },
 
         forceStatus(status) {
-            // Parked, not ticking: keeps design screenshots deterministic.
+            // Parked, not ticking: keeps screenshots deterministic.
             stopTicking()
             endsAt = 0
-            publish(DEV_STATES[status])
+            publish(PARKED_STATES[status])
         },
     }
 }

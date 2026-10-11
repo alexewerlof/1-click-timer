@@ -92,9 +92,6 @@ Debug logs are prefixed with `[1-click-timer:sw]` (service worker). View them in
 
 ## Next steps
 
-- Remove the **dev bar** (the `State: idle/running/paused/expired` row) from the
-  demo page. Note it is also the only way to park a state for screenshots, so the
-  visual tests would need another entry point.
 - Build the settings screen (MANUAL "Settings"): alarm volume, chime selection,
   face/remaining/ticks colours, reset to defaults.
 - UI tweaks.

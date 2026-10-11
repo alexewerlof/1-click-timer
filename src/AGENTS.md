@@ -19,11 +19,10 @@ one dial face; the multi-variant experiment is over.
 | `manifest.json`                     | Extension manifest (MV3). Service worker runs as an ES module.                                              |
 | `popup.html`                        | Popup entry. Sets `data-surface="popup"`.                                                                   |
 | `fullscreen.html`                   | Tab entry for the big view. Sets `data-surface="fullscreen"`.                                               |
-| `app/main.tsx`                      | Mounts `TimerApp`, reads the surface, injects the dev harness in development builds.                        |
+| `app/main.tsx`                      | Mounts `TimerApp`, reads the surface and picks the runtime.                                                 |
 | `app/TimerApp.tsx`                  | Composition shared by both surfaces.                                                                        |
 | `app/components/TimerFace/`         | The dial. Geometry in `lib/dial.ts`; one component per element (`Disc`, `RemainingTime`, `PreviewArc`, `PreviewTicks`, `PreviewNumeral`, `CenterReadout`, `ReadoutControl`, `Caption`, `CreatorMark`); static chrome in `dialChrome.tsx` (`DIAL_TICKS`, `DIAL_NUMERALS`, and the `Tick` both tick groups share). `ReadoutControl` is the one non-SVG element — an HTML `<button>` overlaid on the face. |
 | `app/components/TransportControls/` | The four corner controls (mute, fullscreen, reset, and info), ghost glyphs pinned to the corners of the dial's square. Icons from Lucide. The fullscreen control shows expand or shrink with the document's own fullscreen state. The info control opens the author's site in a new tab (`AUTHOR_SITE_URL` + `openTab`, both from `app/lib/links.ts`). Pause/resume and restart are the `ReadoutControl` on the readout disc. |
-| `app/components/DevBar/`            | Design harness (`import.meta.env.DEV` only): parks the timer in a given state.                              |
 | `app/design/tokens.css`             | Every colour, size and stroke weight, in one `:root` block.                                                 |
 | `app/design/global.css`             | Resets, body, and the popup/tab sizing per `[data-surface]`.                                                |
 | `app/lib/dial.ts`                   | Dial geometry: counter-clockwise mapping, sector/arc paths, pointer → dial point/minute, disc/readout-disc regions, and the derived readout size. |
@@ -32,7 +31,7 @@ one dial face; the multi-variant experiment is over.
 | `app/lib/links.ts`                  | Outbound destinations (`AUTHOR_SITE_URL`) and `openTab`, the one way the app opens a new tab: `chrome.tabs` in the extension, `window.open` in the design preview. |
 | `app/lib/useDocumentFullscreen.ts`  | `useSyncExternalStore` binding to the Fullscreen API's `fullscreenchange` event.                            |
 | `app/runtime/types.ts`              | `TimerState` / `TimerRuntime` contract. **The seam Phase 3 implements.**                                    |
-| `app/runtime/mockRuntime.ts`        | In-memory implementation (interval-driven) + `forceStatus` for the harness.                                               |
+| `app/runtime/mockRuntime.ts`        | In-memory implementation (interval-driven) + `forceStatus`, the mock-only parking helper (`MockRuntime`) the visual tests use to freeze a state.                                              |
 | `app/runtime/runtime.ts`            | The single line that swaps mock → Chrome runtime.                                                                         |
 | `app/runtime/useTimerState.ts`      | `useSyncExternalStore` binding.                                                                                           |
 | `background/index.ts`               | Service worker: storage, alarms, badge/icon, notifications, messages.                                                     |

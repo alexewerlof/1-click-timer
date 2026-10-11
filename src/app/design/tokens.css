@@ -13,7 +13,6 @@
 
     /* ---- shape ---- */
     --radius-control: 8px;
-    --radius-pill: 999px;
     /* The corner controls scale with the dial rather than sitting at a fixed
        size: `cqmin` is the dial square's side (the `.faceSlot` size container),
        so these values are only meaningful inside it. 34px on the 352px popup
@@ -70,11 +69,7 @@
        readout disc's: one light, two directions. */
     --disc-inner-shadow: var(--readout-shadow);
 
-    --chrome-ink: #14181f;
-    --chrome-border: rgb(20 24 31 / 12%);
-
     --accent: #e0201b;
     --control-ink: #14181f;
-    --control-border: rgb(20 24 31 / 16%);
     --control-surface: transparent;
 }

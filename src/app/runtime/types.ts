@@ -38,11 +38,3 @@ export interface TimerRuntime {
     restart(): void
     toggleMute(): void
 }
-
-/**
- * Affordances the design harness uses to park the UI in a given state.
- * Deliberately *not* part of `TimerRuntime` — the Chrome runtime never has it.
- */
-export interface TimerDevControls {
-    forceStatus(status: TimerStatus): void
-}

@@ -60,7 +60,6 @@ Three related measures, used throughout the geometry:
 | -------------------- | ----------------------------------------------------------------------------------- |
 | **Face slot**        | The region that holds the face. The **Transport** controls overlay it, so the face gets the whole slot. |
 | **Transport**        | The four corner controls, one on each corner of the dial's square: mute (top left), fullscreen (top right), reset (bottom left) and info (bottom right). They are ghost glyphs — black by default, red on hover. Pause/resume and restart live on the **Readout control**. |
-| **Dev bar**          | Development-only harness for parking the timer in a given state. Never shipped.     |
 
 Icons come from **Lucide** (`lucide-react`), not hand-drawn SVG, so control
 labels and glyphs stay conventional.
