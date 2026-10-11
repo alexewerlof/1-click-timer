@@ -4,38 +4,34 @@ A simple, slick, and practical countdown timer extension for Google Chrome.
 
 Licensed under GPL. Originally developed using WebStorm.
 
-## Status: Phase 1 — interface rewrite (design preview)
+## Status: Phase 3 — the real runtime
 
-The interface has been rewritten in React + TypeScript, and it runs in a plain
-browser so the design can be iterated on quickly:
+The extension is usable. The timer is owned by the service worker in
+`chrome.storage.local` as an absolute end time, so it survives closing the popup
+and restarting Chrome; the toolbar badge counts down, `chrome.alarms` raise the
+"time is up" notification, and the alarm sound plays in the UI. The popup, the
+full-tab view and the settings screen are all live.
+
+The React interface still runs in a plain browser for fast iteration:
 
 ```bash
 npm install
-npm run dev     # → http://localhost:5173/popup.html and /fullscreen.html
+npm run dev     # → http://localhost:5173/popup.html, /fullscreen.html, /settings.html
 ```
 
 (Vite prints the actual port; it moves to the next free one if 5173 is taken.)
 
-Both pages are the same app in two surfaces: the popup panel and a full-tab
-view (there is a button in the transport row to move between them, and the tab
-view can go fullscreen). Hover the dial to preview a duration and click to start
-it, or click a numeral to start that many minutes.
+In a plain browser the `chrome.*` APIs are absent, so `src/app/runtime/` falls
+back to the in-memory mock (`mockRuntime.ts`) and settings fall back to
+`localStorage` (`mockSettings.ts`); the layout, the themes and the settings screen
+behave the same. `MANUAL.md` describes the product and is the source of truth for
+behaviour.
 
-**Not implemented yet:** persistence across restarts, the toolbar badge,
-alarms, notifications, the settings screen, and the alarm sound. Timing is
-currently an in-memory mock (`src/app/runtime/mockRuntime.ts`), so the extension
-is a live, interactive design preview rather than a usable timer. `MANUAL.md`
-describes the finished product and is the source of truth for behaviour.
+### The dial
 
-### Design harness
-
-`npm run dev` renders a development-only row under the controls that parks the
-timer in `idle` / `running` / `paused` / `expired`, so each state can be
-inspected (and screenshotted) without waiting for a real countdown. It is
-stripped from production builds.
-
-The dial has a single face. An earlier experiment with three alternative dial
-directions was removed once "Classic dial" was chosen.
+Hover the dial to preview a duration and click to start it, or click a numeral to
+start that many minutes. There is a single dial face; an earlier experiment with
+alternative dial directions was removed once "Classic dial" was chosen.
 
 Icons are [Lucide](https://lucide.dev) (`lucide-react`), not hand-drawn SVG.
 `MANUAL.md` → **UI elements** is the vocabulary the code and the spec share, so
@@ -43,16 +39,18 @@ feedback in one of those terms maps to one place in the source.
 
 ## Manifest V3 architecture
 
-- **Service worker** (`src/background/index.ts`): manages timer state in
-  `chrome.storage.local`, schedules `chrome.alarms` for the timeup event and
-  periodic badge updates, and updates the toolbar icon/badge via
-  `chrome.action`.
-- **UI** (`src/app/`): React. One composition (`TimerApp`) serves both the popup
-  and the full-tab view. It reads time through the `TimerRuntime` contract and
-  never keeps time itself.
-- **Runtime** (`src/app/runtime/`): the contract the UI depends on. Phase 1 ships
-  an in-memory mock; Phase 3 adds the `chrome.storage` + messaging
-  implementation behind the same interface.
+- **Service worker** (`src/background/index.ts`): the single writer of timer
+  state in `chrome.storage.local`. It schedules `chrome.alarms` for the timeup
+  event and periodic badge updates, updates the toolbar icon/badge via
+  `chrome.action`, and raises the notification via `chrome.notifications`.
+- **UI** (`src/app/`): React. One composition (`TimerApp`) serves the popup and
+  the full-tab view, and a settings screen (`SettingsApp`) covers appearance,
+  alarm and colours. It reads time through `TimerRuntime` and never keeps time
+  itself.
+- **Runtime** (`src/app/runtime/`): the contracts the UI depends on. The
+  extension uses `chromeRuntime` (`chrome.storage` + messaging); a plain browser
+  falls back to the in-memory mock. Settings follow the same pattern with
+  `chromeSettings` / `mockSettings`.
 - **Countdown**: state holds an absolute `endTime`, and remaining seconds are
   computed as `max(0, (endTime - Date.now()) / 1000)`. This is what survives
   service-worker termination.
@@ -92,9 +90,7 @@ Debug logs are prefixed with `[1-click-timer:sw]` (service worker). View them in
 
 ## Next steps
 
-- Build the settings screen (MANUAL "Settings"): alarm volume, chime selection,
-  face/remaining/ticks colours, reset to defaults.
-- UI tweaks.
-- Phase 3: the `chrome.storage` + `chrome.alarms` runtime behind `TimerRuntime`,
-  so the timer actually persists, badges and rings.
+- UI tweaks (see the loose ends in `AGENTS.md`).
+- A ringing overlay for the UI (Lucide `Bell`).
+- Refresh the Chrome Web Store listing copy in `dashboard/`.
 

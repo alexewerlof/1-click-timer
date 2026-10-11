@@ -60,7 +60,6 @@
     "dependencies": {
         "lucide-react": "^1.55.0",
         "react": "^19.3.0",
-        "react-dom": "^19.3.0",
-        "zustand": "^5.0.15"
+        "react-dom": "^19.3.0"
     }
 }

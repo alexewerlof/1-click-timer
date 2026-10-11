@@ -12,7 +12,7 @@ const DIST = resolve(ROOT, 'dist')
  * Files Chrome needs verbatim next to the manifest. Vite only knows about
  * imports, so anything referenced by `manifest.json` is copied by hand.
  */
-const STATIC_ASSETS = ['manifest.json', 'images', 'audio'] as const
+const STATIC_ASSETS = ['manifest.json', 'images'] as const
 
 function copyAsset(relativePath: string): void {
     const from = resolve(SRC, relativePath)
@@ -54,6 +54,7 @@ export default defineConfig({
             input: {
                 popup: resolve(SRC, 'popup.html'),
                 fullscreen: resolve(SRC, 'fullscreen.html'),
+                settings: resolve(SRC, 'settings.html'),
                 background: resolve(SRC, 'background/index.ts'),
             },
             output: {

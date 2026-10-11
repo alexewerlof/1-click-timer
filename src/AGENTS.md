@@ -1,10 +1,12 @@
 # src/ — source code
 
-Three layers, deliberately separate:
+Layers, deliberately separate:
 
-1. **`background/`** — the service worker. Framework-free TypeScript; no React.
-2. **`app/runtime/`** — the contract the UI talks to about time.
-3. **`app/`** — the React UI. Presentation only; it never keeps time itself.
+1. **`shared/`** — the timer protocol (record, reducer, storage keys) shared by
+   the worker and the UI, so both agree on what an action does.
+2. **`background/`** — the service worker. Framework-free TypeScript; no React.
+3. **`app/runtime/`** — the contracts the UI talks to (time, and settings).
+4. **`app/`** — the React UI. Presentation only; it never keeps time itself.
 
 **Names come from the spec.** `MANUAL.md` → "UI elements" defines the vocabu-
 lary (face, dial, disc, tick, major tick, numeral, remaining sector, preview
@@ -19,23 +21,45 @@ one dial face; the multi-variant experiment is over.
 | `manifest.json`                     | Extension manifest (MV3). Service worker runs as an ES module.                                              |
 | `popup.html`                        | Popup entry. Sets `data-surface="popup"`.                                                                   |
 | `fullscreen.html`                   | Tab entry for the big view. Sets `data-surface="fullscreen"`.                                               |
-| `app/main.tsx`                      | Mounts `TimerApp`, reads the surface and picks the runtime.                                                 |
-| `app/TimerApp.tsx`                  | Composition shared by both surfaces.                                                                        |
+| `app/main.tsx`                      | Mounts `App`; imports the global CSS.                                                 |
+| `app/TimerApp.tsx`                  | The timer composition shared by the popup and the tab.                                                      |
 | `app/components/TimerFace/`         | The dial. Geometry in `lib/dial.ts`; one component per element (`Disc`, `RemainingTime`, `PreviewArc`, `PreviewTicks`, `PreviewNumeral`, `CenterReadout`, `ReadoutControl`, `Caption`, `CreatorMark`); static chrome in `dialChrome.tsx` (`DIAL_TICKS`, `DIAL_NUMERALS`, and the `Tick` both tick groups share). `ReadoutControl` is the one non-SVG element — an HTML `<button>` overlaid on the face. |
-| `app/components/TransportControls/` | The four corner controls (mute, fullscreen, reset, and info), ghost glyphs pinned to the corners of the dial's square. Icons from Lucide. The fullscreen control shows expand or shrink with the document's own fullscreen state. The info control opens the author's site in a new tab (`AUTHOR_SITE_URL` + `openTab`, both from `app/lib/links.ts`). The group fades out while the dial is previewed, so nothing competes with the choice being made. Pause/resume and restart are the `ReadoutControl` on the readout disc. |
-| `app/design/tokens.css`             | Every colour, size and stroke weight, in one `:root` block.                                                 |
-| `app/design/global.css`             | Resets, body, and the popup/tab sizing per `[data-surface]`.                                                |
+| `app/components/TransportControls/` | The four corner controls (mute, fullscreen, reset, and settings), ghost glyphs pinned to the corners of the dial's square. Icons from Lucide. The fullscreen control shows expand or shrink with the document's own fullscreen state. The settings control opens `settings.html` in a new tab (`openSettings` in `app/lib/surface.ts`); the About-the-author link inside that screen opens the author's site (`AUTHOR_SITE_URL` + `openTab`, both from `app/lib/links.ts`). The group fades out while the dial is previewed, so nothing competes with the choice being made. Pause/resume and restart are the `ReadoutControl` on the readout disc. |
+| `app/design/tokens.css`             | Every colour, size and stroke weight. The light palette is `:root`; `[data-theme='dark']` overrides it.      |
+| `app/design/global.css`             | Resets, body, and the popup/tab/settings sizing per `[data-surface]`.                                                |
 | `app/lib/dial.ts`                   | Dial geometry: counter-clockwise mapping, sector/arc paths, pointer → dial point/minute, disc/readout-disc regions, and the derived readout size. |
-| `app/lib/time.ts`                   | `MAX_MINUTES` clamp, `formatClock`, `toWholeMinutes`.                                                       |
-| `app/lib/surface.ts`                | Surface type, `readSurface`, and the fullscreen button behaviour.                                           |
+| `app/lib/time.ts`                   | `MAX_MINUTES` clamp and `formatClock`.                                                                     |
+| `app/lib/surface.ts`                | Surface type, `readSurface`, `openSettings`, and the fullscreen button behaviour.                                           |
 | `app/lib/links.ts`                  | Outbound destinations (`AUTHOR_SITE_URL`) and `openTab`, the one way the app opens a new tab: `chrome.tabs` in the extension, `window.open` in the design preview. |
 | `app/lib/useDocumentFullscreen.ts`  | `useSyncExternalStore` binding to the Fullscreen API's `fullscreenchange` event.                            |
-| `app/runtime/types.ts`              | `TimerState` / `TimerRuntime` contract. **The seam Phase 3 implements.**                                    |
+| `app/runtime/types.ts`              | `TimerState` / `TimerRuntime` contract (the timer seam).                                                     |
 | `app/runtime/mockRuntime.ts`        | In-memory implementation (interval-driven) + `forceStatus`, the mock-only parking helper (`MockRuntime`) the visual tests use to freeze a state.                                              |
-| `app/runtime/runtime.ts`            | The single line that swaps mock → Chrome runtime.                                                                         |
+| `app/runtime/runtime.ts`            | Picks the chrome runtime in the extension, the mock in a plain browser.                                                                         |
 | `app/runtime/useTimerState.ts`      | `useSyncExternalStore` binding.                                                                                           |
-| `background/index.ts`               | Service worker: storage, alarms, badge/icon, notifications, messages.                                                     |
-| `images/`, `audio/`                 | Extension icons (toolbar/store) and the alarm sound. Copied verbatim into `dist/`.                          |
+| `background/index.ts`               | Service worker: the single writer of the timer record, alarms, badge/icon, notifications, messages.          |
+| `images/`                           | Extension icons (toolbar/store). Copied verbatim into `dist/`.                                              |
+
+### Added in Phase 3
+
+| Path                                          | Role                                                                       |
+| --------------------------------------------- | -------------------------------------------------------------------------- |
+| `settings.html`                               | Settings-screen entry. Sets `data-surface="settings"`.                     |
+| `app/App.tsx`                                 | Picks `SettingsApp` or `TimerSurface`; applies the theme.                  |
+| `app/TimerSurface.tsx`                        | Wires `useAlarmSound` + audio priming + theme around `TimerApp`.           |
+| `app/SettingsApp.tsx`                         | The settings screen (appearance, volume, chime, colours, reset, about).    |
+| `app/design/palette.ts`                       | The colour swatches and the custom properties each slot drives.            |
+| `app/lib/chimes.ts`                           | Synthesised chimes (`Chime`/`Beep`/`Bell`/`Silent`) and audio priming.      |
+| `app/runtime/settings.ts`                     | `TimerSettings` / `SettingsStore` contract, defaults, normalization.       |
+| `app/runtime/mockSettings.ts`                 | localStorage-backed settings store for the design preview and tests.       |
+| `app/runtime/chromeSettings.ts`               | `chrome.storage.sync` settings store with a local fallback.                |
+| `app/runtime/settingsRuntime.ts`              | The settings seam (chrome vs mock).                                        |
+| `app/runtime/useSettings.ts`                  | `useSyncExternalStore` binding for settings.                               |
+| `app/runtime/useSettingsTheme.ts`             | Resolves the theme and writes the colour overrides to `<html>`.            |
+| `app/runtime/useAlarmSound.ts`                | Rings the chosen chime while the timer is `expired`.                       |
+| `app/runtime/platform.ts`                     | `isExtension()` — the chrome-or-mock switch both seams use.                |
+| `app/runtime/chromeRuntime.ts`                | The `chrome.storage` + messaging `TimerRuntime`.                           |
+| `app/runtime/timerState.ts`                   | Maps a stored record to the UI `TimerState`.                               |
+| `shared/timer.ts`                             | The timer record, the pure reducer, and the worker/UI message protocol.    |
 
 ## Key patterns
 
@@ -110,6 +134,23 @@ one dial face; the multi-variant experiment is over.
   It is placed by `CREATOR_MARK_*` in `lib/dial.ts`, in the band between the
   readout disc and the 0 numeral.
 - **Service worker logs** are prefixed `[1-click-timer:sw]`.
+- **The worker is the single writer.** Every action is a `TimerRequest` message;
+  the worker applies `reduceTimer` (in `shared/timer.ts`), persists to
+  `chrome.storage.local` and reschedules alarms. The UI reads state back through
+  `chrome.storage.onChanged`, never by writing. `chromeRuntime` adds a 250 ms
+  interval while running so the dial stays smooth.
+- **The timer is an absolute `endTime`.** Remaining seconds are always derived,
+  never accumulated, so it survives service-worker termination;
+  `expireIfElapsed` resolves a run-out timer to `expired` at read time on both
+  sides.
+- **Settings are their own store.** `SettingsStore` mirrors `TimerRuntime`'s
+  `getState`/`subscribe` shape; `chromeSettings` uses `storage.sync` with a local
+  fallback, `mockSettings` uses `localStorage`. Anything read from storage goes
+  through `normalizeSettings`.
+- **The theme is one attribute and three overrides.** `useSettingsTheme` sets
+  `data-theme` (Auto resolved via `prefers-color-scheme`) and writes the face /
+  ticks / remaining overrides as inline custom properties — the base palette
+  stays in `tokens.css`.
 
 ## Tests
 
@@ -123,6 +164,6 @@ one dial face; the multi-variant experiment is over.
 ## Build pipeline
 
 `vite.config.ts` sets `root: src`, so dev URLs match the built extension. Vite
-bundles `popup.html`, `fullscreen.html` and `background/index.ts`, then the
-`extensionAssets` plugin copies `manifest.json`, `images/` and `audio/` into
+bundles `popup.html`, `fullscreen.html`, `settings.html` and `background/index.ts`, then the
+`extensionAssets` plugin copies `manifest.json` and `images/` into
 `dist/`.

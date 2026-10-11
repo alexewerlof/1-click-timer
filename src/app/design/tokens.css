@@ -1,18 +1,22 @@
 /**
  * Design tokens.
  *
- * Every colour and size the UI uses resolves through a custom property. The
- * "colour of the face / remaining time / ticks" settings from MANUAL land here
- * later, so components never name a colour directly.
+ * Every colour and size the UI uses resolves through a custom property.
+ * Components never name a colour directly. The light palette is the `:root`
+ * default; `[data-theme='dark']` overrides it (MANUAL "Settings" — Appearance).
+ * The colour-slot settings (face / ticks / remaining) write over these custom
+ * properties at runtime, so `design/palette.ts` and the theme here are the only
+ * sources of colour.
  */
 
 :root {
+    color-scheme: light;
+
     /* ---- typography ---- */
     --font-ui: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
     --font-numeric: var(--font-ui);
 
     /* ---- shape ---- */
-    --radius-control: 8px;
     /* The corner controls scale with the dial rather than sitting at a fixed
        size: `cqmin` is the dial square's side (the `.faceSlot` size container),
        so these values are only meaningful inside it. 34px on the 352px popup
@@ -31,6 +35,9 @@
     --stroke-tick-major: 0.8;
     /* Slight transparency lets the ticks show through the remaining sector. */
     --remaining-alpha: 0.9;
+    /* A disabled control and a paused sector recede rather than changing ink. */
+    --disabled-opacity: 0.3;
+    --paused-opacity: 0.45;
 
     /* ---- dial typography (px here means SVG user units) ---- */
     --size-numeral: 8px;
@@ -69,7 +76,31 @@
        readout disc's: one light, two directions. */
     --disc-inner-shadow: var(--readout-shadow);
 
-    --accent: #e0201b;
+    /* The interactive signal (hover, focus) follows the remaining colour. */
+    --accent: var(--remaining);
     --control-ink: #14181f;
-    --control-surface: transparent;
+
+    /* ---- settings screen ---- */
+    --panel: #ffffff;
+    --panel-border: rgb(20 24 31 / 12%);
+}
+
+/*
+ * Dark theme (MANUAL "Settings" — Appearance). Set from `data-theme` on <html>,
+ * which `useSettingsTheme` resolves from the mode; Auto follows the OS
+ * `prefers-color-scheme`. Only the palette flips — every size stays put.
+ */
+[data-theme='dark'] {
+    color-scheme: dark;
+    --surface: #101216;
+    --ink: #e8eaee;
+    --ink-soft: rgb(232 234 238 / 55%);
+    --dial-mark: #e8eaee;
+    --remaining: #ff4a3d;
+    --readout: #f2f4f7;
+    --readout-surface: #1b1f26;
+    --readout-shadow: rgb(0 0 0 / 55%);
+    --control-ink: #e8eaee;
+    --panel: #181b21;
+    --panel-border: rgb(232 234 238 / 14%);
 }

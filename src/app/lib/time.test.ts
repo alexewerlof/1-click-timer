@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { MAX_SECONDS, clampSeconds, formatClock, toWholeMinutes } from './time'
+import { MAX_SECONDS, clampSeconds, formatClock } from './time'
 
 describe('clampSeconds', () => {
     it('clamps to the dial range', () => {
@@ -32,15 +32,5 @@ describe('formatClock', () => {
 
     it('never shows a negative time', () => {
         expect(formatClock(-5)).toBe('0:00')
-    })
-})
-
-describe('toWholeMinutes', () => {
-    it('rounds up so a running timer never reads 0m', () => {
-        expect(toWholeMinutes(1)).toBe(1)
-        expect(toWholeMinutes(60)).toBe(1)
-        expect(toWholeMinutes(61)).toBe(2)
-        expect(toWholeMinutes(0)).toBe(0)
-        expect(toWholeMinutes(MAX_SECONDS)).toBe(60)
     })
 })

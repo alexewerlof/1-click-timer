@@ -7,7 +7,7 @@ import tseslint from 'typescript-eslint'
 
 export default tseslint.config(
     {
-        ignores: ['dist/', 'node_modules/', '.agents/', 'dashboard/', 'snapshots/', 'vector/'],
+        ignores: ['dist/', 'node_modules/', '.agents/', 'dashboard/', 'vector/'],
     },
 
     js.configs.recommended,

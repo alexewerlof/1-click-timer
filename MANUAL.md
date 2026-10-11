@@ -17,6 +17,7 @@ A simple and solid timer extension for Chrome.
 - Resilient: if the user restarts Chrome (e.g. for updating, or even accidentally), the timer should survive this even and keep counting
 - Show the number of remaining minutes as a colored badge. Considering limitations of Chrome environment (timed events trigger every minute or so) we should still do our best to show the remaining time as accurately as possible.
 - Full screen tab view as well as popup view (both show the same functionality).
+- Light and dark appearance, following the system by default.
 - Notification popup when the time is up (shows the period).
 
 # Interface
@@ -46,7 +47,7 @@ change requested with one of these terms maps to one place in the source.
 | **Readout control** | The round button on the **Readout disc**, whose click surface is the whole disc. It is revealed when the disc is hovered (or the button has keyboard focus), and always shown where the device has no hover. It offers pause while the timer runs, resume while it is paused, and restart while the alarm is ringing, and it wears the **Remaining sector**'s colour. While it shows it replaces the readout. |
 | **Caption**         | The text "Made in Sweden", inscribed inside the disc on a circular path just above the bottom rim.        |
 | **Creator mark**    | The "Alex Ewerlöf" wordmark, drawn in the dial's ink (the numerals' and ticks' colour), sitting in the band between the readout disc and the 0 numeral. |
-| **Info control**    | The bottom-right corner control: an info glyph that opens the author's site in a new tab, for the user who wonders who is behind the timer. |
+| **Settings control**  | The bottom-right corner control: a gear glyph that opens the settings screen (see "Settings") in a tab of its own. |
 
 Three related measures, used throughout the geometry:
 
@@ -59,7 +60,7 @@ Three related measures, used throughout the geometry:
 | Area                 | What it is                                                                          |
 | -------------------- | ----------------------------------------------------------------------------------- |
 | **Face slot**        | The region that holds the face. The **Transport** controls overlay it, so the face gets the whole slot. |
-| **Transport**        | The four corner controls, one on each corner of the dial's square: mute (top left), fullscreen (top right), reset (bottom left) and info (bottom right). They are ghost glyphs — black by default, red on hover — and they fade out while the dial is previewed, so nothing competes with the choice being made. Pause/resume and restart live on the **Readout control**. |
+| **Transport**        | The four corner controls, one on each corner of the dial's square: mute (top left), fullscreen (top right), reset (bottom left) and settings (bottom right). They are ghost glyphs — black by default, red on hover — and they fade out while the dial is previewed, so nothing competes with the choice being made. Pause/resume and restart live on the **Readout control**. |
 
 Icons come from **Lucide** (`lucide-react`), not hand-drawn SVG, so control
 labels and glyphs stay conventional.
@@ -111,12 +112,25 @@ When the timer is running, a red area shows exactly how much time is remaining. 
 
 ## Settings
 
-This screen allows the user to configure various aspects of the timer:
+The settings screen opens from the gear in the bottom-right corner of the dial's
+square (the **Settings control**), in a tab of its own. It offers:
 
-- Alarm volume (is maxed by default).
-- Choosing a chime for when the time is up (including silent mode where no sound is played)
-- Color of the timer face, remaining time, and ticks (this allows the users to set their own branding colors). These settings persist and are ideally synced across the same user's profiles if it doesn't require an extra permission.
-- Set to default: resets all configs to factory settings.
+- **Appearance** — light, dark, or auto. Auto follows the operating system's
+  preference and is the default. The whole interface recolours: the surface, the
+  dial ink and the remaining indicator, along with the dimmed states of the
+  disabled controls and the paused remaining sector.
+- **Alarm volume** — maxed by default.
+- **Chime** — what plays when the time is up: Chime, Beep, Bell, or Silent. A
+  **Preview** button plays the current choice.
+- **Colours** — the face, the ticks (the dial's ink) and the remaining indicator.
+  Each offers a small set of swatches plus **Auto**, which follows the light or
+  dark appearance.
+- **Reset to defaults** — returns every setting to its factory value.
+- **About the author** — opens my website, https://www.alexewerlof.com/, in a new
+  tab, for the curious user who wants to find out who is behind the timer.
+
+Settings persist, and sync across the same user's Chrome profiles; this needs no
+permission beyond `storage`.
 
 # How to
 
@@ -152,6 +166,10 @@ When the user opens the timer in the popup area, they can press a button to open
 
 ## Discover the author
 
-The bottom-right corner control is an info glyph. Pressing it opens my website — https://www.alexewerlof.com/ — in a new tab, so a curious user can find out who is behind the timer and support the work if they want to.
+The bottom-right corner control is a gear, which opens the settings screen. The
+**About the author** button on that screen opens my website —
+https://www.alexewerlof.com/ — in a new tab, so a curious user can find out who is
+behind the timer and support the work if they want to.
 
-It is the extension's only way out: it never touches the timer, and the timer keeps running while the site is open.
+It is the extension's only way out: it never touches the timer, and the timer
+keeps running while the site is open.

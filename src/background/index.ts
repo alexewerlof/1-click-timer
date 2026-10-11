@@ -1,354 +1,284 @@
 /**
- * 1-click timer — Manifest V3 Service Worker (TypeScript).
+ * 1-click timer — Manifest V3 service worker.
+ *
+ * The worker is the single writer of the timer record in `chrome.storage.local`:
+ * it applies every UI action, schedules the alarms, paints the toolbar badge and
+ * raises the "time is up" notification. The alarm sound itself is played by the
+ * UI (see `app/lib/chimes.ts`), because the worker has no audio output — this is
+ * the split the README describes.
  */
 
-// ---- Types ----------------------------------------------------------
-
-interface TimerState {
-    running: boolean
-    endTime: number | null
-    alarming: boolean
-}
-
-interface PopupMessage {
-    action: string
-    seconds?: number
-}
-
-interface PopupResponse {
-    success?: boolean
-    error?: string
-    running?: boolean
-    endTime?: number | null
-    alarming?: boolean
-    remaining?: number
-}
-
-// ---- Helpers --------------------------------------------------------
+import {
+    expireIfElapsed,
+    normalizeTimerRecord,
+    reduceTimer,
+    remainingFrom,
+    TIMER_STORAGE_KEY,
+    type TimerRecord,
+    type TimerRequest,
+    type TimerResponse,
+} from '../shared/timer'
 
 const LOG_PREFIX = '[1-click-timer:sw]'
 
+const TICK_ALARM = '1ct-tick'
+const TIMEUP_ALARM = '1ct-timeup'
+const NOTIFICATION_ID = '1ct-timeup'
+
+/** 30 s is the shortest repeating alarm Chrome allows; the badge is minute-accurate. */
+const TICK_PERIOD_MINUTES = 0.5
+
+/** The bell glyph flips on this cadence while the alarm rings. */
+const BELL_MS = 500
+
+const BASE_TITLE = '1-click timer'
+
+// ---- Storage --------------------------------------------------------
+
+async function readRecord(): Promise<TimerRecord> {
+    const stored = await chrome.storage.local.get(TIMER_STORAGE_KEY)
+    return normalizeTimerRecord(stored[TIMER_STORAGE_KEY])
+}
+
+async function writeRecord(record: TimerRecord): Promise<void> {
+    await chrome.storage.local.set({ [TIMER_STORAGE_KEY]: record })
+}
+
+// ---- Toolbar --------------------------------------------------------
+
 function setBadge(text: string): void {
-    chrome.action.setBadgeText({ text: text }).catch((err: Error) => {
-        console.warn(LOG_PREFIX, 'setBadgeText failed:', err.message)
+    chrome.action.setBadgeText({ text }).catch((error: Error) => {
+        console.warn(LOG_PREFIX, 'setBadgeText failed:', error.message)
     })
 }
 
-function setColor(r: number, g: number, b: number): void {
-    chrome.action.setBadgeBackgroundColor({ color: [r, g, b, 255] }).catch((err: Error) => {
-        console.warn(LOG_PREFIX, 'setBadgeBackgroundColor failed:', err.message)
+function setBadgeColor(color: string): void {
+    chrome.action.setBadgeBackgroundColor({ color }).catch((error: Error) => {
+        console.warn(LOG_PREFIX, 'setBadgeBackgroundColor failed:', error.message)
     })
 }
 
 function setTitle(title: string): void {
-    chrome.action.setTitle({ title: title }).catch((err: Error) => {
-        console.warn(LOG_PREFIX, 'setTitle failed:', err.message)
+    chrome.action.setTitle({ title }).catch((error: Error) => {
+        console.warn(LOG_PREFIX, 'setTitle failed:', error.message)
     })
 }
 
 function setIcon(name: string): void {
-    chrome.action.setIcon({ path: 'images/' + name + '.png' }).catch((err: Error) => {
-        console.warn(LOG_PREFIX, `setIcon failed for "${name}":`, err.message)
+    chrome.action.setIcon({ path: `images/${name}.png` }).catch((error: Error) => {
+        console.warn(LOG_PREFIX, `setIcon failed for "${name}":`, error.message)
     })
 }
 
-// ---- State ----------------------------------------------------------
+let bellTimer: ReturnType<typeof setInterval> | null = null
+let bellInverse = false
 
-const STATE_KEY = 'timerState'
-
-function getRemaining(endTime: number | null): number {
-    if (!endTime) return 0
-    return Math.max(0, Math.round((endTime - Date.now()) / 1000))
+function stopBell(): void {
+    if (bellTimer !== null) {
+        clearInterval(bellTimer)
+        bellTimer = null
+    }
 }
 
-function formatMMSS(remaining: number): string {
-    const m = Math.floor(remaining / 60)
-    const s = remaining % 60
-    return m + ':' + (s < 10 ? '0' + s : String(s))
+function startBell(): void {
+    if (bellTimer !== null) return
+    bellInverse = false
+    setIcon('logo19_bell')
+    bellTimer = setInterval(() => {
+        bellInverse = !bellInverse
+        setIcon(bellInverse ? 'logo19_bell_inverse' : 'logo19_bell')
+    }, BELL_MS)
 }
 
-async function getState(): Promise<TimerState> {
-    const stored = (await chrome.storage.local.get(STATE_KEY)) as Record<string, TimerState | undefined>
-    return stored[STATE_KEY] ?? { running: false, endTime: null, alarming: false }
+function formatMMSS(seconds: number): string {
+    const total = Math.max(0, Math.round(seconds))
+    const minutes = Math.floor(total / 60)
+    const rest = total % 60
+    return `${minutes}:${String(rest).padStart(2, '0')}`
 }
 
-async function saveState(state: TimerState): Promise<void> {
-    const obj: Record<string, TimerState> = {}
-    obj[STATE_KEY] = state
-    await chrome.storage.local.set(obj)
+/** The elapsed period, phrased for the notification (MANUAL "Notification"). */
+function describeDuration(seconds: number): string {
+    const total = Math.max(0, Math.round(seconds))
+    if (total < 60) return `${total} seconds`
+    const minutes = Math.floor(total / 60)
+    const rest = total % 60
+    const minuteLabel = `${minutes} minute${minutes === 1 ? '' : 's'}`
+    return rest === 0 ? minuteLabel : `${minuteLabel} ${rest} seconds`
 }
 
-// ---- Badge update ---------------------------------------------------
+function describeBadge(record: TimerRecord, remaining: number): void {
+    switch (record.status) {
+        case 'running': {
+            const minutes = Math.floor(remaining / 60)
+            if (remaining > 60) {
+                setBadge(`${minutes}m`)
+                setBadgeColor(`rgb(${Math.floor(((60 - minutes) * 255) / 60)}, 128, 0)`)
+                setIcon('logo19')
+            } else {
+                const seconds = Math.ceil(remaining % 60)
+                if (seconds > 0) {
+                    setBadge(String(seconds))
+                    setBadgeColor('#e0201b')
+                    setIcon(seconds % 2 ? 'logo19_inverse' : 'logo19')
+                } else {
+                    setBadge('')
+                    setIcon('logo19')
+                }
+            }
+            setTitle(formatMMSS(remaining))
+            return
+        }
 
-async function updateBadge(): Promise<void> {
-    const state = await getState()
+        case 'paused':
+            setBadge(`${Math.max(1, Math.ceil(remaining / 60))}m`)
+            setBadgeColor('#6b7280')
+            setIcon('logo19')
+            setTitle(`Paused · ${formatMMSS(remaining)}`)
+            return
 
-    if (!state.running || !state.endTime) {
-        if (!state.alarming) {
+        case 'expired':
+            setBadge('')
+            startBell()
+            setTitle('Time is up')
+            return
+
+        default:
             setBadge('')
             setIcon('logo19')
-            setTitle('1-click timer')
-        }
-        return
+            setTitle(BASE_TITLE)
     }
+}
 
-    const remaining = getRemaining(state.endTime)
+async function updateBadge(record: TimerRecord): Promise<void> {
+    const now = Date.now()
+    const resolved = expireIfElapsed(record, now)
+    if (resolved.status !== 'expired') stopBell()
+    describeBadge(resolved, remainingFrom(resolved, now))
+}
 
-    if (remaining <= 0) {
-        console.log(LOG_PREFIX, `badge: time expired (remaining=${remaining})`)
+// ---- Alarms ---------------------------------------------------------
+
+async function syncAlarms(record: TimerRecord): Promise<void> {
+    await chrome.alarms.clear(TICK_ALARM)
+    await chrome.alarms.clear(TIMEUP_ALARM)
+    if (record.status === 'running' && record.endTime !== null) {
+        await chrome.alarms.create(TIMEUP_ALARM, { when: record.endTime })
+        await chrome.alarms.create(TICK_ALARM, { periodInMinutes: TICK_PERIOD_MINUTES })
+    }
+}
+
+// ---- Notification ---------------------------------------------------
+
+function notifyElapsed(record: TimerRecord): void {
+    chrome.notifications
+        .create(NOTIFICATION_ID, {
+            type: 'basic' as chrome.notifications.TemplateType,
+            iconUrl: chrome.runtime.getURL('images/logo128.png'),
+            title: BASE_TITLE,
+            message: `Time is up — ${describeDuration(record.durationSeconds)}.`,
+            priority: 2,
+        })
+        .catch((error: Error) => {
+            console.warn(LOG_PREFIX, 'notification failed:', error.message)
+        })
+}
+
+// ---- Timeup ---------------------------------------------------------
+
+async function handleTimeup(): Promise<void> {
+    const record = expireIfElapsed(await readRecord(), Date.now())
+    console.log(LOG_PREFIX, `time up after ${record.durationSeconds}s`)
+    await writeRecord(record)
+    await syncAlarms(record)
+    notifyElapsed(record)
+    await updateBadge(record)
+}
+
+async function handleTick(): Promise<void> {
+    const record = await readRecord()
+    if (record.status === 'running' && remainingFrom(record, Date.now()) <= 0) {
         await handleTimeup()
         return
     }
-
-    const mmss = formatMMSS(remaining)
-
-    if (remaining > 60) {
-        const minutes = Math.floor(remaining / 60)
-        setBadge(minutes + 'm')
-        setColor(Math.floor(((60 - minutes) * 255) / 60), 128, 0)
-        setIcon('logo19')
-    } else {
-        const seconds = remaining % 60
-        if (seconds > 0) {
-            setBadge(String(seconds))
-            setColor(255, 0, 0)
-            setIcon(seconds % 2 ? 'logo19_inverse' : 'logo19')
-        } else {
-            setBadge('')
-            setIcon('logo19')
-        }
-    }
-    setTitle(mmss)
-
-    console.log(
-        LOG_PREFIX,
-        `badge → "${remaining > 60 ? Math.floor(remaining / 60) + 'm' : String(remaining % 60)}" | ${mmss} remaining`,
-    )
+    await updateBadge(record)
 }
 
-// ---- Timeup ----------------------------------------------------------
-
-let _bellInterval: ReturnType<typeof setInterval> | null = null
-
-async function handleTimeup(): Promise<void> {
-    console.log(LOG_PREFIX, 'timeup!')
-
-    const state = await getState()
-    state.running = false
-    state.alarming = true
-    await saveState(state)
-
-    if (_bellInterval) clearInterval(_bellInterval)
-    let bellInverse = false
-    setIcon('logo19_bell')
-    _bellInterval = setInterval(() => {
-        bellInverse = !bellInverse
-        setIcon(bellInverse ? 'logo19_bell_inverse' : 'logo19_bell')
-    }, 500)
-
-    chrome.notifications
-        .create({
-            type: 'basic' as chrome.notifications.TemplateType,
-            iconUrl: chrome.runtime.getURL('images/logo128.png'),
-            title: '1-click timer',
-            message: 'Time is up!',
-            priority: 2,
-        })
-        .catch((err: Error) => {
-            console.warn(LOG_PREFIX, 'notification failed:', err.message)
-        })
-
-    console.log(LOG_PREFIX, 'notification shown')
+async function applyAction(request: TimerRequest): Promise<void> {
+    const now = Date.now()
+    const current = expireIfElapsed(await readRecord(), now)
+    const next = reduceTimer(current, request, now)
+    await writeRecord(next)
+    await syncAlarms(next)
+    await updateBadge(next)
 }
 
-function stopBellAnimation(): void {
-    if (_bellInterval) {
-        clearInterval(_bellInterval)
-        _bellInterval = null
-    }
-    setBadge('')
-    setIcon('logo19')
-    setTitle('1-click timer')
-}
-
-// ---- Alarms ----------------------------------------------------------
-
-const TICK_ALARM = '1ct-tick'
-const TIMEUP_ALARM = '1ct-timeup'
-
-async function createAlarms(endTime: number): Promise<void> {
-    await chrome.alarms.clear(TICK_ALARM)
-    await chrome.alarms.clear(TIMEUP_ALARM)
-
-    await chrome.alarms.create(TICK_ALARM, { periodInMinutes: 0.5 })
-    await chrome.alarms.create(TIMEUP_ALARM, { when: endTime })
-
-    console.log(LOG_PREFIX, `alarms created: tick(30s), timeup at ${new Date(endTime).toISOString()}`)
-}
-
-async function clearAllAlarms(): Promise<void> {
-    await chrome.alarms.clear(TICK_ALARM)
-    await chrome.alarms.clear(TIMEUP_ALARM)
-    console.log(LOG_PREFIX, 'alarms cleared')
-}
-
-// ---- Message handlers ------------------------------------------------
+// ---- Messages -------------------------------------------------------
 
 chrome.runtime.onMessage.addListener(
     (
-        message: PopupMessage,
+        message: TimerRequest,
         _sender: chrome.runtime.MessageSender,
-        sendResponse: (response: PopupResponse) => void,
+        sendResponse: (response: TimerResponse) => void,
     ): boolean => {
-        console.log(LOG_PREFIX, 'msg received:', JSON.stringify(message))
-
-        ;(async () => {
+        void (async () => {
             try {
-                switch (message.action) {
-                    case 'start': {
-                        const seconds = Math.min(Math.max(0, message.seconds || 0), 3600)
-                        if (seconds === 0) {
-                            sendResponse({ success: false, error: 'seconds must be > 0' })
-                            return
-                        }
-                        const endTime = Date.now() + seconds * 1000
-                        await saveState({ running: true, endTime, alarming: false })
-                        await createAlarms(endTime)
-                        await updateBadge()
-                        console.log(LOG_PREFIX, `started: ${seconds}s → endTime=${new Date(endTime).toISOString()}`)
-                        sendResponse({ success: true })
-                        return
-                    }
-
-                    case 'stop':
-                        await saveState({
-                            running: false,
-                            endTime: null,
-                            alarming: false,
-                        })
-                        await clearAllAlarms()
-                        setBadge('')
-                        setIcon('logo19')
-                        setTitle('1-click timer')
-                        console.log(LOG_PREFIX, 'stopped')
-                        sendResponse({ success: true })
-                        return
-
-                    case 'reset':
-                        await saveState({
-                            running: false,
-                            endTime: null,
-                            alarming: false,
-                        })
-                        await clearAllAlarms()
-                        stopBellAnimation()
-                        console.log(LOG_PREFIX, 'reset')
-                        sendResponse({ success: true })
-                        return
-
-                    case 'silent':
-                        await clearAllAlarms()
-                        stopBellAnimation()
-                        await saveState({
-                            running: false,
-                            endTime: null,
-                            alarming: false,
-                        })
-                        console.log(LOG_PREFIX, 'silent')
-                        sendResponse({ success: true })
-                        return
-
-                    case 'getState': {
-                        const state = await getState()
-                        const remaining = getRemaining(state.endTime)
-                        console.log(
-                            LOG_PREFIX,
-                            `state: running=${state.running} alarming=${state.alarming} remaining=${remaining}s`,
-                        )
-                        sendResponse({
-                            running: state.running,
-                            endTime: state.endTime,
-                            alarming: state.alarming,
-                            remaining,
-                        })
-                        return
-                    }
-
-                    default:
-                        console.warn(LOG_PREFIX, 'unknown action:', message.action)
-                        sendResponse({ error: 'Unknown action: ' + message.action })
-                }
-            } catch (err) {
-                const error = err as Error
-                console.error(LOG_PREFIX, 'ERROR:', error.message, error.stack)
-                sendResponse({ error: error.message })
+                await applyAction(message)
+                sendResponse({ ok: true })
+            } catch (error) {
+                const failure = error as Error
+                console.error(LOG_PREFIX, 'ERROR:', failure.message, failure.stack)
+                sendResponse({ ok: false, error: failure.message })
             }
         })()
-
-        return true // keep channel open for async response
+        return true // keep the channel open for the async response
     },
 )
 
-// ---- Alarm handler ---------------------------------------------------
-
-chrome.alarms.onAlarm.addListener(async (alarm: chrome.alarms.Alarm) => {
+chrome.alarms.onAlarm.addListener((alarm) => {
     console.log(LOG_PREFIX, 'alarm fired:', alarm.name)
-
-    if (alarm.name === TICK_ALARM) {
-        await updateBadge()
-    } else if (alarm.name === TIMEUP_ALARM) {
-        await handleTimeup()
+    if (alarm.name === TIMEUP_ALARM) {
+        void handleTimeup()
+    } else if (alarm.name === TICK_ALARM) {
+        void handleTick()
     }
 })
 
-// ---- Notification click → silence ------------------------------------
-
-chrome.notifications.onClicked.addListener(async () => {
-    console.log(LOG_PREFIX, 'notification clicked → silent')
-    stopBellAnimation()
-    await saveState({ running: false, endTime: null, alarming: false })
+chrome.notifications.onClicked.addListener(() => {
+    console.log(LOG_PREFIX, 'notification clicked → dismiss the bell')
+    stopBell()
+    setBadge('')
+    setIcon('logo19')
+    setTitle(BASE_TITLE)
 })
 
-// ---- Startup ----------------------------------------------------------
+// ---- Startup --------------------------------------------------------
 
-;(async function startup(): Promise<void> {
+async function startup(): Promise<void> {
     console.log(LOG_PREFIX, 'START')
+    const stored = await readRecord()
+    const record = expireIfElapsed(stored, Date.now())
+    const justElapsed = stored.status === 'running' && record.status === 'expired'
+    await writeRecord(record)
+    await syncAlarms(record)
 
-    const state = await getState()
-    console.log(LOG_PREFIX, 'stored state:', JSON.stringify(state))
-
-    if (state.alarming) {
-        console.log(LOG_PREFIX, 'restoring alarming state')
-        if (_bellInterval) clearInterval(_bellInterval)
-        let bellInverse = false
-        setIcon('logo19_bell')
-        _bellInterval = setInterval(() => {
-            bellInverse = !bellInverse
-            setIcon(bellInverse ? 'logo19_bell_inverse' : 'logo19_bell')
-        }, 500)
+    if (justElapsed) {
+        console.log(LOG_PREFIX, 'timer ran out while the worker was asleep')
+        notifyElapsed(record)
+        await updateBadge(record)
         return
     }
 
-    if (state.running && state.endTime) {
-        const remaining = getRemaining(state.endTime)
-        console.log(LOG_PREFIX, `restoring: ${remaining}s remaining`)
-
-        if (remaining <= 0) {
-            console.log(LOG_PREFIX, 'timer expired while SW was inactive')
-            await handleTimeup()
-        } else {
-            const existing = await chrome.alarms.get(TIMEUP_ALARM)
-            if (!existing) {
-                console.log(LOG_PREFIX, 're-creating alarms')
-                await createAlarms(state.endTime)
-            } else {
-                console.log(LOG_PREFIX, 'alarms still present')
-            }
-            await updateBadge()
-        }
-    } else {
+    if (record.status === 'expired') {
+        // Already rang earlier; restore the quiet icon rather than alarming again.
+        stopBell()
         setBadge('')
         setIcon('logo19')
-        setTitle('1-click timer')
+        setTitle(BASE_TITLE)
+        return
     }
-})()
+
+    await updateBadge(record)
+}
+
+void startup()

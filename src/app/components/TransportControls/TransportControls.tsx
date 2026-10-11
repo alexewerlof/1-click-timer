@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Expand, Info, Maximize, Shrink, TimerOff, Volume2, VolumeOff } from 'lucide-react'
+import { Expand, Maximize, Settings, Shrink, TimerOff, Volume2, VolumeOff } from 'lucide-react'
 import type { Surface } from '../../lib/surface'
 import { useDocumentFullscreen } from '../../lib/useDocumentFullscreen'
 import type { TimerStatus } from '../../runtime/types'
@@ -15,8 +15,8 @@ export interface TransportControlsProps {
     onToggleMute: () => void
     onReset: () => void
     onToggleFullscreen: () => void
-    /** Opens the author's site, where a curious user can discover and support the work. */
-    onOpenAbout: () => void
+    /** Opens the settings screen (MANUAL "Settings"). */
+    onOpenSettings: () => void
 }
 
 interface CornerButtonProps {
@@ -80,7 +80,7 @@ export function TransportControls({
     onToggleMute,
     onReset,
     onToggleFullscreen,
-    onOpenAbout,
+    onOpenSettings,
 }: TransportControlsProps) {
     const nativeFullscreen = useDocumentFullscreen()
     const { label: fullscreenLabel, Icon: FullscreenIcon } = fullscreenAction(surface, nativeFullscreen)
@@ -99,9 +99,9 @@ export function TransportControls({
                 <TimerOff />
             </CornerButton>
 
-            {/* Who made this: leads to the author's site. */}
-            <CornerButton corner="bottom-right" label="About" onClick={onOpenAbout}>
-                <Info />
+            {/* Settings (MANUAL "Settings"). */}
+            <CornerButton corner="bottom-right" label="Settings" onClick={onOpenSettings}>
+                <Settings />
             </CornerButton>
         </div>
     )

@@ -116,7 +116,7 @@
 
 /* A paused timer keeps its shape but recedes. */
 .sector[data-active='false'] {
-    opacity: 0.45;
+    opacity: var(--paused-opacity);
 }
 
 /* ---- preview arc ---- */

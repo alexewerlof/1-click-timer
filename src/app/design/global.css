@@ -58,6 +58,16 @@ button {
     height: 100vh;
 }
 
+/* The settings screen is a full page and may scroll; the timer surfaces don't. */
+html[data-surface='settings'] body {
+    overflow-y: auto;
+}
+
+[data-surface='settings'] #root {
+    width: 100%;
+    min-height: 100%;
+}
+
 @media (prefers-reduced-motion: reduce) {
     body {
         transition: none;

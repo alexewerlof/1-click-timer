@@ -2,18 +2,20 @@
 
 A Chrome extension that provides a one-click countdown timer with a visual dial UI.
 
-> **Status: Phase 1 — design preview.** The UI has been rewritten in React and
-> runs from the Vite dev server in a plain browser. Timer logic is currently an
-> in-memory mock (`src/app/runtime/mockRuntime.ts`); persistence, alarms,
-> notifications and the toolbar badge land in Phase 3.
+> **Status: Phase 3 — the real runtime.** The service worker owns the timer in
+> `chrome.storage.local` as an absolute `endTime`, so it survives closing the
+> popup and restarting Chrome; the toolbar badge counts down and `chrome.alarms`
+> raise the notification. The UI talks to it through `TimerRuntime`; a plain
+> browser (`npm run dev`) falls back to the in-memory mock. A settings screen
+> (`settings.html`) covers appearance (light/dark/auto), the alarm chime, the
+> three colours and reset.
 > `MANUAL.md` is the product spec and the source of truth for behaviour.
-> See **Roadmap** below for what is next.
 
 ## Tech stack
 
 - **TypeScript** (strict, ES2022) + **React 19**
 - **Vite 8** — dev server for the browser design loop, and the extension build
-- **Zustand** — planned store (Phase 3); the runtime seam it will sit behind exists today
+- **Zustand** — installed but unused: the runtime and settings stores are plain `useSyncExternalStore` bindings
 - **CSS Modules + CSS custom properties** — all colours live in `design/tokens.css`
 - **Lucide** (`lucide-react`) for control icons
 - **Manifest V3** with an ES module service worker
@@ -24,7 +26,7 @@ A Chrome extension that provides a one-click countdown timer with a visual dial 
 | Command                      | What it does                                       |
 | ---------------------------- | -------------------------------------------------- |
 | `npm install`                | install dependencies                               |
-| `npm run dev`                | Vite dev server → `/popup.html`, `/fullscreen.html` |
+| `npm run dev`                | Vite dev server → `/popup.html`, `/fullscreen.html`, `/settings.html` |
 | `npm run build`              | build the unpacked extension into `dist/`          |
 | `npm run lint`               | ESLint (flat config)                               |
 | `npm run lint:fix`           | ESLint with `--fix`                                |
@@ -45,15 +47,20 @@ src/
   manifest.json        MV3 manifest
   popup.html           popup entry      (data-surface="popup")
   fullscreen.html      tab entry        (data-surface="fullscreen")
+  settings.html        settings entry   (data-surface="settings")
   app/                 the React UI
-    main.tsx           mounts TimerApp; chooses the runtime
-    TimerApp.tsx       composition shared by both surfaces
+    main.tsx           mounts App
+    App.tsx            picks the screen from the surface
+    TimerApp.tsx       the timer composition shared by popup + tab
+    TimerSurface.tsx   wires the alarm/audio + theme around TimerApp
+    SettingsApp.tsx    the settings screen
     components/        TimerFace, TransportControls
-    design/            tokens.css (all colours/sizes), global.css
-    lib/               dial geometry, time formatting, surface helpers, links
-    runtime/           the TimerRuntime contract and its mock implementation
+    design/            tokens.css (colours/sizes + themes), global.css, palette.ts (swatches)
+    lib/               dial geometry, time, surface, links, chimes, fullscreen
+    runtime/           TimerRuntime + SettingsStore contracts, mock/chrome impls, hooks
+  shared/              timer protocol shared by the UI and the worker
   background/index.ts  service worker (framework-free TypeScript)
-  images/ audio/       toggle icons and the alarm sound
+  images/              toolbar/store icons
 ```
 
 ## UI vocabulary
@@ -67,14 +74,16 @@ of those terms maps to one place in the source. There is a single dial face.
 ## Architecture
 
 ```
-popup.html / fullscreen.html
-  └─ app/main.tsx
-       └─ TimerApp ── uses ──> TimerRuntime (runtime/runtime.ts)
-            ├─ TimerFace          ├─ mockRuntime   (Phase 1: in-memory, browser)
-            │    ├─ lib/dial.ts   └─ chromeRuntime (Phase 3: storage + alarms)
-            │    └─ ReadoutControl (HTML button on the readout disc)
-            └─ TransportControls
-background/index.ts (service worker)
+popup.html / fullscreen.html / settings.html
+  └─ app/main.tsx → App
+       ├─ TimerSurface ──> TimerApp ──uses──> TimerRuntime (runtime/runtime.ts)
+       │     ├─ useAlarmSound (lib/chimes)      ├─ mockRuntime        (plain browser)
+       │     └─ useSettingsTheme                └─ createChromeRuntime (extension)
+       └─ SettingsApp ──uses──> SettingsStore (runtime/settingsRuntime.ts)
+              ├─ mockSettings   (localStorage)
+              └─ chromeSettings (storage.sync, local fallback)
+app/ and background/ both import shared/timer.ts (record + reducer + protocol)
+background/index.ts (service worker) — the single writer
   ├─ chrome.storage.local (truth)   └─ chrome.alarms, chrome.action, chrome.notifications
 ```
 
@@ -105,38 +114,49 @@ termination. The UI never accumulates time.
   only HTML element in the face. It is a `<button>` overlaid on the SVG (never
   *in* it), sized from `READOUT_DISC_DIAMETER_RATIO` × `cqmin`, revealed on
   hover/focus and always visible where there is no hover.
-- The mute, fullscreen, reset and info buttons are the **corner controls**:
+- The mute, fullscreen, reset and settings buttons are the **corner controls**:
   ghost glyphs (black, red on hover) pinned to the corners of the dial's square
   rather than a row of their own, so the face gets the whole slot. They live in
   `TransportControls` as a sibling of the face; the square is the letterboxed SVG
   viewBox, so the overlay offsets itself by half the letterbox margin, and their
   sizes are `cqmin` tokens so they scale with the dial. While the dial is
   previewed they fade out with the numerals, keyed off the face's `data-pickable`
-  signal, and fade back when the pointer leaves the disc. The info control (bottom
-  right) opens the author's site in a new tab — the URL and the tab-opening
+  signal, and fade back when the pointer leaves the disc. The settings control
+  (bottom right) opens `settings.html` in a new tab; the About-the-author link
+  inside that screen opens the author's site. The URL and the tab-opening
   primitive live in `app/lib/links.ts`, which is the only place that opens a tab.
-- `images/bell.svg` and `images/reset.svg` are currently **unreferenced** — they
-  belonged to the pre-React popup. They are kept deliberately: the ringing
-  overlay (MANUAL) is expected to want the bell. The `logo*.png` files are live
-  (manifest, toolbar icon states in `background/index.ts`, notification icon).
-- `dist/` is a **design preview** until Phase 3: the dial and controls are live,
-  but nothing persists and no `chrome.*` API is used yet.
+- **Two runtimes behind one seam.** `runtime.ts` picks `createChromeRuntime()`
+  when `isExtension()` (see `app/runtime/platform.ts`) and the mock otherwise;
+  `settingsRuntime.ts` does the same for settings. Build the chrome runtimes
+  **lazily, inside the seam** — a module-level singleton is evaluated in the plain
+  browser too, where `chrome.storage` is undefined and the app crashes before it
+  can choose the mock.
+- **Themes are `data-theme`, not components.** `useSettingsTheme` sets
+  `data-theme` on `<html>` and writes the three colour overrides as inline custom
+  properties. `tokens.css` keeps the **light** palette in `:root` and overrides it
+  in `[data-theme='dark']`; a timer surface left on Auto renders light in the
+  screenshot tests, so the baselines only move if a colour actually changes.
+- **Chimes are synthesised**, not files (`app/lib/chimes.ts`) — there is no audio
+  asset in the repo. `useAlarmSound` rings the chosen chime while the status is
+  `expired` and not muted. The worker only raises the notification — it has no
+  audio output.
+- `images/` holds only live files — the `logo*.png` set that the manifest, the
+  toolbar icon states in `background/index.ts` and the notification use. The
+  pre-React popup's `bell.svg`/`reset.svg` were removed; a ringing overlay should
+  use the Lucide `Bell` icon, like every other control.
+- `dist/` is the real extension now: load it unpacked and the timer persists,
+  badges and rings.
 - `npm run dev` serves `src/` as the web root, so dev URLs match the built
   extension. VS Code Live Server cannot transpile TSX or CSS Modules.
 
 ## Roadmap
 
-Phase 1 (the interface, in a browser) is done. What is next, in the order the
-product spec implies:
+Phases 1–3 are done: the interface (in a browser), the settings screen, and the
+real `chrome.storage` + `chrome.alarms` runtime. What is next:
 
-1. **Settings screen** — MANUAL "Settings": alarm volume, chime selection
-   including silent, and the face / remaining / tick colours. Those colours are
-   already tokens, so this is wiring a write to the same custom properties.
-2. Small UI tweaks.
-3. **Phase 3** — the real runtime: a `chrome.storage`-backed implementation of
-   `TimerRuntime` behind `runtime/runtime.ts`, plus the service worker's alarms,
-   badge, notifications and audio. Nothing in `app/` needs to change shape for
-   this; `runtime/mockRuntime.ts` is the reference implementation.
+1. Small UI tweaks (see the loose ends below).
+2. A ringing overlay for the UI (use the Lucide `Bell` icon).
+3. Refresh the Chrome Web Store listing copy in `dashboard/`.
 
 Known loose ends, none blocking:
 
@@ -145,8 +165,8 @@ Known loose ends, none blocking:
   fix it.
 - `MANUAL.md` says 40 sits at the bottom of the dial, which contradicts its own
   5/55 statements. The implemented mapping (uniform 0–60) puts 30 there.
-- The store listing copy in `dashboard/` still describes v5 and overstates what
-  ships today.
+- The alarm rings only while a timer surface is open (audio is played in the UI,
+  not the worker); with the popup closed only the notification fires.
 
 ## Deployment
 
@@ -155,5 +175,6 @@ npm run build
 ```
 
 Then load `dist/` as an unpacked extension at `chrome://extensions` (Developer
-mode). The store listing copy still describes the v5 behaviour — refresh it
-before publishing.
+mode). Debug logs are prefixed `[1-click-timer:sw]` (view them from the
+service-worker inspector). The store listing copy still describes the v5
+behaviour — refresh it before publishing.

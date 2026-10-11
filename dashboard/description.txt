@@ -1,11 +1,10 @@
 Set the timer with one click!
 
-* Quick and easy
-* Beautiful design
-* Light-weight (doesn't consume much memory and processing power)
-* Well-tested program
-* No extra libraries
+* One click to start: hover the dial to preview a duration, click to set it
+* Or click a numeral to start that many minutes
+* Keeps counting when you close the popup or restart Chrome
+* The remaining time on the toolbar badge
+* A notification when the time is up
+* Light and dark appearance, following your system by default
 * Open source
-* Works offline
-* Safe: does not need any special permission
 * Made in Sweden

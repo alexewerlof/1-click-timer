@@ -25,8 +25,3 @@ export function formatClock(seconds: number): string {
     const rest = whole % SECONDS_PER_MINUTE
     return `${minutes}:${String(rest).padStart(2, '0')}`
 }
-
-/** Whole minutes remaining, rounded up, so a running timer never reads `0m`. */
-export function toWholeMinutes(seconds: number): number {
-    return Math.ceil(clampSeconds(seconds) / SECONDS_PER_MINUTE)
-}

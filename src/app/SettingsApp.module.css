@@ -1,0 +1,187 @@
+.page {
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 24px 20px 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    color: var(--ink);
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.title {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.close {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    color: var(--ink);
+    transition: color 160ms ease;
+}
+
+.close:hover {
+    color: var(--accent);
+}
+
+.close svg {
+    inline-size: 18px;
+    block-size: 18px;
+}
+
+.panel {
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.panelTitle {
+    margin: 0;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+}
+
+.modes {
+    display: flex;
+    gap: 8px;
+}
+
+.mode {
+    padding: 8px 18px;
+    border-radius: 8px;
+    border: 1px solid var(--panel-border);
+    color: var(--ink);
+    transition:
+        color 160ms ease,
+        border-color 160ms ease;
+}
+
+.mode[data-selected='true'] {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.fieldRow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.fieldLabel {
+    min-width: 72px;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.value {
+    margin-left: auto;
+    color: var(--ink-soft);
+    font-variant-numeric: tabular-nums;
+}
+
+.slider {
+    width: 100%;
+    accent-color: var(--accent);
+}
+
+.select {
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--panel-border);
+    background: var(--surface);
+    color: var(--ink);
+}
+
+.swatches {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.swatch {
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid var(--panel-border);
+    background: var(--swatch, transparent);
+    font-size: 11px;
+    color: var(--ink);
+}
+
+/* The Auto option has no colour of its own, so it reads as a labelled pill. */
+.swatch[data-auto='true'] {
+    width: auto;
+    padding: 0 12px;
+    border-radius: 999px;
+}
+
+.swatch[data-selected='true'] {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+.button {
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--panel-border);
+    color: var(--ink);
+    font-weight: 600;
+    transition:
+        color 160ms ease,
+        border-color 160ms ease;
+}
+
+.button:hover:not(:disabled) {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.button:disabled {
+    opacity: var(--disabled-opacity);
+    cursor: default;
+}
+
+.hint {
+    margin: 0;
+    color: var(--ink-soft);
+    font-size: 12px;
+}
+
+.footer {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .close,
+    .mode,
+    .button {
+        transition: none;
+    }
+}

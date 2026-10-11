@@ -167,10 +167,10 @@ export const MIN_TICK_NUMERAL_CLEARANCE = 1.5
  * numerals are the outermost element, so they set the crop on every side — which
  * is why it is square.
  */
-export const DIAL_VIEWBOX_LEFT = DIAL_CENTER_X - NUMERAL_RADIUS - NUMERAL_GLYPH_HALF_WIDTH
-export const DIAL_VIEWBOX_TOP = DIAL_CENTER_Y - NUMERAL_RADIUS - NUMERAL_GLYPH_HALF_WIDTH
+const DIAL_VIEWBOX_LEFT = DIAL_CENTER_X - NUMERAL_RADIUS - NUMERAL_GLYPH_HALF_WIDTH
+const DIAL_VIEWBOX_TOP = DIAL_CENTER_Y - NUMERAL_RADIUS - NUMERAL_GLYPH_HALF_WIDTH
 export const DIAL_VIEWBOX_WIDTH = 2 * (NUMERAL_RADIUS + NUMERAL_GLYPH_HALF_WIDTH)
-export const DIAL_VIEWBOX_HEIGHT = DIAL_VIEWBOX_WIDTH
+const DIAL_VIEWBOX_HEIGHT = DIAL_VIEWBOX_WIDTH
 
 export const DIAL_VIEWBOX = `${DIAL_VIEWBOX_LEFT} ${DIAL_VIEWBOX_TOP} ${DIAL_VIEWBOX_WIDTH} ${DIAL_VIEWBOX_HEIGHT}`
 
@@ -378,8 +378,6 @@ function buildTicks(): readonly DialTick[] {
 
 /** Static geometry, computed once at module load rather than on every render. */
 export const DIAL_TICKS: readonly DialTick[] = buildTicks()
-
-export const DIAL_MAJOR_TICKS: readonly DialTick[] = DIAL_TICKS.filter((tick) => tick.major)
 
 /**
  * The ticks a preview of `minutes` covers: every tick whose angle falls inside

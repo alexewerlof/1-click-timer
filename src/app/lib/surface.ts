@@ -1,23 +1,28 @@
 /**
  * Which surface the app is rendered in, and how the fullscreen button behaves.
  *
- * The popup and the tab render the same app; the fullscreen button opens the
+ * The popup and the tab render the same timer; the fullscreen button opens the
  * tab from the popup, and goes fullscreen when already in the tab (MANUAL
- * "Full screen").
+ * "Full screen"). The settings screen is a third surface of its own (MANUAL
+ * "Settings"), opened from the face's gear control.
  */
 
 import { openTab } from './links'
 
-export type Surface = 'popup' | 'fullscreen'
+export type Surface = 'popup' | 'fullscreen' | 'settings'
 
-/** Set on `<html>` by each HTML entry (see `src/popup.html`, `src/fullscreen.html`). */
-export const SURFACE_ATTRIBUTE = 'data-surface'
-
-export const FULLSCREEN_PAGE = 'fullscreen.html'
+const FULLSCREEN_PAGE = 'fullscreen.html'
+const SETTINGS_PAGE = 'settings.html'
 
 export function readSurface(): Surface {
     const value = document.documentElement.dataset.surface
-    return value === 'popup' ? 'popup' : 'fullscreen'
+    if (value === 'popup' || value === 'settings') return value
+    return 'fullscreen'
+}
+
+/** Opens the settings screen in a new tab (MANUAL "Settings"). */
+export function openSettings(): void {
+    openExtensionTab(SETTINGS_PAGE)
 }
 
 export function toggleFullscreenSurface(surface: Surface): void {
