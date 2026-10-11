@@ -1,6 +1,7 @@
 import { DevBar } from './components/DevBar/DevBar'
 import { TimerFace } from './components/TimerFace/TimerFace'
 import { TransportControls } from './components/TransportControls/TransportControls'
+import { AUTHOR_SITE_URL, openTab } from './lib/links'
 import { toggleFullscreenSurface, type Surface } from './lib/surface'
 import type { TimerDevControls, TimerRuntime } from './runtime/types'
 import { useTimerState } from './runtime/useTimerState'
@@ -54,6 +55,7 @@ export function TimerApp({ surface, runtime, dev }: TimerAppProps) {
                     onToggleMute={() => runtime.toggleMute()}
                     onReset={() => runtime.reset()}
                     onToggleFullscreen={() => toggleFullscreenSurface(surface)}
+                    onOpenAbout={() => openTab(AUTHOR_SITE_URL)}
                 />
             </div>
 

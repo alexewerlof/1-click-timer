@@ -6,6 +6,8 @@
  * "Full screen").
  */
 
+import { openTab } from './links'
+
 export type Surface = 'popup' | 'fullscreen'
 
 /** Set on `<html>` by each HTML entry (see `src/popup.html`, `src/fullscreen.html`). */
@@ -31,16 +33,8 @@ async function toggleDocumentFullscreen(): Promise<void> {
     return document.documentElement.requestFullscreen()
 }
 
-/**
- * Prefers `chrome.tabs` (the extension context) and falls back to
- * `window.open`, so the same button works in the browser design preview.
- * Creating a tab does not require the `tabs` permission.
- */
+/** The page as an extension URL when there is an extension to resolve it against. */
 function openExtensionTab(page: string): void {
     const api = typeof chrome !== 'undefined' ? chrome : undefined
-    if (api?.tabs) {
-        void api.tabs.create({ url: api.runtime.getURL(page) })
-        return
-    }
-    window.open(page, '_blank', 'noopener,noreferrer')
+    openTab(api ? api.runtime.getURL(page) : page)
 }

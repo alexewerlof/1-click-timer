@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Coffee, Expand, Maximize, Shrink, TimerOff, Volume2, VolumeOff } from 'lucide-react'
+import { Expand, Info, Maximize, Shrink, TimerOff, Volume2, VolumeOff } from 'lucide-react'
 import type { Surface } from '../../lib/surface'
 import { useDocumentFullscreen } from '../../lib/useDocumentFullscreen'
 import type { TimerStatus } from '../../runtime/types'
@@ -15,6 +15,8 @@ export interface TransportControlsProps {
     onToggleMute: () => void
     onReset: () => void
     onToggleFullscreen: () => void
+    /** Opens the author's site, where a curious user can discover and support the work. */
+    onOpenAbout: () => void
 }
 
 interface CornerButtonProps {
@@ -64,8 +66,8 @@ function CornerButton({ corner, label, onClick, pressed, disabled, children }: C
 
 /**
  * The four corner controls (MANUAL "Transport"), one per corner of the dial's
- * square: mute (top left), fullscreen (top right), reset (bottom left) and the
- * break button (bottom right).
+ * square: mute (top left), fullscreen (top right), reset (bottom left) and info
+ * (bottom right).
  *
  * They are ghost glyphs — black by default, red on hover — so the dial stays the
  * loudest thing on the screen. Pause/resume and restart are not here: they live
@@ -78,6 +80,7 @@ export function TransportControls({
     onToggleMute,
     onReset,
     onToggleFullscreen,
+    onOpenAbout,
 }: TransportControlsProps) {
     const nativeFullscreen = useDocumentFullscreen()
     const { label: fullscreenLabel, Icon: FullscreenIcon } = fullscreenAction(surface, nativeFullscreen)
@@ -96,9 +99,9 @@ export function TransportControls({
                 <TimerOff />
             </CornerButton>
 
-            {/* The break button's behaviour is still to come; only its glyph is placed for now. */}
-            <CornerButton corner="bottom-right" label="Coffee break">
-                <Coffee />
+            {/* Who made this: leads to the author's site. */}
+            <CornerButton corner="bottom-right" label="About" onClick={onOpenAbout}>
+                <Info />
             </CornerButton>
         </div>
     )

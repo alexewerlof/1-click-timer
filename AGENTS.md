@@ -50,7 +50,7 @@ src/
     TimerApp.tsx       composition shared by both surfaces
     components/        TimerFace, TransportControls, DevBar
     design/            tokens.css (all colours/sizes), global.css
-    lib/               dial geometry, time formatting, surface helpers
+    lib/               dial geometry, time formatting, surface helpers, links
     runtime/           the TimerRuntime contract and its mock implementation
   background/index.ts  service worker (framework-free TypeScript)
   images/ audio/       toggle icons and the alarm sound
@@ -105,13 +105,14 @@ termination. The UI never accumulates time.
   only HTML element in the face. It is a `<button>` overlaid on the SVG (never
   *in* it), sized from `READOUT_DISC_DIAMETER_RATIO` × `cqmin`, revealed on
   hover/focus and always visible where there is no hover.
-- The mute, fullscreen, reset and break buttons are the **corner controls**:
+- The mute, fullscreen, reset and info buttons are the **corner controls**:
   ghost glyphs (black, red on hover) pinned to the corners of the dial's square
   rather than a row of their own, so the face gets the whole slot. They live in
   `TransportControls` as a sibling of the face; the square is the letterboxed SVG
   viewBox, so the overlay offsets itself by half the letterbox margin, and their
-  sizes are `cqmin` tokens so they scale with the dial. The break control is
-  placed but has no behaviour yet.
+  sizes are `cqmin` tokens so they scale with the dial. The info control (bottom
+  right) opens the author's site in a new tab — the URL and the tab-opening
+  primitive live in `app/lib/links.ts`, which is the only place that opens a tab.
 - `images/bell.svg` and `images/reset.svg` are currently **unreferenced** — they
   belonged to the pre-React popup. They are kept deliberately: the ringing
   overlay (MANUAL) is expected to want the bell. The `logo*.png` files are live

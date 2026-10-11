@@ -46,6 +46,7 @@ change requested with one of these terms maps to one place in the source.
 | **Readout control** | The round button on the **Readout disc**, whose click surface is the whole disc. It is revealed when the disc is hovered (or the button has keyboard focus), and always shown where the device has no hover. It offers pause while the timer runs, resume while it is paused, and restart while the alarm is ringing, and it wears the **Remaining sector**'s colour. While it shows it replaces the readout. |
 | **Caption**         | The text "Made in Sweden", inscribed inside the disc on a circular path just above the bottom rim.        |
 | **Creator mark**    | The "Alex Ewerlöf" wordmark, drawn in the dial's ink (the numerals' and ticks' colour), sitting in the band between the readout disc and the 0 numeral. |
+| **Info control**    | The bottom-right corner control: an info glyph that opens the author's site in a new tab, for the user who wonders who is behind the timer. |
 
 Three related measures, used throughout the geometry:
 
@@ -58,7 +59,7 @@ Three related measures, used throughout the geometry:
 | Area                 | What it is                                                                          |
 | -------------------- | ----------------------------------------------------------------------------------- |
 | **Face slot**        | The region that holds the face. The **Transport** controls overlay it, so the face gets the whole slot. |
-| **Transport**        | The four corner controls, one on each corner of the dial's square: mute (top left), fullscreen (top right), reset (bottom left) and break (bottom right). They are ghost glyphs — black by default, red on hover. Pause/resume and restart live on the **Readout control**. |
+| **Transport**        | The four corner controls, one on each corner of the dial's square: mute (top left), fullscreen (top right), reset (bottom left) and info (bottom right). They are ghost glyphs — black by default, red on hover. Pause/resume and restart live on the **Readout control**. |
 | **Dev bar**          | Development-only harness for parking the timer in a given state. Never shipped.     |
 
 Icons come from **Lucide** (`lucide-react`), not hand-drawn SVG, so control
@@ -66,12 +67,10 @@ labels and glyphs stay conventional.
 
 ### Implementation status
 
-Names above are implemented as written. Three deliberate deviations:
+Names above are implemented as written. Two deliberate deviations:
 
 - **One dial only.** Alternatives that were explored during the React rewrite
   have been removed; the classic face is the only one.
-- **The break button is a placeholder.** The bottom-right corner control is
-  placed with its coffee glyph, but its behaviour is not defined yet.
 - **The bottom numeral is 30, not 40.** The list below says 40 sits at the
   bottom, which contradicts its own 5/55 statements. The uniform 0–60 mapping
   the code implements puts **30** there.
@@ -151,3 +150,9 @@ If the timer has previously been reset, there is no memory of the last timer tha
 ## Full screen
 
 When the user opens the timer in the popup area, they can press a button to open the same timer in a tab. If they press this exact button while the timer screen is shown in the tag, the page goes to fullscreen mode. The button shows which way it will go: an expanding glyph while the page is normal, and a shrinking glyph once it is fullscreen, so pressing it always reads as "back to the size I came from".
+
+## Discover the author
+
+The bottom-right corner control is an info glyph. Pressing it opens my website — https://www.alexewerlof.com/ — in a new tab, so a curious user can find out who is behind the timer and support the work if they want to.
+
+It is the extension's only way out: it never touches the timer, and the timer keeps running while the site is open.

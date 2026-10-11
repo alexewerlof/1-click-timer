@@ -302,7 +302,7 @@ test('leaves pause/resume and restart out of the corner controls', async () => {
     const labels = [...transport.querySelectorAll('button')].map((button) => button.getAttribute('aria-label'))
     // One per corner, in corner order: top left, top right, bottom left, bottom
     // right. The popup's fullscreen button opens a tab instead (see `lib/surface.ts`).
-    expect(labels).toEqual(['Mute', 'Open in a tab', 'Reset', 'Coffee break'])
+    expect(labels).toEqual(['Mute', 'Open in a tab', 'Reset', 'About'])
 })
 
 /** The Lucide glyph a corner control is showing, e.g. `lucide-shrink`. */
@@ -389,7 +389,7 @@ test('pins one control to each corner of the dial square, clear of the dial', as
         { name: 'Mute', across: -1, down: -1 },
         { name: 'Open in a tab', across: 1, down: -1 },
         { name: 'Reset', across: -1, down: 1 },
-        { name: 'Coffee break', across: 1, down: 1 },
+        { name: 'About', across: 1, down: 1 },
     ] as const
 
     for (const corner of corners) {
