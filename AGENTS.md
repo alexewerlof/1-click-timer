@@ -110,7 +110,9 @@ termination. The UI never accumulates time.
   rather than a row of their own, so the face gets the whole slot. They live in
   `TransportControls` as a sibling of the face; the square is the letterboxed SVG
   viewBox, so the overlay offsets itself by half the letterbox margin, and their
-  sizes are `cqmin` tokens so they scale with the dial. The info control (bottom
+  sizes are `cqmin` tokens so they scale with the dial. While the dial is
+  previewed they fade out with the numerals, keyed off the face's `data-pickable`
+  signal, and fade back when the pointer leaves the disc. The info control (bottom
   right) opens the author's site in a new tab — the URL and the tab-opening
   primitive live in `app/lib/links.ts`, which is the only place that opens a tab.
 - `images/bell.svg` and `images/reset.svg` are currently **unreferenced** — they

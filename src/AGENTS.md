@@ -22,7 +22,7 @@ one dial face; the multi-variant experiment is over.
 | `app/main.tsx`                      | Mounts `TimerApp`, reads the surface and picks the runtime.                                                 |
 | `app/TimerApp.tsx`                  | Composition shared by both surfaces.                                                                        |
 | `app/components/TimerFace/`         | The dial. Geometry in `lib/dial.ts`; one component per element (`Disc`, `RemainingTime`, `PreviewArc`, `PreviewTicks`, `PreviewNumeral`, `CenterReadout`, `ReadoutControl`, `Caption`, `CreatorMark`); static chrome in `dialChrome.tsx` (`DIAL_TICKS`, `DIAL_NUMERALS`, and the `Tick` both tick groups share). `ReadoutControl` is the one non-SVG element — an HTML `<button>` overlaid on the face. |
-| `app/components/TransportControls/` | The four corner controls (mute, fullscreen, reset, and info), ghost glyphs pinned to the corners of the dial's square. Icons from Lucide. The fullscreen control shows expand or shrink with the document's own fullscreen state. The info control opens the author's site in a new tab (`AUTHOR_SITE_URL` + `openTab`, both from `app/lib/links.ts`). Pause/resume and restart are the `ReadoutControl` on the readout disc. |
+| `app/components/TransportControls/` | The four corner controls (mute, fullscreen, reset, and info), ghost glyphs pinned to the corners of the dial's square. Icons from Lucide. The fullscreen control shows expand or shrink with the document's own fullscreen state. The info control opens the author's site in a new tab (`AUTHOR_SITE_URL` + `openTab`, both from `app/lib/links.ts`). The group fades out while the dial is previewed, so nothing competes with the choice being made. Pause/resume and restart are the `ReadoutControl` on the readout disc. |
 | `app/design/tokens.css`             | Every colour, size and stroke weight, in one `:root` block.                                                 |
 | `app/design/global.css`             | Resets, body, and the popup/tab sizing per `[data-surface]`.                                                |
 | `app/lib/dial.ts`                   | Dial geometry: counter-clockwise mapping, sector/arc paths, pointer → dial point/minute, disc/readout-disc regions, and the derived readout size. |
@@ -90,10 +90,13 @@ one dial face; the multi-variant experiment is over.
   itself by half the letterbox margin (`calc(50cqw - 50cqmin)`) — so its corners
   are the corners of the dial's square, and the same file's CSS pins one control
   to each. It takes the pointer only on its buttons, so the dial underneath keeps
-  the rest. The sizes are `cqmin` tokens (`--size-corner-control`,
-  `--size-corner-icon`), so the glyphs keep their weight against the dial instead
-  of staying a fixed 18px on a large fullscreen face; the icon is a percentage of
-  the control, which is why the control resets the button's default padding.
+  the rest. The group fades out while the dial is previewed — keyed off the
+  face's `data-pickable` attribute with `:has()`, the same signal that drives the
+  cursor and the numeral swap — and fades back when the pointer leaves the disc.
+  The sizes are `cqmin` tokens (`--size-corner-control`, `--size-corner-icon`),
+  so the glyphs keep their weight against the dial instead of staying a fixed
+  18px on a large fullscreen face; the icon is a percentage of the control,
+  which is why the control resets the button's default padding.
 - **Pointer maths uses `getScreenCTM()`**, so scaling or letterboxing of the
   element cannot skew the selected minute.
 - **Two surfaces, one app.** `popup.html` and `fullscreen.html` mount the same

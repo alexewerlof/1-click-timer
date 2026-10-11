@@ -305,6 +305,39 @@ test('leaves pause/resume and restart out of the corner controls', async () => {
     expect(labels).toEqual(['Mute', 'Open in a tab', 'Reset', 'About'])
 })
 
+/**
+ * The corner controls sit on the dial's square, so they would sit in the way of
+ * the choice being made. While the dial is previewed they fade out with the
+ * numeral ring, and come straight back when the pointer leaves the disc — which
+ * it must do to reach a control (MANUAL "Set a custom timer"). The fade keys off
+ * the same `data-pickable` signal the face sets, so the two cannot disagree.
+ */
+test('fades the corner controls out while the dial is previewed', async () => {
+    const runtime = createMockRuntime()
+    runtime.forceStatus('idle')
+    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} />))
+
+    const svg = screen.getByRole('slider').element() as SVGSVGElement
+    const transport = screen.getByRole('group', transportGroup).element()
+    expect(getComputedStyle(transport).opacity).toBe('1')
+
+    // Preview a duration by moving the pointer onto the disc, off the readout
+    // disc at its centre.
+    const onDisc = pointOnDial(20, DISC_RADIUS - 2)
+    const matrix = svg.getScreenCTM()
+    if (!matrix) throw new Error('the slider has no screen CTM')
+    const at = new DOMPoint(onDisc.x, onDisc.y).matrixTransform(matrix)
+    svg.dispatchEvent(new PointerEvent('pointermove', { clientX: at.x, clientY: at.y, bubbles: true }))
+
+    await vi.waitFor(() => expect(getComputedStyle(transport).opacity).toBe('0'))
+
+    // Off the disc — where a corner control lives — they come straight back.
+    const rect = svg.getBoundingClientRect()
+    svg.dispatchEvent(new PointerEvent('pointermove', { clientX: rect.left + 2, clientY: rect.top + 2, bubbles: true }))
+
+    await vi.waitFor(() => expect(getComputedStyle(transport).opacity).toBe('1'))
+})
+
 /** The Lucide glyph a corner control is showing, e.g. `lucide-shrink`. */
 function glyph(control: Element): string {
     const svg = control.querySelector('svg')

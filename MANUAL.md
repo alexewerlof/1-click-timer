@@ -59,7 +59,7 @@ Three related measures, used throughout the geometry:
 | Area                 | What it is                                                                          |
 | -------------------- | ----------------------------------------------------------------------------------- |
 | **Face slot**        | The region that holds the face. The **Transport** controls overlay it, so the face gets the whole slot. |
-| **Transport**        | The four corner controls, one on each corner of the dial's square: mute (top left), fullscreen (top right), reset (bottom left) and info (bottom right). They are ghost glyphs — black by default, red on hover. Pause/resume and restart live on the **Readout control**. |
+| **Transport**        | The four corner controls, one on each corner of the dial's square: mute (top left), fullscreen (top right), reset (bottom left) and info (bottom right). They are ghost glyphs — black by default, red on hover — and they fade out while the dial is previewed, so nothing competes with the choice being made. Pause/resume and restart live on the **Readout control**. |
 
 Icons come from **Lucide** (`lucide-react`), not hand-drawn SVG, so control
 labels and glyphs stay conventional.
@@ -103,7 +103,7 @@ Each minute is represented by a thin line.
 
 The multiplies of 5 have a label: 0, 5, 10, 15, ..., 55 and a slightly thicker indicator. Each label is itself a one-click shortcut: clicking a numeral starts a timer of that many minutes (clicking 55 starts 55 minutes), without touching the dial. The 0 numeral marks a whole turn — it sits where the preview numeral shows 60 — so clicking it starts 60 minutes. Hovering a numeral tints it with the **Remaining sector**'s colour — the same signal the preview arc and the preview numeral use — so it reads as interactive.
 
-When the user hovers over the disc — everywhere except the readout disc at its centre — a preliminary arc is drawn to show what alert will be set if they click. The number of minutes they are selecting is shown as the **preview numeral**: a single numeral drawn on the numeral ring at the end of the arc, in the numerals' style and the remaining sector's colour, so it reads as the arc's own label. The regular numerals are hidden while previewing, and the ticks the arc covers are drawn in that same colour, so the arc, its numeral and the ticks it covers read as one mark. The readout in the centre keeps showing the remaining time; it does not show the previewed duration.
+When the user hovers over the disc — everywhere except the readout disc at its centre — a preliminary arc is drawn to show what alert will be set if they click. The number of minutes they are selecting is shown as the **preview numeral**: a single numeral drawn on the numeral ring at the end of the arc, in the numerals' style and the remaining sector's colour, so it reads as the arc's own label. The regular numerals are hidden while previewing, and the ticks the arc covers are drawn in that same colour, so the arc, its numeral and the ticks it covers read as one mark. The four **Transport** controls fade out with the numerals, so nothing but the choice being made is on the face; they fade back as soon as the pointer leaves the disc. The readout in the centre keeps showing the remaining time; it does not show the previewed duration.
 
 If the user clicks somewhere, the corresponding timer will start. Setting a timer is always a single click, whether or not one is already in progress: replacing a timer is low-risk, so there is no confirmation step.
 
@@ -122,7 +122,7 @@ This screen allows the user to configure various aspects of the timer:
 
 ## Set a custom timer
 
-Hover your mouse over the disc — everywhere except the readout disc at its centre — and see how the preliminary indicator arc and the preview numeral at its end show what timer will start if you click.
+Hover your mouse over the disc — everywhere except the readout disc at its centre — and see how the preliminary indicator arc and the preview numeral at its end show what timer will start if you click. The four corner controls step aside while you hover, so the face is clear; they return as soon as your mouse leaves the disc.
 
 Once you're happy, just click the screen and the timer starts with the number that's chosen.
 
