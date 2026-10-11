@@ -9,12 +9,6 @@
 
 export type TimerStatus = 'idle' | 'running' | 'paused' | 'expired'
 
-export interface TimerPreset {
-    id: string
-    label: string
-    minutes: number
-}
-
 export interface TimerState {
     status: TimerStatus
     /** Fractional seconds, so the dial animates smoothly between ticks. */
@@ -22,7 +16,6 @@ export interface TimerState {
     /** The duration this countdown was started with. `0` when idle. */
     durationSeconds: number
     muted: boolean
-    presets: readonly TimerPreset[]
     /** `null` after a reset — the restart button has nothing to restore. */
     lastDurationSeconds: number | null
 }

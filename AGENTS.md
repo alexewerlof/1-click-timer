@@ -48,7 +48,7 @@ src/
   app/                 the React UI
     main.tsx           mounts TimerApp; chooses the runtime + dev harness
     TimerApp.tsx       composition shared by both surfaces
-    components/        TimerFace, PresetBar, TransportControls, DevBar
+    components/        TimerFace, TransportControls, DevBar
     design/            tokens.css (all colours/sizes), global.css
     lib/               dial geometry, time formatting, surface helpers
     runtime/           the TimerRuntime contract and its mock implementation
@@ -72,7 +72,6 @@ popup.html / fullscreen.html
        └─ TimerApp ── uses ──> TimerRuntime (runtime/runtime.ts)
             ├─ TimerFace          ├─ mockRuntime   (Phase 1: in-memory, browser)
             │    └─ lib/dial.ts   └─ chromeRuntime (Phase 3: storage + alarms)
-            ├─ PresetBar
             └─ TransportControls
 background/index.ts (service worker)
   ├─ chrome.storage.local (truth)   └─ chrome.alarms, chrome.action, chrome.notifications
@@ -120,10 +119,9 @@ product spec implies:
    state for a deterministic screenshot, so the visual test needs another route
    to the same states before it goes — otherwise it will start capturing
    whatever the mock happens to be doing.
-2. **Settings screen** — MANUAL "Settings": add/remove/rename presets, alarm
-   volume, chime selection including silent, and the face / remaining / tick
-   colours. Those colours are already tokens, so this is wiring a write to the
-   same custom properties.
+2. **Settings screen** — MANUAL "Settings": alarm volume, chime selection
+   including silent, and the face / remaining / tick colours. Those colours are
+   already tokens, so this is wiring a write to the same custom properties.
 3. Small UI tweaks.
 4. **Phase 3** — the real runtime: a `chrome.storage`-backed implementation of
    `TimerRuntime` behind `runtime/runtime.ts`, plus the service worker's alarms,

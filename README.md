@@ -18,8 +18,8 @@ npm run dev     # → http://localhost:5173/popup.html and /fullscreen.html
 
 Both pages are the same app in two surfaces: the popup panel and a full-tab
 view (there is a button in the transport row to move between them, and the tab
-view can go fullscreen). Hover the dial to preview a duration, click to start
-it, use the preset buttons for 5 / 10 / 30 minutes.
+view can go fullscreen). Hover the dial to preview a duration and click to start
+it, or click a numeral to start that many minutes.
 
 **Not implemented yet:** persistence across restarts, the toolbar badge,
 alarms, notifications, the settings screen, and the alarm sound. Timing is
@@ -95,8 +95,8 @@ Debug logs are prefixed with `[1-click-timer:sw]` (service worker). View them in
 - Remove the **dev bar** (the `State: idle/running/paused/expired` row) from the
   demo page. Note it is also the only way to park a state for screenshots, so the
   visual tests would need another entry point.
-- Build the settings screen (MANUAL "Settings"): presets and labels, alarm
-  volume, chime selection, face/remaining/ticks colours, reset to defaults.
+- Build the settings screen (MANUAL "Settings"): alarm volume, chime selection,
+  face/remaining/ticks colours, reset to defaults.
 - UI tweaks.
 - Phase 3: the `chrome.storage` + `chrome.alarms` runtime behind `TimerRuntime`,
   so the timer actually persists, badges and rings.

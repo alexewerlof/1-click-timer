@@ -33,7 +33,6 @@ for (const status of STATES) {
         const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} />))
 
         await expect.element(screen.getByRole('slider')).toBeVisible()
-        await expect.element(screen.getByRole('button', { name: '5m' })).toBeVisible()
         await expect(page.elementLocator(screen.container)).toMatchScreenshot(`classic-${status}`)
     })
 }

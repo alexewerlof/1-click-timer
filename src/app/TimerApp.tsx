@@ -1,5 +1,4 @@
 import { DevBar } from './components/DevBar/DevBar'
-import { PresetBar } from './components/PresetBar/PresetBar'
 import { TimerFace } from './components/TimerFace/TimerFace'
 import { TransportControls } from './components/TransportControls/TransportControls'
 import { toggleFullscreenSurface, type Surface } from './lib/surface'
@@ -42,7 +41,6 @@ export function TimerApp({ surface, runtime, dev }: TimerAppProps) {
             </div>
 
             <div className={styles.controls}>
-                <PresetBar presets={state.presets} activeSeconds={state.durationSeconds} onPick={startTimer} />
                 <TransportControls
                     status={state.status}
                     muted={state.muted}

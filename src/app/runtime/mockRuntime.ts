@@ -7,7 +7,6 @@
  */
 
 import { clampSeconds, MAX_SECONDS, SECONDS_PER_MINUTE } from '../lib/time'
-import { DEFAULT_PRESETS } from './presets'
 import type { TimerDevControls, TimerRuntime, TimerState, TimerStateListener, TimerStatus } from './types'
 
 /** 4 Hz keeps the dial smooth without thrashing React. */
@@ -46,7 +45,6 @@ const INITIAL_STATE: TimerState = {
     remainingSeconds: 0,
     durationSeconds: 0,
     muted: false,
-    presets: DEFAULT_PRESETS,
     lastDurationSeconds: null,
 }
 

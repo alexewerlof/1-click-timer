@@ -13,11 +13,11 @@ A simple and solid timer extension for Chrome.
 
 - Slick design but not too distracting (my personal brand should be there but not too large and dominant. I just want to get credit as the creator but since it's free and I have no monetary incentives keep it small. It should just answer the curious user who wonders who is behind it).
 - The general look and functionality should match that of common 60m timers that is used in schools already.
-- The ability to set pre-allocated timers (e.g. start the timer for common periods like 5m, 10m, 15m, 25m, ideally the user should be able to configure their own presets and even label them like "Pomodoro" for 25m)
+- The ability to set a custom timer in a single click: hover the dial to preview a duration and click to start it, or click a numeral to start that many minutes.
 - Resilient: if the user restarts Chrome (e.g. for updating, or even accidentally), the timer should survive this even and keep counting
 - Show the number of remaining minutes as a colored badge. Considering limitations of Chrome environment (timed events trigger every minute or so) we should still do our best to show the remaining time as accurately as possible.
 - Full screen tab view as well as popup view (both show the same functionality).
-- Notification popup when the time is up (shows the timer name and period)
+- Notification popup when the time is up (shows the period).
 
 # Interface
 
@@ -57,7 +57,6 @@ Three related measures, used throughout the geometry:
 | Area                 | What it is                                                                          |
 | -------------------- | ----------------------------------------------------------------------------------- |
 | **Face slot**        | The region that holds the face. It takes the room the controls do not.              |
-| **Preset bar**       | The row of pre-configured duration buttons (5m / 10m / 30m).                        |
 | **Transport**        | The row of controls: pause/resume, mute, reset, restart, fullscreen.                |
 | **Dev bar**          | Development-only harness for parking the timer in a given state. Never shipped.     |
 
@@ -114,7 +113,6 @@ When the timer is running, a red area shows exactly how much time is remaining. 
 
 This screen allows the user to configure various aspects of the timer:
 
-- Adjusting pre-configured periods and names (add/remove/update)
 - Alarm volume (is maxed by default).
 - Choosing a chime for when the time is up (including silent mode where no sound is played)
 - Color of the timer face, remaining time, and ticks (this allows the users to set their own branding colors). These settings persist and are ideally synced across the same user's profiles if it doesn't require an extra permission.
@@ -129,11 +127,6 @@ Hover your mouse over the disc — everywhere except the readout disc at its cen
 Once you're happy, just click the screen and the timer starts with the number that's chosen.
 
 To skip the dial, click a numeral on the ring instead: the timer starts at that many minutes. This always works, whether a timer is already running or not.
-
-## Set a pre-configured timer
-
-By default, there are few buttons to start the timer: 5m, 10m and 30m.
-The user can edit these preset values and even give them a custom name.
 
 ## Stop a timer
 

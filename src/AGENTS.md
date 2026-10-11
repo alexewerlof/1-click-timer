@@ -22,7 +22,6 @@ one dial face; the multi-variant experiment is over.
 | `app/main.tsx`                      | Mounts `TimerApp`, reads the surface, injects the dev harness in development builds.                        |
 | `app/TimerApp.tsx`                  | Composition shared by both surfaces.                                                                        |
 | `app/components/TimerFace/`         | The dial. Geometry in `lib/dial.ts`; one component per element (`Disc`, `RemainingTime`, `PreviewArc`, `PreviewTicks`, `PreviewNumeral`, `CenterReadout`, `Caption`, `CreatorMark`); static chrome in `dialChrome.tsx` (`DIAL_TICKS`, `DIAL_NUMERALS`, and the `Tick` both tick groups share). |
-| `app/components/PresetBar/`         | Pre-configured durations (MANUAL "Set a pre-configured timer").                                             |
 | `app/components/TransportControls/` | Pause/resume, mute, reset, restart, fullscreen. Icons from Lucide.                                          |
 | `app/components/DevBar/`            | Design harness (`import.meta.env.DEV` only): parks the timer in a given state.                              |
 | `app/design/tokens.css`             | Every colour, size and stroke weight, in one `:root` block.                                                 |
@@ -34,7 +33,6 @@ one dial face; the multi-variant experiment is over.
 | `app/runtime/mockRuntime.ts`        | In-memory implementation (interval-driven) + `forceStatus` for the harness.                                               |
 | `app/runtime/runtime.ts`            | The single line that swaps mock → Chrome runtime.                                                                         |
 | `app/runtime/useTimerState.ts`      | `useSyncExternalStore` binding.                                                                                           |
-| `app/runtime/presets.ts`            | Factory presets (5m / 10m / 30m).                                                                                         |
 | `background/index.ts`               | Service worker: storage, alarms, badge/icon, notifications, messages.                                                     |
 | `images/`, `audio/`                 | Extension icons (toolbar/store) and the alarm sound. Copied verbatim into `dist/`.                          |
 
