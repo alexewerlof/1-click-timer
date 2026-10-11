@@ -105,6 +105,13 @@ termination. The UI never accumulates time.
   only HTML element in the face. It is a `<button>` overlaid on the SVG (never
   *in* it), sized from `READOUT_DISC_DIAMETER_RATIO` × `cqmin`, revealed on
   hover/focus and always visible where there is no hover.
+- The mute, fullscreen, reset and break buttons are the **corner controls**:
+  ghost glyphs (black, red on hover) pinned to the corners of the dial's square
+  rather than a row of their own, so the face gets the whole slot. They live in
+  `TransportControls` as a sibling of the face; the square is the letterboxed SVG
+  viewBox, so the overlay offsets itself by half the letterbox margin, and their
+  sizes are `cqmin` tokens so they scale with the dial. The break control is
+  placed but has no behaviour yet.
 - `images/bell.svg` and `images/reset.svg` are currently **unreferenced** — they
   belonged to the pre-React popup. They are kept deliberately: the ringing
   overlay (MANUAL) is expected to want the bell. The `logo*.png` files are live

@@ -32,6 +32,10 @@ export function TimerApp({ surface, runtime, dev }: TimerAppProps) {
 
     return (
         <div className={styles.app} data-surface={surface}>
+            {/*
+             * The corner controls overlay the face rather than taking a row of
+             * their own, so the dial gets the whole slot (MANUAL "Transport").
+             */}
             <div className={styles.faceSlot}>
                 <div className={styles.face}>
                     <TimerFace
@@ -42,9 +46,7 @@ export function TimerApp({ surface, runtime, dev }: TimerAppProps) {
                         onRestart={() => runtime.restart()}
                     />
                 </div>
-            </div>
 
-            <div className={styles.controls}>
                 <TransportControls
                     status={state.status}
                     muted={state.muted}

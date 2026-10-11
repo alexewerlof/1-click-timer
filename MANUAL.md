@@ -57,8 +57,8 @@ Three related measures, used throughout the geometry:
 
 | Area                 | What it is                                                                          |
 | -------------------- | ----------------------------------------------------------------------------------- |
-| **Face slot**        | The region that holds the face. It takes the room the controls do not.              |
-| **Transport**        | The row of controls: mute, reset, fullscreen. Pause/resume and restart live on the **Readout control**. |
+| **Face slot**        | The region that holds the face. The **Transport** controls overlay it, so the face gets the whole slot. |
+| **Transport**        | The four corner controls, one on each corner of the dial's square: mute (top left), fullscreen (top right), reset (bottom left) and break (bottom right). They are ghost glyphs — black by default, red on hover. Pause/resume and restart live on the **Readout control**. |
 | **Dev bar**          | Development-only harness for parking the timer in a given state. Never shipped.     |
 
 Icons come from **Lucide** (`lucide-react`), not hand-drawn SVG, so control
@@ -66,13 +66,15 @@ labels and glyphs stay conventional.
 
 ### Implementation status
 
-Names above are implemented as written. Three deliberate deviations:
+Names above are implemented as written. Four deliberate deviations:
 
 - **One dial only.** Alternatives that were explored during the React rewrite
   have been removed; the classic face is the only one.
 - **The creator mark is currently hidden** (logo + "Alex Ewerlöf"). It is still
   part of this spec, gated by `SHOW_CREATOR_MARK` in `src/app/lib/dial.ts`; the
   band between the readout disc and the 0 numeral is left clear for it.
+- **The break button is a placeholder.** The bottom-right corner control is
+  placed with its coffee glyph, but its behaviour is not defined yet.
 - **The bottom numeral is 30, not 40.** The list below says 40 sits at the
   bottom, which contradicts its own 5/55 statements. The uniform 0–60 mapping
   the code implements puts **30** there.
@@ -149,4 +151,4 @@ If the timer has previously been reset, there is no memory of the last timer tha
 
 ## Full screen
 
-When the user opens the timer in the popup area, they can press a button to open the same timer in a tab. If they press this exact button while the timer screen is shown in the tag, the page goes to fullscreen mode.
+When the user opens the timer in the popup area, they can press a button to open the same timer in a tab. If they press this exact button while the timer screen is shown in the tag, the page goes to fullscreen mode. The button shows which way it will go: an expanding glyph while the page is normal, and a shrinking glyph once it is fullscreen, so pressing it always reads as "back to the size I came from".

@@ -19,29 +19,23 @@
 
 /*
  * The SVG is given the whole slot and fits its own viewBox inside it, so the
- * dial is always as large as the space allows.
+ * dial is always as large as the space allows. The slot also holds the corner
+ * controls, which is why it is a size container: they place themselves on the
+ * corners of the dial's square (see `TransportControls.module.css`).
  */
 .faceSlot {
+    position: relative;
     display: flex;
     flex: 1 1 auto;
     min-height: 0;
     width: 100%;
+    container-type: size;
 }
 
 .face {
     display: block;
     width: 100%;
     height: 100%;
-}
-
-.controls {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    flex: 0 0 auto;
-    width: 100%;
-    max-width: 420px;
 }
 
 @media (prefers-reduced-motion: reduce) {

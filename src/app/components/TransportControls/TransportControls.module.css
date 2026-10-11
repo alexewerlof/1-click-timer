@@ -1,37 +1,80 @@
-.bar {
-    display: flex;
-    gap: 6px;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
+/*
+ * The controls live on the four corners of the dial's square, not in a row of
+ * their own. The square is the letterboxed face (a square viewBox with the
+ * default `xMidYMid meet`), so its edges sit half the letterbox margin in from
+ * the slot's edges: `cqw`/`cqh` are the slot (the size container is `.faceSlot`
+ * in `TimerApp.module.css`) and `cqmin` is the square's side.
+ */
+.corners {
+    position: absolute;
+    top: calc(50cqh - 50cqmin);
+    left: calc(50cqw - 50cqmin);
+    width: 100cqmin;
+    height: 100cqmin;
+    /* The overlay spans the whole face, so it takes the pointer only on its
+       buttons; everything else stays with the dial underneath. */
+    pointer-events: none;
 }
 
+/*
+ * Ghost controls: no frame or fill of their own, just the glyph, so the dial
+ * stays the loudest thing on screen. Black by default, red on hover.
+ */
 .button {
+    position: absolute;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: var(--tap-target);
-    height: var(--tap-target);
-    border: 1px solid transparent;
-    border-radius: var(--radius-control);
+    width: var(--size-corner-control);
+    height: var(--size-corner-control);
+    /* The percentage glyph below resolves against the content box, so the UA's
+       default button padding has to go for it to be a fraction of the control. */
+    padding: 0;
     color: var(--control-ink);
-    transition:
-        background-color 160ms ease,
-        border-color 160ms ease,
-        color 160ms ease,
-        opacity 160ms ease;
+    pointer-events: auto;
+    transition: color 160ms ease;
 }
 
-.button:hover:not(:disabled) {
-    border-color: var(--control-border);
+/* The glyph is a fraction of the control, so it scales with the dial with it. */
+.button svg {
+    inline-size: var(--size-corner-icon);
+    block-size: var(--size-corner-icon);
 }
 
+.button:hover:not(:disabled),
+.button:focus-visible,
 .button[aria-pressed='true'] {
-    border-color: var(--accent);
     color: var(--accent);
 }
 
 .button:disabled {
     opacity: 0.3;
     cursor: default;
+}
+
+/* One corner each, set in from the square's edge by `--corner-inset`. */
+.button[data-corner='top-left'] {
+    top: var(--corner-inset);
+    left: var(--corner-inset);
+}
+
+.button[data-corner='top-right'] {
+    top: var(--corner-inset);
+    right: var(--corner-inset);
+}
+
+.button[data-corner='bottom-left'] {
+    bottom: var(--corner-inset);
+    left: var(--corner-inset);
+}
+
+.button[data-corner='bottom-right'] {
+    bottom: var(--corner-inset);
+    right: var(--corner-inset);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .button {
+        transition: none;
+    }
 }

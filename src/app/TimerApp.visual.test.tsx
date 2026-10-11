@@ -3,7 +3,7 @@ import { expect, test, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import type { ReactElement } from 'react'
 import { TimerApp } from './TimerApp'
-import { DIAL_TICKS, DISC_RADIUS, MINUTES_PER_TURN, NUMERAL_RADIUS, pointOnDial } from './lib/dial'
+import { DIAL_TICKS, DIAL_VIEWBOX_WIDTH, DISC_RADIUS, MINUTES_PER_TURN, NUMERAL_RADIUS, pointOnDial } from './lib/dial'
 import './design/global.css'
 import { SECONDS_PER_MINUTE } from './lib/time'
 import { createMockRuntime } from './runtime/mockRuntime'
@@ -256,7 +256,7 @@ test('replaces a running timer from a numeral without confirming', async () => {
 
     expect(runtime.getState().status).toBe('running')
     expect(runtime.getState().durationSeconds).toBe(10 * SECONDS_PER_MINUTE)
-    // The transport row is never replaced by a confirmation prompt.
+    // The corner controls are never replaced by a confirmation prompt.
     expect(screen.container.textContent).not.toContain('already in progress')
     runtime.reset()
 })
@@ -292,16 +292,123 @@ const READOUT_CONTROL_STATES: readonly { status: TimerStatus; label: string }[] 
 
 const transportGroup = { name: 'Timer controls', exact: true } as const
 
-/** Pause/resume and restart all moved off the transport row, onto the disc. */
-test('leaves pause/resume and restart out of the transport row', async () => {
+/** Pause/resume and restart all moved off the corner controls, onto the disc. */
+test('leaves pause/resume and restart out of the corner controls', async () => {
     const runtime = createMockRuntime()
     runtime.forceStatus('running')
     const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} />))
 
     const transport = screen.getByRole('group', transportGroup).element()
     const labels = [...transport.querySelectorAll('button')].map((button) => button.getAttribute('aria-label'))
-    // The popup's fullscreen button opens a tab instead (see `lib/surface.ts`).
-    expect(labels).toEqual(['Mute', 'Reset', 'Open in a tab'])
+    // One per corner, in corner order: top left, top right, bottom left, bottom
+    // right. The popup's fullscreen button opens a tab instead (see `lib/surface.ts`).
+    expect(labels).toEqual(['Mute', 'Open in a tab', 'Reset', 'Coffee break'])
+})
+
+/** The Lucide glyph a corner control is showing, e.g. `lucide-shrink`. */
+function glyph(control: Element): string {
+    const svg = control.querySelector('svg')
+    if (!svg) throw new Error('the control has no glyph')
+    return [...svg.classList].find((name) => name.startsWith('lucide-')) ?? ''
+}
+
+/**
+ * A muted timer shows the speaker with a slash through it — `volume-off` — rather
+ * than the speaker with an x (`volume-x`), which reads as a different thing.
+ */
+test('shows the volume-off glyph while the timer is muted', async () => {
+    const runtime = createMockRuntime()
+    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} />))
+
+    const mute = screen.getByRole('button', { name: 'Mute', exact: true }).element()
+    expect(glyph(mute)).toBe('lucide-volume-2')
+
+    await screen.getByRole('button', { name: 'Mute', exact: true }).click()
+    expect(runtime.getState().muted).toBe(true)
+
+    await vi.waitFor(() => {
+        expect(screen.getByRole('button', { name: 'Unmute', exact: true }).element()).toBe(mute)
+        expect(glyph(mute)).toBe('lucide-volume-off')
+    })
+})
+
+/**
+ * The fullscreen control says what pressing it will do: it offers fullscreen
+ * while the page is normal, and swaps to the shrink glyph and the matching label
+ * once the document *is* fullscreen (MANUAL "Full screen"). The real Fullscreen
+ * API needs a user gesture, so `fullscreenElement` is stood in for; the event
+ * fired here is the one the browser fires.
+ */
+test('flips the fullscreen control with the document fullscreen state', async () => {
+    const runtime = createMockRuntime()
+    const screen = await render(stage(<TimerApp surface="fullscreen" runtime={runtime} />))
+
+    const control = screen.getByRole('button', { name: 'Full screen', exact: true }).element()
+    expect(glyph(control)).toBe('lucide-expand')
+
+    Object.defineProperty(document, 'fullscreenElement', {
+        configurable: true,
+        get: () => document.documentElement,
+    })
+    document.dispatchEvent(new Event('fullscreenchange'))
+
+    await vi.waitFor(() => {
+        expect(screen.getByRole('button', { name: 'Exit full screen', exact: true }).element()).toBe(control)
+        expect(glyph(control)).toBe('lucide-shrink')
+    })
+
+    delete (document as { fullscreenElement?: Element }).fullscreenElement
+    document.dispatchEvent(new Event('fullscreenchange'))
+
+    await vi.waitFor(() => {
+        expect(screen.getByRole('button', { name: 'Full screen', exact: true }).element()).toBe(control)
+        expect(glyph(control)).toBe('lucide-expand')
+    })
+})
+
+/**
+ * The four controls are pinned to the corners of the dial's square rather than to
+ * a row of their own (MANUAL "Transport"), and none of them reaches the dial, so
+ * the face keeps its whole surface. The square is the letterboxed SVG (a square
+ * viewBox), so its centre is the element's centre and its side is the smaller of
+ * the element's two sides.
+ */
+test('pins one control to each corner of the dial square, clear of the dial', async () => {
+    const runtime = createMockRuntime()
+    runtime.forceStatus('idle')
+    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} />))
+
+    const svg = screen.getByRole('slider').element() as SVGSVGElement
+    const rect = svg.getBoundingClientRect()
+    const side = Math.min(rect.width, rect.height)
+    const centre = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 }
+    /** Screen pixels per dial unit. */
+    const unit = side / DIAL_VIEWBOX_WIDTH
+
+    const corners = [
+        { name: 'Mute', across: -1, down: -1 },
+        { name: 'Open in a tab', across: 1, down: -1 },
+        { name: 'Reset', across: -1, down: 1 },
+        { name: 'Coffee break', across: 1, down: 1 },
+    ] as const
+
+    for (const corner of corners) {
+        const button = screen.getByRole('button', { name: corner.name, exact: true }).element()
+        const box = button.getBoundingClientRect()
+        const dx = box.left + box.width / 2 - centre.x
+        const dy = box.top + box.height / 2 - centre.y
+
+        // On the named side of the dial on both axes, and still inside the square.
+        expect(Math.sign(dx)).toBe(corner.across)
+        expect(Math.sign(dy)).toBe(corner.down)
+        expect(Math.abs(dx)).toBeLessThanOrEqual(side / 2)
+        expect(Math.abs(dy)).toBeLessThanOrEqual(side / 2)
+
+        // Its nearest point to the dial centre is outside the numeral ring.
+        const nearestX = corner.across > 0 ? box.left : box.right
+        const nearestY = corner.down > 0 ? box.top : box.bottom
+        expect(Math.hypot(nearestX - centre.x, nearestY - centre.y)).toBeGreaterThan(NUMERAL_RADIUS * unit)
+    }
 })
 
 /** An idle timer has nothing to pause, resume or restart, so the disc stays bare. */
@@ -337,8 +444,9 @@ test('reveals the readout control on hover, hiding the readout', async () => {
     const sector = svg.querySelector('[class*="sector"]') as SVGElement
     expect(getComputedStyle(control).color).toBe(getComputedStyle(sector).fill)
 
-    // Park the pointer off the disc first, so the hidden state is a real reading.
-    await screen.getByRole('group', transportGroup).hover()
+    // Park the pointer off the disc first — on the mute control in the corner —
+    // so the hidden state is a real reading.
+    await screen.getByRole('button', { name: 'Mute', exact: true }).hover()
     await vi.waitFor(() => {
         expect(getComputedStyle(control).opacity).toBe('0')
         expect(getComputedStyle(readout).opacity).toBe('1')

@@ -14,7 +14,16 @@
     /* ---- shape ---- */
     --radius-control: 8px;
     --radius-pill: 999px;
-    --tap-target: 34px;
+    /* The corner controls scale with the dial rather than sitting at a fixed
+       size: `cqmin` is the dial square's side (the `.faceSlot` size container),
+       so these values are only meaningful inside it. 34px on the 352px popup
+       face, and proportionally larger on a big fullscreen dial. */
+    --size-corner-control: 9.66cqmin;
+    /* The glyph, as a fraction of the control — the same shape as
+       `--size-readout-control-icon`. 18px on the 34px control. */
+    --size-corner-icon: 53%;
+    /* How far a corner control is set in from the corner of the dial's square. */
+    --corner-inset: 1.14cqmin;
     --gap-row: 10px;
     --pad: 14px;
     /* Ticks are short hairlines; the strokes shrink with their length so they

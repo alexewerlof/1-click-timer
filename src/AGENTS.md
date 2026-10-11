@@ -22,13 +22,14 @@ one dial face; the multi-variant experiment is over.
 | `app/main.tsx`                      | Mounts `TimerApp`, reads the surface, injects the dev harness in development builds.                        |
 | `app/TimerApp.tsx`                  | Composition shared by both surfaces.                                                                        |
 | `app/components/TimerFace/`         | The dial. Geometry in `lib/dial.ts`; one component per element (`Disc`, `RemainingTime`, `PreviewArc`, `PreviewTicks`, `PreviewNumeral`, `CenterReadout`, `ReadoutControl`, `Caption`, `CreatorMark`); static chrome in `dialChrome.tsx` (`DIAL_TICKS`, `DIAL_NUMERALS`, and the `Tick` both tick groups share). `ReadoutControl` is the one non-SVG element — an HTML `<button>` overlaid on the face. |
-| `app/components/TransportControls/` | Mute, reset, fullscreen. Icons from Lucide. Pause/resume and restart are the `ReadoutControl` on the readout disc. |
+| `app/components/TransportControls/` | The four corner controls (mute, fullscreen, reset, and the break placeholder), ghost glyphs pinned to the corners of the dial's square. Icons from Lucide. The fullscreen control shows expand or shrink with the document's own fullscreen state. Pause/resume and restart are the `ReadoutControl` on the readout disc. |
 | `app/components/DevBar/`            | Design harness (`import.meta.env.DEV` only): parks the timer in a given state.                              |
 | `app/design/tokens.css`             | Every colour, size and stroke weight, in one `:root` block.                                                 |
 | `app/design/global.css`             | Resets, body, and the popup/tab sizing per `[data-surface]`.                                                |
 | `app/lib/dial.ts`                   | Dial geometry: counter-clockwise mapping, sector/arc paths, pointer → dial point/minute, disc/readout-disc regions, and the derived readout size. |
 | `app/lib/time.ts`                   | `MAX_MINUTES` clamp, `formatClock`, `toWholeMinutes`.                                                       |
 | `app/lib/surface.ts`                | Surface type, `readSurface`, and the fullscreen button behaviour.                                           |
+| `app/lib/useDocumentFullscreen.ts`  | `useSyncExternalStore` binding to the Fullscreen API's `fullscreenchange` event.                            |
 | `app/runtime/types.ts`              | `TimerState` / `TimerRuntime` contract. **The seam Phase 3 implements.**                                    |
 | `app/runtime/mockRuntime.ts`        | In-memory implementation (interval-driven) + `forceStatus` for the harness.                                               |
 | `app/runtime/runtime.ts`            | The single line that swaps mock → Chrome runtime.                                                                         |
@@ -82,6 +83,17 @@ one dial face; the multi-variant experiment is over.
   `READOUT_DISC_DIAMETER_RATIO` (from `dial.ts`) times the face's rendered side,
   which is `cqmin` because the square viewBox is letterboxed (see `.stage`). It is
   revealed on hover or focus, and always under `@media (hover: none)`.
+- **The corner controls overlay the face.** `TransportControls` is a sibling of the
+  face inside `.faceSlot` (which is the size container, see
+  `TimerApp.module.css`), so the dial is not shortened by a controls row. The
+  overlay is sized to the *letterboxed square* rather than the slot — it offsets
+  itself by half the letterbox margin (`calc(50cqw - 50cqmin)`) — so its corners
+  are the corners of the dial's square, and the same file's CSS pins one control
+  to each. It takes the pointer only on its buttons, so the dial underneath keeps
+  the rest. The sizes are `cqmin` tokens (`--size-corner-control`,
+  `--size-corner-icon`), so the glyphs keep their weight against the dial instead
+  of staying a fixed 18px on a large fullscreen face; the icon is a percentage of
+  the control, which is why the control resets the button's default padding.
 - **Pointer maths uses `getScreenCTM()`**, so scaling or letterboxing of the
   element cannot skew the selected minute.
 - **Two surfaces, one app.** `popup.html` and `fullscreen.html` mount the same
