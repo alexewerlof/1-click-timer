@@ -23,6 +23,7 @@ import { DISC } from './Disc'
 import { PreviewArc } from './PreviewArc'
 import { PreviewNumeral } from './PreviewNumeral'
 import { PreviewTicks } from './PreviewTicks'
+import { ReadoutControl } from './ReadoutControl'
 import { RemainingTime } from './RemainingTime'
 import { DIAL_NUMERALS, DIAL_TICKS } from './dialChrome'
 import styles from './TimerFace.module.css'
@@ -36,6 +37,10 @@ export interface TimerFaceProps {
     remainingSeconds: number
     /** Receives the chosen duration in seconds. */
     onPick: (seconds: number) => void
+    /** Stop or resume the timer, from the control on the readout disc. */
+    onTogglePause: () => void
+    /** Re-run the last duration, from the control shown while ringing. */
+    onRestart: () => void
 }
 
 function clampMinutes(minutes: number): number {
@@ -50,8 +55,11 @@ function clampMinutes(minutes: number): number {
  * Exposed as a slider so the disc action is reachable from the keyboard —
  * arrows move counter-clockwise (more time) and clockwise (less time), shift
  * jumps by five, Enter sets the timer.
+ *
+ * The readout disc carries its own control (`ReadoutControl`), a real HTML button
+ * overlaid on the face rather than drawn in it.
  */
-export function TimerFace({ status, remainingSeconds, onPick }: TimerFaceProps) {
+export function TimerFace({ status, remainingSeconds, onPick, onTogglePause, onRestart }: TimerFaceProps) {
     const svgRef = useRef<SVGSVGElement>(null)
     const [previewMinutes, setPreviewMinutes] = useState<number | null>(null)
 
@@ -162,50 +170,53 @@ export function TimerFace({ status, remainingSeconds, onPick }: TimerFaceProps) 
     const previewNumeral = previewing && previewMinutes > 0 ? previewMinutes : null
 
     return (
-        <svg
-            ref={svgRef}
-            className={styles.face}
-            viewBox={DIAL_VIEWBOX}
-            data-pickable={previewing}
-            role="slider"
-            tabIndex={0}
-            aria-label="Timer duration"
-            aria-valuemin={0}
-            aria-valuemax={MINUTES_PER_TURN}
-            aria-valuenow={previewMinutes ?? 0}
-            aria-valuetext={previewMinutes === null ? 'No duration selected' : `${previewMinutes} minutes`}
-            onPointerMove={handlePointerMove}
-            onPointerLeave={handlePointerLeave}
-            onClick={handleClick}
-            onKeyDown={handleKeyDown}
-        >
-            {DISC}
-            {DIAL_TICKS}
-            {/*
-             * The numeral ring and the preview's own chrome are mutually
-             * exclusive: while previewing, the ring is swapped for the single
-             * numeral the arc points at, and the ticks the arc covers are
-             * redrawn in the remaining colour — so the arc, its numeral and
-             * those ticks read as one mark.
-             */}
-            {previewNumeral === null ? (
-                DIAL_NUMERALS
-            ) : (
-                <>
-                    <PreviewTicks minutes={previewNumeral} />
-                    <PreviewNumeral minutes={previewNumeral} />
-                </>
-            )}
-            {/*
-             * The remaining sector sits *over* the chrome and is slightly
-             * translucent, so it tints the ticks it swallows — the way the
-             * plastic overlay on a physical timer does.
-             */}
-            <RemainingTime seconds={remainingSeconds} active={status === 'running'} />
-            <PreviewArc previewMinutes={previewMinutes} />
-            <CenterReadout status={status} remainingSeconds={remainingSeconds} />
-            {SHOW_CREATOR_MARK ? <CreatorMark /> : null}
-            <Caption />
-        </svg>
+        <div className={styles.stage}>
+            <svg
+                ref={svgRef}
+                className={styles.face}
+                viewBox={DIAL_VIEWBOX}
+                data-pickable={previewing}
+                role="slider"
+                tabIndex={0}
+                aria-label="Timer duration"
+                aria-valuemin={0}
+                aria-valuemax={MINUTES_PER_TURN}
+                aria-valuenow={previewMinutes ?? 0}
+                aria-valuetext={previewMinutes === null ? 'No duration selected' : `${previewMinutes} minutes`}
+                onPointerMove={handlePointerMove}
+                onPointerLeave={handlePointerLeave}
+                onClick={handleClick}
+                onKeyDown={handleKeyDown}
+            >
+                {DISC}
+                {DIAL_TICKS}
+                {/*
+                 * The numeral ring and the preview's own chrome are mutually
+                 * exclusive: while previewing, the ring is swapped for the single
+                 * numeral the arc points at, and the ticks the arc covers are
+                 * redrawn in the remaining colour — so the arc, its numeral and
+                 * those ticks read as one mark.
+                 */}
+                {previewNumeral === null ? (
+                    DIAL_NUMERALS
+                ) : (
+                    <>
+                        <PreviewTicks minutes={previewNumeral} />
+                        <PreviewNumeral minutes={previewNumeral} />
+                    </>
+                )}
+                {/*
+                 * The remaining sector sits *over* the chrome and is slightly
+                 * translucent, so it tints the ticks it swallows — the way the
+                 * plastic overlay on a physical timer does.
+                 */}
+                <RemainingTime seconds={remainingSeconds} active={status === 'running'} />
+                <PreviewArc previewMinutes={previewMinutes} />
+                <CenterReadout status={status} remainingSeconds={remainingSeconds} />
+                {SHOW_CREATOR_MARK ? <CreatorMark /> : null}
+                <Caption />
+            </svg>
+            <ReadoutControl status={status} onTogglePause={onTogglePause} onRestart={onRestart} />
+        </div>
     )
 }

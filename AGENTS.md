@@ -60,8 +60,8 @@ src/
 
 `MANUAL.md` → **UI elements** is the canonical list of names for the interface
 (face, dial, disc, tick, major tick, numeral, remaining sector, preview arc,
-readout, readout disc, caption). The code uses the same words — see
-`src/app/lib/dial.ts` and `src/app/components/TimerFace/` — so feedback in one
+readout, readout disc, readout control, caption). The code uses the same words —
+see `src/app/lib/dial.ts` and `src/app/components/TimerFace/` — so feedback in one
 of those terms maps to one place in the source. There is a single dial face.
 
 ## Architecture
@@ -71,7 +71,8 @@ popup.html / fullscreen.html
   └─ app/main.tsx
        └─ TimerApp ── uses ──> TimerRuntime (runtime/runtime.ts)
             ├─ TimerFace          ├─ mockRuntime   (Phase 1: in-memory, browser)
-            │    └─ lib/dial.ts   └─ chromeRuntime (Phase 3: storage + alarms)
+            │    ├─ lib/dial.ts   └─ chromeRuntime (Phase 3: storage + alarms)
+            │    └─ ReadoutControl (HTML button on the readout disc)
             └─ TransportControls
 background/index.ts (service worker)
   ├─ chrome.storage.local (truth)   └─ chrome.alarms, chrome.action, chrome.notifications
@@ -100,6 +101,10 @@ termination. The UI never accumulates time.
   two settings that are easy to get wrong (`sRGB` interpolation, and a filter
   region wide enough not to clip). The disc has no outline — the inner shadow is
   what draws its edge.
+- The readout disc carries its own pause/resume control (`ReadoutControl`) — the
+  only HTML element in the face. It is a `<button>` overlaid on the SVG (never
+  *in* it), sized from `READOUT_DISC_DIAMETER_RATIO` × `cqmin`, revealed on
+  hover/focus and always visible where there is no hover.
 - `images/bell.svg` and `images/reset.svg` are currently **unreferenced** — they
   belonged to the pre-React popup. They are kept deliberately: the ringing
   overlay (MANUAL) is expected to want the bell. The `logo*.png` files are live

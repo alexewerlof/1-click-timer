@@ -4,6 +4,8 @@ import {
     DIAL_CENTER_Y,
     DISC_RADIUS,
     READOUT_DISC_RADIUS,
+    READOUT_DISC_DIAMETER_RATIO,
+    DIAL_VIEWBOX_WIDTH,
     DIAL_TICKS,
     NUMERAL_GLYPH_HALF_WIDTH,
     NUMERAL_RADIUS,
@@ -164,5 +166,15 @@ describe('dial geometry constants', () => {
     it('straddles the disc rim, so the ticks read as part of the face', () => {
         expect(TICK_INNER_RADIUS).toBeLessThan(DISC_RADIUS)
         expect(DIAL_TICKS.some((tick) => radiusOf(tick.outer) > DISC_RADIUS)).toBe(true)
+    })
+
+    it('turns the face’s rendered side back into the readout disc’s diameter', () => {
+        // The readout control is `READOUT_DISC_DIAMETER_RATIO × cqmin`, and
+        // `cqmin` is the rendered square face (the viewBox is square). So the
+        // ratio must map the viewBox width onto the disc's diameter — that is
+        // what keeps the button's click surface exactly the disc at any size.
+        expect(READOUT_DISC_DIAMETER_RATIO * DIAL_VIEWBOX_WIDTH).toBeCloseTo(2 * READOUT_DISC_RADIUS, 10)
+        expect(READOUT_DISC_DIAMETER_RATIO).toBeGreaterThan(0)
+        expect(READOUT_DISC_DIAMETER_RATIO).toBeLessThan(1)
     })
 })

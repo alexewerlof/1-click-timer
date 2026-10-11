@@ -35,15 +35,3 @@
     opacity: 0.3;
     cursor: default;
 }
-
-/* Primary transport action (pause / resume) carries more weight. */
-.primary {
-    background: var(--accent);
-    color: var(--accent-ink);
-    border-color: var(--accent);
-}
-
-.primary:hover:not(:disabled) {
-    border-color: var(--accent);
-    filter: brightness(1.05);
-}

@@ -1,4 +1,4 @@
-import { Expand, Maximize, Pause, Play, TimerOff, TimerReset, Volume2, VolumeX } from 'lucide-react'
+import { Expand, Maximize, TimerOff, Volume2, VolumeX } from 'lucide-react'
 import type { Surface } from '../../lib/surface'
 import type { TimerStatus } from '../../runtime/types'
 import styles from './TransportControls.module.css'
@@ -9,45 +9,25 @@ const ICON_SIZE = 18
 export interface TransportControlsProps {
     status: TimerStatus
     muted: boolean
-    /** False once a reset has wiped the memory of the last duration. */
-    canRestart: boolean
     surface: Surface
-    onTogglePause: () => void
     onToggleMute: () => void
     onReset: () => void
-    onRestart: () => void
     onToggleFullscreen: () => void
 }
 
-/** Pause/resume, mute, reset, restart and the fullscreen button (MANUAL "How to"). */
+/** Mute, reset and the fullscreen button (MANUAL "How to"). Pause/resume and restart live on the readout disc (`ReadoutControl`). */
 export function TransportControls({
     status,
     muted,
-    canRestart,
     surface,
-    onTogglePause,
     onToggleMute,
     onReset,
-    onRestart,
     onToggleFullscreen,
 }: TransportControlsProps) {
-    const running = status === 'running'
-    const countable = running || status === 'paused'
     const fullscreenLabel = surface === 'popup' ? 'Open in a tab' : 'Full screen'
 
     return (
         <div className={styles.bar} role="group" aria-label="Timer controls">
-            <button
-                type="button"
-                className={`${styles.button} ${styles.primary}`}
-                onClick={onTogglePause}
-                disabled={!countable}
-                aria-label={running ? 'Pause' : 'Resume'}
-                title={running ? 'Pause' : 'Resume'}
-            >
-                {running ? <Pause size={ICON_SIZE} /> : <Play size={ICON_SIZE} />}
-            </button>
-
             <button
                 type="button"
                 className={styles.button}
@@ -68,17 +48,6 @@ export function TransportControls({
                 title="Reset"
             >
                 <TimerOff size={ICON_SIZE} />
-            </button>
-
-            <button
-                type="button"
-                className={styles.button}
-                onClick={onRestart}
-                disabled={!canRestart}
-                aria-label="Restart last timer"
-                title="Restart last timer"
-            >
-                <TimerReset size={ICON_SIZE} />
             </button>
 
             <button

@@ -1,3 +1,16 @@
+/*
+ * The stage: the face plus the readout control that overlays the disc at its
+ * centre. `container-type: size` lets the control size itself from the face's
+ * rendered side (`cqmin`) — the square viewBox is letterboxed, so the rendered
+ * face is the smaller of the element's two sides.
+ */
+.stage {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    container-type: size;
+}
+
 /* The face fills the space it is given; the aspect ratio keeps the dial square. */
 
 .face {
@@ -149,6 +162,64 @@
     letter-spacing: var(--tracking-readout);
     text-anchor: middle;
     dominant-baseline: central;
+    transition: opacity 120ms ease;
+}
+
+/*
+ * The readout control: pause/resume, or restart while ringing, revealed on the
+ * readout disc. It is an HTML `<button>` overlaid on the face rather than an SVG
+ * element, so it keeps native semantics and stays outside the face's
+ * `role="slider"` (see `ReadoutControl`). Its click surface is the whole disc,
+ * so its size is the disc's diameter: the ratio comes from `dial.ts` and the
+ * face's rendered side is `cqmin` (see `.stage`).
+ */
+.readoutControl {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    display: grid;
+    place-items: center;
+    inline-size: calc(100cqmin * var(--readout-disc-ratio));
+    block-size: calc(100cqmin * var(--readout-disc-ratio));
+    padding: 0;
+    border-radius: 50%;
+    color: var(--remaining);
+    opacity: 0;
+    transition: opacity 120ms ease;
+    touch-action: manipulation;
+}
+
+.readoutControl svg {
+    inline-size: var(--size-readout-control-icon);
+    block-size: var(--size-readout-control-icon);
+}
+
+.readoutControl:hover,
+.readoutControl:focus-visible {
+    opacity: 1;
+}
+
+/* Nothing to hover with: keep the control visible wherever it exists. */
+@media (hover: none) {
+    .readoutControl {
+        opacity: 1;
+    }
+}
+
+/*
+ * The readout steps aside while the control is showing, so the button reads as
+ * replacing the number rather than sitting on top of it.
+ */
+.stage:has(.readoutControl:hover) .readout,
+.stage:has(.readoutControl:focus-visible) .readout {
+    opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .readoutControl,
+    .readout {
+        transition: none;
+    }
 }
 
 /* ---- branding ---- */

@@ -41,8 +41,9 @@ change requested with one of these terms maps to one place in the source.
 | **Preview arc**     | The unfilled outline drawn from 12 o'clock to the minute currently under the pointer. It shows what a click would start. |
 | **Preview ticks**   | The ticks inside the preview arc's span, drawn in the **Remaining sector**'s colour so the arc, its numeral and the ticks it covers read as one mark. The rest of the ring keeps the dial's ink. |
 | **Preview numeral** | The single numeral shown while previewing. It sits on the numeral ring at the end of the preview arc, in the numerals' style and in the **Remaining sector**'s colour, and replaces the whole numeral ring so it is the only number on the face. A whole turn (60) is labelled where the 0 numeral sits. |
-| **Readout**         | The digital `M:SS` in the middle of the disc, e.g. `1:05`. It always shows the remaining time — except while the timer is idle, when it is left blank, because there is nothing to report and a standing `0:00` only adds noise. |
+| **Readout**         | The digital `M:SS` in the middle of the disc, e.g. `1:05`. It always shows the remaining time — except while the timer is idle, when it is left blank because there is nothing to report and a standing `0:00` only adds noise, and while the **Readout control** is showing in its place. |
 | **Readout disc**    | The small circle behind the readout, sitting at the centre of the dial. It is white with a soft shadow, so it reads as a layer above the dial rather than a hole in it. |
+| **Readout control** | The round button on the **Readout disc**, whose click surface is the whole disc. It is revealed when the disc is hovered (or the button has keyboard focus), and always shown where the device has no hover. It offers pause while the timer runs, resume while it is paused, and restart while the alarm is ringing, and it wears the **Remaining sector**'s colour. While it shows it replaces the readout. |
 | **Caption**         | The text "Made in Sweden", inscribed inside the disc on a circular path just above the bottom rim.        |
 | **Creator mark**    | The logo plus "Alex Ewerlöf". Currently not drawn.                                                       |
 
@@ -57,7 +58,7 @@ Three related measures, used throughout the geometry:
 | Area                 | What it is                                                                          |
 | -------------------- | ----------------------------------------------------------------------------------- |
 | **Face slot**        | The region that holds the face. It takes the room the controls do not.              |
-| **Transport**        | The row of controls: pause/resume, mute, reset, restart, fullscreen.                |
+| **Transport**        | The row of controls: mute, reset, fullscreen. Pause/resume and restart live on the **Readout control**. |
 | **Dev bar**          | Development-only harness for parking the timer in a given state. Never shipped.     |
 
 Icons come from **Lucide** (`lucide-react`), not hand-drawn SVG, so control
@@ -130,7 +131,7 @@ To skip the dial, click a numeral on the ring instead: the timer starts at that 
 
 ## Stop a timer
 
-Stop and pause are the same thing. While the timer is running, the user can stop or resume the timer using the same button (a pause icon).
+Stop and pause are the same thing. Hovering the readout disc reveals one control that does both: a pause icon while the timer runs, and a play icon while it is paused. Clicking it stops or resumes the timer.
 
 ## Mute the timer
 
@@ -142,7 +143,7 @@ Reset means the timer stops ticking and also the remaining time is set to zero.
 
 ## Restart the timer
 
-When the timer is ringing, the user can press a rest button to restart the timer with the last config (e.g. if the alarm goes off after a 7m timer, pressing the restart button sets the timer for 7m again.)
+When the timer is ringing, hovering the readout disc reveals a restart control in place of the readout. Pressing it restarts the timer with the last config (e.g. if the alarm goes off after a 7m timer, pressing the restart button sets the timer for 7m again.)
 
 If the timer has previously been reset, there is no memory of the last timer that was set, therefore the restart button is disabled because it doesn't make sense.
 

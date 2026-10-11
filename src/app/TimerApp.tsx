@@ -21,8 +21,6 @@ export interface TimerAppProps {
 export function TimerApp({ surface, runtime, dev }: TimerAppProps) {
     const state = useTimerState(runtime)
 
-    const inProgress = state.status === 'running' || state.status === 'paused'
-
     /**
      * Setting a timer is always one click, whether or not one is already
      * running: replacing a timer is low-risk and the worst case is starting
@@ -36,7 +34,13 @@ export function TimerApp({ surface, runtime, dev }: TimerAppProps) {
         <div className={styles.app} data-surface={surface}>
             <div className={styles.faceSlot}>
                 <div className={styles.face}>
-                    <TimerFace status={state.status} remainingSeconds={state.remainingSeconds} onPick={startTimer} />
+                    <TimerFace
+                        status={state.status}
+                        remainingSeconds={state.remainingSeconds}
+                        onPick={startTimer}
+                        onTogglePause={() => runtime.togglePause()}
+                        onRestart={() => runtime.restart()}
+                    />
                 </div>
             </div>
 
@@ -44,12 +48,9 @@ export function TimerApp({ surface, runtime, dev }: TimerAppProps) {
                 <TransportControls
                     status={state.status}
                     muted={state.muted}
-                    canRestart={state.lastDurationSeconds !== null && !inProgress}
                     surface={surface}
-                    onTogglePause={() => runtime.togglePause()}
                     onToggleMute={() => runtime.toggleMute()}
                     onReset={() => runtime.reset()}
-                    onRestart={() => runtime.restart()}
                     onToggleFullscreen={() => toggleFullscreenSurface(surface)}
                 />
             </div>

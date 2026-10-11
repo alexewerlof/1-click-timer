@@ -174,6 +174,17 @@ export const DIAL_VIEWBOX_HEIGHT = DIAL_VIEWBOX_WIDTH
 
 export const DIAL_VIEWBOX = `${DIAL_VIEWBOX_LEFT} ${DIAL_VIEWBOX_TOP} ${DIAL_VIEWBOX_WIDTH} ${DIAL_VIEWBOX_HEIGHT}`
 
+/**
+ * The readout disc's diameter as a fraction of the face's rendered side. The
+ * readout control (`ReadoutControl`) is sized from this rather than by eye, so
+ * its click surface stays exactly the disc.
+ *
+ * The viewBox is square and the readout disc is concentric with it, so the
+ * rendered face is the smaller of the element's two sides — which is what the
+ * control's `cqmin` unit resolves to (see `.stage` in `TimerFace.module.css`).
+ */
+export const READOUT_DISC_DIAMETER_RATIO = (2 * READOUT_DISC_RADIUS) / DIAL_VIEWBOX_WIDTH
+
 /** The creator mark returns once the dial is settled (MANUAL "UI elements"). */
 export const SHOW_CREATOR_MARK = false
 

@@ -21,8 +21,8 @@ one dial face; the multi-variant experiment is over.
 | `fullscreen.html`                   | Tab entry for the big view. Sets `data-surface="fullscreen"`.                                               |
 | `app/main.tsx`                      | Mounts `TimerApp`, reads the surface, injects the dev harness in development builds.                        |
 | `app/TimerApp.tsx`                  | Composition shared by both surfaces.                                                                        |
-| `app/components/TimerFace/`         | The dial. Geometry in `lib/dial.ts`; one component per element (`Disc`, `RemainingTime`, `PreviewArc`, `PreviewTicks`, `PreviewNumeral`, `CenterReadout`, `Caption`, `CreatorMark`); static chrome in `dialChrome.tsx` (`DIAL_TICKS`, `DIAL_NUMERALS`, and the `Tick` both tick groups share). |
-| `app/components/TransportControls/` | Pause/resume, mute, reset, restart, fullscreen. Icons from Lucide.                                          |
+| `app/components/TimerFace/`         | The dial. Geometry in `lib/dial.ts`; one component per element (`Disc`, `RemainingTime`, `PreviewArc`, `PreviewTicks`, `PreviewNumeral`, `CenterReadout`, `ReadoutControl`, `Caption`, `CreatorMark`); static chrome in `dialChrome.tsx` (`DIAL_TICKS`, `DIAL_NUMERALS`, and the `Tick` both tick groups share). `ReadoutControl` is the one non-SVG element — an HTML `<button>` overlaid on the face. |
+| `app/components/TransportControls/` | Mute, reset, fullscreen. Icons from Lucide. Pause/resume and restart are the `ReadoutControl` on the readout disc. |
 | `app/components/DevBar/`            | Design harness (`import.meta.env.DEV` only): parks the timer in a given state.                              |
 | `app/design/tokens.css`             | Every colour, size and stroke weight, in one `:root` block.                                                 |
 | `app/design/global.css`             | Resets, body, and the popup/tab sizing per `[data-surface]`.                                                |
@@ -74,6 +74,14 @@ one dial face; the multi-variant experiment is over.
   a solid hit area, and hovering one takes `--remaining` — the same interactive
   signal the preview arc and preview numeral use. Nothing asks for confirmation,
   even when a timer is already running.
+- **The readout control is HTML, not SVG.** Pause/resume (and restart, while
+  ringing) is a real `<button>` (`ReadoutControl`) overlaid on the readout disc as
+  a *sibling* of the `<svg>` — a `<button>` is not valid in the SVG namespace, and
+  a focusable button nested in the face's `role="slider"` would make the
+  accessibility tree ambiguous. Its click surface is the whole disc: the size is
+  `READOUT_DISC_DIAMETER_RATIO` (from `dial.ts`) times the face's rendered side,
+  which is `cqmin` because the square viewBox is letterboxed (see `.stage`). It is
+  revealed on hover or focus, and always under `@media (hover: none)`.
 - **Pointer maths uses `getScreenCTM()`**, so scaling or letterboxing of the
   element cannot skew the selected minute.
 - **Two surfaces, one app.** `popup.html` and `fullscreen.html` mount the same

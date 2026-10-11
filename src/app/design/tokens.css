@@ -38,6 +38,9 @@
        radius in `lib/dial.ts`, so the text always fits its circle. */
     --weight-readout: 700;
     --tracking-readout: 0;
+    /* The readout control's icon, as a fraction of the readout disc, so the
+       glyph scales with the disc instead of being a fixed size. */
+    --size-readout-control-icon: 56%;
 
     /* ---- palette ---- */
     --surface: #ffffff;
@@ -65,7 +68,6 @@
     --chrome-border: rgb(20 24 31 / 12%);
 
     --accent: #e0201b;
-    --accent-ink: #ffffff;
     --control-ink: #14181f;
     --control-border: rgb(20 24 31 / 16%);
     --control-surface: transparent;

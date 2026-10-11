@@ -278,3 +278,119 @@ test('replaces a running timer from the dial without confirming', async () => {
     expect(runtime.getState().durationSeconds).toBe(20 * SECONDS_PER_MINUTE)
     runtime.reset()
 })
+
+/**
+ * The readout control (MANUAL "Readout control"): pause/resume — and restart
+ * while ringing — on the readout disc, revealed on hover. It is a real
+ * `<button>` overlaid on the face, whose click surface is the whole disc.
+ */
+const READOUT_CONTROL_STATES: readonly { status: TimerStatus; label: string }[] = [
+    { status: 'running', label: 'Pause' },
+    { status: 'paused', label: 'Resume' },
+    { status: 'expired', label: 'Restart timer' },
+]
+
+const transportGroup = { name: 'Timer controls', exact: true } as const
+
+/** Pause/resume and restart all moved off the transport row, onto the disc. */
+test('leaves pause/resume and restart out of the transport row', async () => {
+    const runtime = createMockRuntime()
+    runtime.forceStatus('running')
+    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} />))
+
+    const transport = screen.getByRole('group', transportGroup).element()
+    const labels = [...transport.querySelectorAll('button')].map((button) => button.getAttribute('aria-label'))
+    // The popup's fullscreen button opens a tab instead (see `lib/surface.ts`).
+    expect(labels).toEqual(['Mute', 'Reset', 'Open in a tab'])
+})
+
+/** An idle timer has nothing to pause, resume or restart, so the disc stays bare. */
+test('has no readout control while the timer is idle', async () => {
+    const runtime = createMockRuntime()
+    runtime.forceStatus('idle')
+    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} />))
+
+    const stageElement = screen.getByRole('slider').element().parentElement
+    expect(stageElement?.querySelector('button')).toBeNull()
+})
+
+test('reveals the readout control on hover, hiding the readout', async () => {
+    const runtime = createMockRuntime()
+    runtime.forceStatus('running')
+    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} />))
+
+    const svg = screen.getByRole('slider').element() as SVGSVGElement
+    const readout = svg.querySelector('text[class*="readout"]') as SVGTextElement
+    const disc = svg.querySelector('circle[class*="readoutDisc"]') as SVGCircleElement
+    const control = screen.getByRole('button', { name: 'Pause', exact: true }).element() as HTMLButtonElement
+
+    // The click surface is the whole readout disc: same size, same centre.
+    const discBox = disc.getBoundingClientRect()
+    const controlBox = control.getBoundingClientRect()
+    expect(controlBox.width).toBeCloseTo(discBox.width, 0)
+    expect(controlBox.height).toBeCloseTo(discBox.height, 0)
+    expect(controlBox.left + controlBox.width / 2).toBeCloseTo(discBox.left + discBox.width / 2, 0)
+    expect(controlBox.top + controlBox.height / 2).toBeCloseTo(discBox.top + discBox.height / 2, 0)
+
+    // It wears the remaining sector's colour — the shared `--remaining` token, so
+    // the two cannot drift apart.
+    const sector = svg.querySelector('[class*="sector"]') as SVGElement
+    expect(getComputedStyle(control).color).toBe(getComputedStyle(sector).fill)
+
+    // Park the pointer off the disc first, so the hidden state is a real reading.
+    await screen.getByRole('group', transportGroup).hover()
+    await vi.waitFor(() => {
+        expect(getComputedStyle(control).opacity).toBe('0')
+        expect(getComputedStyle(readout).opacity).toBe('1')
+    })
+
+    await screen.getByRole('button', { name: 'Pause', exact: true }).hover()
+    await vi.waitFor(() => {
+        expect(getComputedStyle(control).opacity).toBe('1')
+        expect(getComputedStyle(readout).opacity).toBe('0')
+    })
+})
+
+for (const { status, label } of READOUT_CONTROL_STATES) {
+    test(`shows the ${status} readout control`, async () => {
+        const runtime = createMockRuntime()
+        runtime.forceStatus(status)
+        const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} />))
+
+        const control = screen.getByRole('button', { name: label, exact: true })
+        await control.hover()
+        await vi.waitFor(() => expect(getComputedStyle(control.element()).opacity).toBe('1'))
+
+        await expect(page.elementLocator(screen.container)).toMatchScreenshot(`readout-control-${status}`)
+    })
+}
+
+test('pauses a running timer from the readout control', async () => {
+    const runtime = createMockRuntime()
+    runtime.forceStatus('running')
+    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} />))
+
+    await screen.getByRole('button', { name: 'Pause', exact: true }).click()
+    expect(runtime.getState().status).toBe('paused')
+})
+
+test('resumes a paused timer from the readout control', async () => {
+    const runtime = createMockRuntime()
+    runtime.forceStatus('paused')
+    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} />))
+
+    await screen.getByRole('button', { name: 'Resume', exact: true }).click()
+    expect(runtime.getState().status).toBe('running')
+    runtime.reset()
+})
+
+test('restarts the last timer from the readout control while ringing', async () => {
+    const runtime = createMockRuntime()
+    runtime.forceStatus('expired')
+    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} />))
+
+    await screen.getByRole('button', { name: 'Restart timer', exact: true }).click()
+    expect(runtime.getState().status).toBe('running')
+    expect(runtime.getState().durationSeconds).toBe(7 * SECONDS_PER_MINUTE)
+    runtime.reset()
+})
