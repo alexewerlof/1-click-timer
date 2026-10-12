@@ -90,7 +90,11 @@ one dial face; the multi-variant experiment is over.
   module load (`DIAL_TICKS`, `DIAL_NUMERALS`). Only the sector and the preview
   chrome are stateful: previewing swaps the numeral ring for the preview numeral
   and redraws the covered ticks in the remaining colour, over the untouched ring
-  (AGENTS.md "Preview numeral", "Preview ticks").
+  (AGENTS.md "Preview numeral", "Preview ticks"). The face paints in that
+  order — disc, ticks, sector, numerals or the preview chrome, arc, readout,
+  mark — so the translucent sector tints the ticks it swallows and stops there:
+  the numerals sit outside the disc, on their own ring, so the fill can never
+  reach them.
 - **One click sets a timer.** Clicking the disc starts the previewed duration;
   clicking a numeral starts that many minutes outright (the 0 numeral marks a
   whole turn, so it starts 60). A numeral carries `data-numeral-minutes`, which

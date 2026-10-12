@@ -190,6 +190,14 @@ export function TimerFace({ status, remainingSeconds, onPick, onTogglePause, onR
                 {DISC}
                 {DIAL_TICKS}
                 {/*
+                 * The remaining sector sits over the ticks and under everything
+                 * else. It is slightly translucent, so it tints the ticks it
+                 * swallows — the way the plastic overlay on a physical timer
+                 * does. The numerals are outside the disc and so are never
+                 * touched by it; the order keeps it that way if the disc grows.
+                 */}
+                <RemainingTime seconds={remainingSeconds} active={status === 'running'} />
+                {/*
                  * The numeral ring and the preview's own chrome are mutually
                  * exclusive: while previewing, the ring is swapped for the single
                  * numeral the arc points at, and the ticks the arc covers are
@@ -204,12 +212,6 @@ export function TimerFace({ status, remainingSeconds, onPick, onTogglePause, onR
                         <PreviewNumeral minutes={previewNumeral} />
                     </>
                 )}
-                {/*
-                 * The remaining sector sits *over* the chrome and is slightly
-                 * translucent, so it tints the ticks it swallows — the way the
-                 * plastic overlay on a physical timer does.
-                 */}
-                <RemainingTime seconds={remainingSeconds} active={status === 'running'} />
                 <PreviewArc previewMinutes={previewMinutes} />
                 <CenterReadout status={status} remainingSeconds={remainingSeconds} />
                 <CreatorMark />

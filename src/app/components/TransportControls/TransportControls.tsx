@@ -66,8 +66,8 @@ function CornerButton({ corner, label, onClick, pressed, disabled, children }: C
 
 /**
  * The four corner controls (AGENTS.md "Transport"), one per corner of the dial's
- * square: mute (top left), fullscreen (top right), reset (bottom left) and info
- * (bottom right).
+ * square: mute (top left), fullscreen (top right), reset (bottom left) and
+ * settings (bottom right).
  *
  * They are ghost glyphs — black by default, red on hover — so the dial stays the
  * loudest thing on the screen. Pause/resume and restart are not here: they live

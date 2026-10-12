@@ -3,7 +3,15 @@ import { expect, test, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import type { ReactElement } from 'react'
 import { TimerApp } from './TimerApp'
-import { DIAL_TICKS, DIAL_VIEWBOX_WIDTH, DISC_RADIUS, MINUTES_PER_TURN, NUMERAL_RADIUS, pointOnDial } from './lib/dial'
+import {
+    DIAL_TICKS,
+    DIAL_VIEWBOX_WIDTH,
+    DISC_RADIUS,
+    MINUTES_PER_TURN,
+    NUMERAL_MINUTES,
+    NUMERAL_RADIUS,
+    pointOnDial,
+} from './lib/dial'
 import './design/global.css'
 import { SECONDS_PER_MINUTE } from './lib/time'
 import { createMockRuntime } from './runtime/mockRuntime'
@@ -240,6 +248,35 @@ test('recolours a numeral on hover', async () => {
     await vi.waitFor(() => {
         expect(getComputedStyle(numeral).fill).toBe(remaining)
     })
+})
+
+/**
+ * The face's stacking order is deliberate: the remaining sector is painted over
+ * the ticks, so its translucent fill tints the ticks it swallows — the
+ * physical-timer look — and under the numerals and the preview chrome. The
+ * numerals sit outside the disc (`dial.test.ts` pins that), so the order is not
+ * what makes them legible today; it is what keeps them legible if the disc ever
+ * grows into the numeral ring.
+ */
+test('paints the remaining sector over the ticks and under the numerals', async () => {
+    const runtime = createMockRuntime()
+    // Parked part-way through a run, so the sector is drawn across the ring.
+    runtime.forceStatus('running')
+    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} />))
+
+    const svg = screen.getByRole('slider').element() as SVGSVGElement
+    const sector = svg.querySelector('[class*="sector"]')
+    const ticks = svg.querySelector('[data-dial-ticks]')
+    if (!sector || !ticks) throw new Error('the running timer has not drawn its ticks and its sector')
+
+    const numerals = Array.from(svg.querySelectorAll('text[data-numeral-minutes]'))
+    expect(numerals).toHaveLength(NUMERAL_MINUTES.length)
+
+    // PRECEDING means the other element is painted first.
+    expect(sector.compareDocumentPosition(ticks) & Node.DOCUMENT_POSITION_PRECEDING).toBeTruthy()
+    for (const numeral of numerals) {
+        expect(sector.compareDocumentPosition(numeral) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    }
 })
 
 /**
