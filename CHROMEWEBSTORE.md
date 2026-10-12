@@ -1,6 +1,6 @@
 # Chrome Web Store Listing — 1-click timer
 
-> Last Updated: 2026-10-11
+> Last Updated: 2026-10-12
 
 The single source of truth for everything typed into the Chrome Developer
 Dashboard. Copy from here, not from memory. `PRIVACY.md` and `dashboard/` are the
@@ -85,34 +85,42 @@ English
 
 ## Graphics & Assets
 
-| Asset                   | Dimensions            | Status         | Filename               |
-| ----------------------- | --------------------- | -------------- | ---------------------- |
-| Store Icon [REQUIRED]   | 128×128 PNG           | ✅ Ready       | `src/images/logo128.png` |
-| Screenshot 1 [REQUIRED] | 1280×800 or 640×400   | ⬜ Not created |                        |
-| Screenshot 2 [RECOMMENDED] | 1280×800 or 640×400 | ⬜ Not created |                      |
-| Screenshot 3 [RECOMMENDED] | 1280×800 or 640×400 | ⬜ Not created |                      |
-| Screenshot 4            | 1280×800 or 640×400   | ⬜ Not created |                        |
-| Screenshot 5            | 1280×800 or 640×400   | ⬜ Not created |                        |
-| Small Promo Tile [RECOMMENDED] | 440×280        | ⬜ Not created |                        |
-| Marquee Promo Tile      | 1400×560              | ⬜ Not created |                        |
+| Asset                   | Dimensions            | Status         | Filename                                |
+| ----------------------- | --------------------- | -------------- | --------------------------------------- |
+| Store Icon [REQUIRED]   | 128×128 PNG           | ✅ Ready       | `src/images/logo128.png`                |
+| Screenshot 1 [REQUIRED] | 1280×800              | ✅ Ready       | `dashboard/screenshots/01-idle.png`     |
+| Screenshot 2 [RECOMMENDED] | 1280×800           | ✅ Ready       | `dashboard/screenshots/02-running.png`  |
+| Screenshot 3 [RECOMMENDED] | 1280×800           | ✅ Ready       | `dashboard/screenshots/03-preview.png`  |
+| Screenshot 4            | 1280×800              | ✅ Ready       | `dashboard/screenshots/04-popup.png`    |
+| Screenshot 5            | 1280×800              | ✅ Ready       | `dashboard/screenshots/05-settings.png` |
+| Screenshot 6            | 1280×800              | ✅ Ready       | `dashboard/screenshots/06-dark.png`     |
+| Small Promo Tile [RECOMMENDED] | 440×280        | ✅ Ready       | `dashboard/screenshots/promo-440x280.png` |
+| Marquee Promo Tile      | 1400×560              | ⬜ Not created |                                         |
 
-The v4 screenshots and promo tiles were deleted on 2026-10-11: they showed the
-pre-React interface, and the review checklist treats outdated screenshots as a
-rejection risk. New ones are needed before submission.
+All of them come from `npm run screenshots` (`scripts/store/capture.mjs`), which
+builds `dist/`, loads the packed extension in Chromium and drives it into each
+state, so a shot cannot show an interface that no longer exists. Everything is
+1280×800 — the size the store prefers. `dashboard/screenshots/` is gitignored:
+the captures are reproducible, and the v4 set was deleted on 2026-10-11 for going
+stale in the repo.
 
 ### Screenshot Notes
 
-Shoot the built extension from `dist/`, at 1280×800 (preferred) or 640×400.
+Capture them with `npm run screenshots`; this is the order it writes, which is the
+order to upload.
 
-1. **Idle face** — the whole dial, no timer running, in the light theme.
+1. **Idle face** — the whole dial in the full-screen view, no timer running, in
+   the light theme. This is what the toolbar icon opens onto.
 2. **Mid-countdown** — a timer with the remaining sector drawn part-way round and
    the readout showing the time left. This is the shot that explains the product.
-3. **Previewing** — pointer on the disc mid-hover, showing the preview arc, the
-   preview numeral and the corner controls faded out.
-4. **Full-screen view** — the tab-sized face, to show it scales up.
+3. **Previewing** — the pointer on the disc mid-hover, showing the preview arc,
+   the preview numeral, and the ring it replaces gone.
+4. **The popup** — the face at its true 380×420 on a plain backdrop, so the
+   listing shows the panel a user actually clicks. No browser or device chrome is
+   drawn around it.
 5. **Settings screen** — appearance, alarm and the colour slots, which also shows
    the icon footer.
-6. **Dark theme** — any of the above with the dark appearance, since a lot of
+6. **Dark theme** — the same running timer in the dark appearance, since a lot of
    people run dark mode and it is worth showing that it is supported.
 
 ## Permissions Justification
@@ -189,9 +197,12 @@ Alex Ewerlöf
 
 **Contact Email** [REQUIRED]
 
-⬜ **PENDING** — the Chrome Web Store requires a monitored address here, and it is
-shown publicly on the listing. It also belongs in the "Contact" section of
-`PRIVACY.md`, which currently points at the issue tracker.
+```
+hello@alexewerlof.com
+```
+
+<!-- Monitored, and shown publicly on the listing. It is also the address in
+     PRIVACY.md's Contact section, so the policy and the listing agree. -->
 
 **Support URL / Email** [RECOMMENDED]
 
@@ -205,7 +216,7 @@ https://www.alexewerlof.com/
 
 | Version | Date       | Changes                                                                                                                                                                   | Status |
 | ------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
-| 5.0.0   | 2026-10-11 | Rewritten as a Manifest V3 extension. New dial interface with one-click duration setting, a toolbar badge that counts the minutes down, a notification when the time is up, and a settings screen for appearance, alarm and colours. Replaces the v4 background-page build, which had no badge and no settings screen. | Draft  |
+| 5.0.0   | 2026-10-12 | Rewritten as a Manifest V3 extension. New dial interface with one-click duration setting, a toolbar badge that counts the minutes down, a notification when the time is up, and a settings screen for appearance, alarm and colours. Replaces the v4 background-page build, which had no badge and no settings screen. | Draft  |
 | 4.0     | —          | Last version published to the store. Manifest V2.                                                                                                                          | Published |
 
 ## Review Notes
@@ -216,10 +227,6 @@ https://www.alexewerlof.com/
   or tab, not by the background service worker, so with the popup closed the user
   gets the notification but not the sound. The listing states this explicitly
   rather than implying a sound always plays. A fix is on the roadmap.
-- **Numerals under the remaining sector render dark red.** The translucent
-  remaining-sector fill sits over the numeral ring, so covered numerals read
-  darker than uncovered ones. Cosmetic, and noticeable in a running screenshot —
-  worth fixing before shooting the gallery images.
 - **No ring/limits.** The dial starts a timer on a single click with no
   confirmation, including while another timer is running. That is intended, and
   stated in the listing: setting a timer is always one click.
@@ -235,9 +242,9 @@ https://www.alexewerlof.com/
 - [x] Privacy policy written and consistent with the disclosure
 - [x] `npm run deploy` produces a clean ZIP containing only `dist/`
 - [ ] **Privacy policy pushed**, so the URL resolves
-- [ ] **Screenshots captured** (at least one, 1280×800 or 640×400)
-- [ ] **Promo tiles refreshed** (optional but recommended)
-- [ ] **Contact email supplied**
+- [x] **Screenshots captured** — `npm run screenshots`, all 1280×800
+- [x] **Promo tiles refreshed** — the 440×280 tile (the marquee is optional)
+- [x] **Contact email supplied** — `hello@alexewerlof.com`, also in `PRIVACY.md`
 - [ ] Loaded unpacked in Chrome and exercised once more before uploading
 
 ### Rejection History

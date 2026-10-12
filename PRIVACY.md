@@ -67,5 +67,6 @@ changes are also noted in the release notes of the version that introduces them.
 
 ## Contact
 
-Questions about privacy? Open an issue at
+Questions about privacy? Write to
+<hello@alexewerlof.com>, or open an issue at
 <https://github.com/alexewerlof/1-click-timer/issues>.
