@@ -40,6 +40,7 @@ loop a fast way to work on the interface.
 | `npm test`                   | unit tests (node)                                  |
 | `npm run test:visual`        | browser-mode visual tests (screenshot diff)        |
 | `npm run test:visual:update` | rewrite the screenshot baselines                   |
+| `npm run screenshots`        | build, then capture the store gallery into `dashboard/screenshots/` |
 | `npm run format`             | Prettier write                                     |
 | `npm run format:check`       | Prettier check                                     |
 
@@ -115,6 +116,12 @@ archive root. Packaging prefers `zip(1)` and falls back to `python3`.
 justifications and the privacy disclosure; `PRIVACY.md` is the policy the listing
 links to. Bump the version in **both** `src/manifest.json` and `package.json` —
 `src/manifest.test.ts` fails if they drift apart.
+
+The listing's screenshots and the promo tile come from `npm run screenshots`,
+which builds `dist/`, loads the packed extension in Playwright's Chromium and
+drives it into each state at 1280×800 (440×280 for the tile). The images land in
+`dashboard/screenshots/`, which is gitignored — reproducible on demand, and never
+a gallery that lies about the current interface.
 
 ## Try it in Chrome
 

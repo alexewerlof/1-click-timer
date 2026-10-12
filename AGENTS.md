@@ -163,14 +163,13 @@ real `chrome.storage` + `chrome.alarms` runtime. What is next:
 
 1. Small UI tweaks (see the loose ends below).
 2. A ringing overlay for the UI (use the Lucide `Bell` icon).
-3. Capture the store screenshots and promo tiles (see `CHROMEWEBSTORE.md`). The v4
-   set was deleted on 2026-10-11: it showed the pre-React interface.
+3. The store screenshots and the promo tile: `npm run screenshots` builds `dist/`,
+   drives the packed extension in Chromium and writes the gallery to the
+   gitignored `dashboard/screenshots/` (`scripts/store/`). The v4 set was deleted
+   on 2026-10-11: it showed the pre-React interface.
 
 Known loose ends, none blocking:
 
-- The counter-clockwise staging puts numerals under the remaining sector's
-  translucent fill, so covered numerals read dark-red. Per-numeral staging would
-  fix it.
 - An earlier version of the spec said 40 sits at the bottom of the dial, while
   contradicting its own 5/55 statements. The implemented mapping (uniform 0–60)
   puts 30 there.

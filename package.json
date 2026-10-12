@@ -15,7 +15,8 @@
         "test": "vitest run --project unit",
         "test:watch": "vitest --project unit",
         "test:visual": "vitest run --project visual",
-        "test:visual:update": "vitest run --project visual --update"
+        "test:visual:update": "vitest run --project visual --update",
+        "screenshots": "npm run build && node scripts/store/capture.mjs"
     },
     "repository": {
         "type": "git",

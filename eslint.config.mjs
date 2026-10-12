@@ -29,6 +29,16 @@ export default tseslint.config(
     },
 
     {
+        // The store capture runs in Node but drives a browser: the outer script
+        // uses Node globals, and the callbacks handed to `page.evaluate` run in
+        // the page, where `document` and `matchMedia` are real.
+        files: ['scripts/**/*.mjs'],
+        languageOptions: {
+            globals: { ...globals.node, ...globals.browser },
+        },
+    },
+
+    {
         files: ['src/app/**/*.{ts,tsx}'],
         plugins: {
             ...reactHooks.configs.flat.recommended.plugins,
