@@ -1,108 +1,111 @@
 <!doctype html>
 <html lang="en">
-    <head>
-        <meta charset="utf-8" />
-        <title>1-click timer — promo tile 440×280</title>
-        <style>
-            /*
+
+<head>
+    <meta charset="utf-8" />
+    <title>1-click timer — promo tile 440×280</title>
+    <style>
+        /*
              * Layout only. The colours and the type come from the app's own
              * `design/tokens.css`, which the capture script injects into this
              * page, so the tile cannot drift from the product it advertises. The
              * dial is a screenshot of the built extension, handed in as a data
              * URL by the same script.
              */
-            * {
-                box-sizing: border-box;
-            }
+        * {
+            box-sizing: border-box;
+        }
 
-            html,
-            body {
-                width: 440px;
-                height: 280px;
-                margin: 0;
-                padding: 0;
-                overflow: hidden;
-            }
+        html,
+        body {
+            width: 440px;
+            height: 280px;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
 
-            body {
-                position: relative;
-                background: var(--surface);
-                color: var(--ink);
-                font-family: var(--font-ui);
-                -webkit-font-smoothing: antialiased;
-            }
+        body {
+            position: relative;
+            background: var(--surface);
+            color: var(--ink);
+            font-family: var(--font-ui);
+            -webkit-font-smoothing: antialiased;
+        }
 
-            /*
+        /*
              * The dial bleeds off the left edge. Size is 0.4 of the 1280×800
              * capture it comes from: 320px of dial, centred at (78, 140), which
              * puts the 512×320 image at (-178, -20).
              */
-            .dial {
-                position: absolute;
-                left: -178px;
-                top: -20px;
-                width: 512px;
-                height: 320px;
-            }
+        .dial {
+            position: absolute;
+            left: -178px;
+            top: -20px;
+            width: 512px;
+            height: 320px;
+        }
 
-            .dial img {
-                display: block;
-                width: 100%;
-                height: 100%;
-            }
+        .dial img {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
 
-            /* Softens the dial's right edge into the copy's side of the tile. */
-            .fade {
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 268px;
-                height: 280px;
-                background: linear-gradient(90deg, transparent 52%, var(--surface) 90%);
-            }
+        /* Softens the dial's right edge into the copy's side of the tile. */
+        .fade {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 268px;
+            height: 280px;
+            background: linear-gradient(90deg, transparent 52%, var(--surface) 90%);
+        }
 
-            .copy {
-                position: absolute;
-                top: 0;
-                left: 214px;
-                width: 208px;
-                height: 280px;
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                gap: 11px;
-            }
+        .copy {
+            position: absolute;
+            top: 0;
+            left: 214px;
+            width: 208px;
+            height: 280px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 11px;
+        }
 
-            .rule {
-                width: 32px;
-                height: 3px;
-                border-radius: 2px;
-                background: var(--remaining);
-            }
+        .rule {
+            width: 32px;
+            height: 3px;
+            border-radius: 2px;
+            background: var(--remaining);
+        }
 
-            h1 {
-                margin: 0;
-                font-size: 29px;
-                line-height: 1.06;
-                letter-spacing: -0.025em;
-                font-weight: 700;
-            }
+        h1 {
+            margin: 0;
+            font-size: 29px;
+            line-height: 1.06;
+            letter-spacing: -0.025em;
+            font-weight: 700;
+        }
 
-            p {
-                margin: 0;
-                font-size: 13.5px;
-                line-height: 1.4;
-                color: var(--ink-soft);
-            }
-        </style>
-    </head>
-    <body>
-        <div class="dial"><img id="dial" alt="" /></div>
-        <div class="fade"></div>
-        <div class="copy">
-            <span class="rule"></span>
-            <h1>1-click<br />timer</h1>
-            <p>Set a countdown timer in one click.</p>
-        </div>
-    </body>
+        p {
+            margin: 0;
+            font-size: 13.5px;
+            line-height: 1.4;
+            color: var(--ink-soft);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dial"><img id="dial" alt="" /></div>
+    <div class="fade"></div>
+    <div class="copy">
+        <span class="rule"></span>
+        <h1>1-click<br />timer</h1>
+        <p>Set a countdown timer in one click.</p>
+    </div>
+</body>
+
 </html>
