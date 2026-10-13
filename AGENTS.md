@@ -64,12 +64,12 @@ face.
 | **Preview ticks**    | The ticks inside the preview arc's span, drawn in the **Remaining sector**'s colour so the arc, its numeral and the ticks it covers read as one mark. The rest of the ring keeps the dial's ink. |
 | **Preview numeral**  | The single numeral shown while previewing, on the numeral ring at the end of the preview arc, in the numerals' style and the remaining sector's colour. It replaces the whole numeral ring, so it is the only number on the face. A whole turn (60) is labelled where the 0 numeral sits. |
 | **Readout**          | The digital `M:SS` in the middle of the disc, e.g. `1:05`. It always shows the remaining time, except while the timer is idle — when it is left blank, because a standing `0:00` only adds noise — and while the **Readout control** replaces it. |
-| **Readout disc**     | The small circle behind the readout, at the centre of the dial. White with a soft shadow, so it reads as a layer above the dial rather than a hole in it.                       |
+| **Readout disc**     | The small circle behind the readout, at the centre of the dial. The surface colour, raised by a soft shadow, so it reads as a layer of the face above the dial rather than a white blob or a hole in it. |
 | **Readout control**  | The round button on the readout disc, whose click surface is the whole disc. Pause while the timer runs, resume while it is paused, restart while the alarm is ringing. Revealed on hover or focus, and always shown where there is no hover. |
 | **Caption**          | The text "Made in Sweden", inscribed inside the disc on a circular path just above the bottom rim.                                                                             |
 | **Creator mark**     | The "Alex Ewerlöf" wordmark, drawn in the dial's ink, in the band between the readout disc and the 0 numeral.                                                                  |
 | **Face slot**        | The region that holds the face. The **Transport** controls overlay it, so the face gets the whole slot.                                                                         |
-| **Transport**        | The four corner controls, one per corner of the dial's square: mute (top left), fullscreen (top right), reset (bottom left) and settings (bottom right). Ghost glyphs, black by default and red on hover, fading out while the dial is previewed. Pause/resume and restart live on the **Readout control**. |
+| **Transport**        | The four corner controls, one per corner of the dial's square: mute (top left), fullscreen (top right), reset (bottom left) and settings (bottom right). Soft-plastic discs of the surface colour, lit along the top-left rim and shaded to the bottom-right, with the glyph black by default and red on hover, sinking under a press, and fading out while the dial is previewed. The rim is the surface colour too, so it shows only where a press-in shadow darkens the disc around it. Pause/resume and restart live on the **Readout control**. |
 | **Settings control** | The bottom-right corner control: a gear that opens the settings screen in a tab of its own.                                                                                     |
 
 Three measures run through the geometry: **disc radius**, **tick length** (how far
@@ -121,6 +121,14 @@ termination. The UI never accumulates time.
   (`readoutFontSizeFor`) and the two shadows (`READOUT_SHADOW`,
   `DISC_INNER_SHADOW`, both from `shadowFor`). Hand picked values drift the
   moment the geometry is tuned, and did.
+- The light surface is a **milky off-white** (`#f2eee5`), not pure white, and the
+  corner controls and the readout disc are painted with it. That is what lets a
+  control read as soft plastic: it catches a lighter sheen along one rim and
+  falls into shade along the other (`--control-soft-shadow` in `tokens.css`, plus
+  its `:active` twin), and it is why the readout disc follows the surface
+  (`--readout-surface`) rather than a hardcoded white. On a pure white face the
+  sheen has nothing to lighten. The recipe is translucent white and black,
+  overridden per theme, so it holds on any face colour the settings choose.
 - The shadows are inline SVG filters, because SVG has no `box-shadow`: the
   readout disc's `feDropShadow`, and the disc's own inner shadow, which
   subtracts an offset copy of the disc from itself. See `src/AGENTS.md` for the
@@ -132,8 +140,9 @@ termination. The UI never accumulates time.
   *in* it), sized from `READOUT_DISC_DIAMETER_RATIO` × `cqmin`, revealed on
   hover/focus and always visible where there is no hover.
 - The mute, fullscreen, reset and settings buttons are the **corner controls**:
-  ghost glyphs (black, red on hover) pinned to the corners of the dial's square
-  rather than a row of their own, so the face gets the whole slot. They live in
+  soft-plastic discs (the surface colour, lit from the top left, shaded to the
+  bottom right) pinned to the corners of the dial's square rather than a row of
+  their own, so the face gets the whole slot. They live in
   `TransportControls` as a sibling of the face; the square is the letterboxed SVG
   viewBox, so the overlay offsets itself by half the letterbox margin, and their
   sizes are `cqmin` tokens so they scale with the dial. While the dial is

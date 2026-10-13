@@ -27,6 +27,40 @@
     --size-corner-icon: 53%;
     /* How far a corner control is set in from the corner of the dial's square. */
     --corner-inset: 1.14cqmin;
+    /*
+     * The corner controls read as soft plastic: each is a flat disc of the
+     * surface colour, and it is the light *around* it that gives it its shape —
+     * a bright cast off the top-left, a soft shade off the bottom-right — so it
+     * pops off the face with no frame and a flat face of its own. Every colour
+     * is translucent, so the recipe reads on whatever colour the theme (or the
+     * Face slot) gives the surface.
+     */
+    --control-sheen: rgb(255 255 255 / 90%);
+    --control-cast: rgb(15 23 42 / 22%);
+    --control-press-shade: rgb(15 23 42 / 26%);
+    /* The light around the disc — a bright cast off the top-left, a shade off the
+       bottom-right — is what lifts it off the face, and it stays put in both
+       states, so a pressed control still reads as a piece on the face. */
+    --control-light-cast: -0.8cqmin -0.9cqmin 2cqmin var(--control-sheen);
+    --control-shade-cast: 0.9cqmin 1.1cqmin 2.4cqmin var(--control-cast);
+    --control-soft-shadow: var(--control-light-cast), var(--control-shade-cast);
+    /* Pressed, two casts are added *inside* and swap corners — a shade from the
+       top-left, a catch-light from the bottom-right — so the disc reads as pushed
+       into the face while the outer light that lifts it stays. */
+    --control-soft-shadow-pressed:
+        var(--control-light-cast), var(--control-shade-cast),
+        inset 0.65cqmin 0.65cqmin 1.5cqmin var(--control-press-shade),
+        inset -0.5cqmin -0.5cqmin 1cqmin var(--control-sheen);
+    /*
+     * The control's rim: the surface colour, all the way round, so no line ever
+     * shows at rest and the disc's shape comes from the light around it. The rim
+     * only reads while pressed, where the press-in shadow draws inside the
+     * padding box and leaves this surface-coloured ring showing as a lit edge
+     * around the recess. `--control-border` is `cqmin`, like every size that
+     * scales with the dial (~1.5px on the popup face, larger fullscreen).
+     */
+    --control-border: 0.42cqmin;
+    --control-rim: var(--surface);
     --gap-row: 10px;
     --pad: 14px;
     /* The glyph inside a settings-screen button. A plain size, not `cqmin`: the
@@ -58,7 +92,11 @@
     --size-readout-control-icon: 56%;
 
     /* ---- palette ---- */
-    --surface: #ffffff;
+    /* A milky off-white, like sun-bleached white plastic, rather than pure
+       white: it leaves the corner controls room to catch a lighter light along
+       one rim and fall into shade along the other (`--control-soft-shadow`),
+       which is what gives them their soft, raised look. */
+    --surface: #f2eee5;
     /* The face is the page background; only the disc is drawn. */
     --face: transparent;
 
@@ -70,7 +108,10 @@
     --remaining: #e0201b;
     /* Solid ink, like the numerals. */
     --readout: #000000;
-    --readout-surface: #ffffff;
+    /* The readout disc is the same material as the face — a layer of the surface
+       raised by its own shadow, like the corner controls — so it follows the
+       theme and the Face slot instead of sitting on the face as a white blob. */
+    --readout-surface: var(--surface);
     /* Soft drop shadow under the readout disc: translucent black-blue, like a
        CSS box-shadow. */
     --readout-shadow: rgb(15 23 42 / 30%);
@@ -101,9 +142,13 @@
     --dial-mark: #e8eaee;
     --remaining: #ff4a3d;
     --readout: #f2f4f7;
-    --readout-surface: #1b1f26;
     --readout-shadow: rgb(0 0 0 / 55%);
     --control-ink: #e8eaee;
+    /* Soft plastic in the dark: a faint cast off the top-left, a deeper shade
+       off the bottom-right, so the control still pops off a dark surface. */
+    --control-sheen: rgb(255 255 255 / 16%);
+    --control-cast: rgb(0 0 0 / 60%);
+    --control-press-shade: rgb(0 0 0 / 58%);
     --panel: #181b21;
     --panel-border: rgb(232 234 238 / 14%);
 }

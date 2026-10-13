@@ -46,7 +46,7 @@ function fullscreenAction(surface: Surface, nativeFullscreen: boolean): Fullscre
     return { label: 'Full screen', Icon: Expand }
 }
 
-/** A single ghost control, pinned to one corner of the dial's square. */
+/** A single soft-plastic control, pinned to one corner of the dial's square. */
 function CornerButton({ corner, label, onClick, pressed, disabled, children }: CornerButtonProps) {
     return (
         <button
@@ -69,9 +69,10 @@ function CornerButton({ corner, label, onClick, pressed, disabled, children }: C
  * square: mute (top left), fullscreen (top right), reset (bottom left) and
  * settings (bottom right).
  *
- * They are ghost glyphs — black by default, red on hover — so the dial stays the
- * loudest thing on the screen. Pause/resume and restart are not here: they live
- * on the readout disc (`ReadoutControl`).
+ * They are soft-plastic discs — the surface colour, lit from the top left and
+ * shaded to the bottom right, with the glyph black by default and red on hover
+ * — so the dial stays the loudest thing on the screen. Pause/resume and restart
+ * are not here: they live on the readout disc (`ReadoutControl`).
  */
 export function TransportControls({
     status,

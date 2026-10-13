@@ -33,8 +33,12 @@
 }
 
 /*
- * Ghost controls: no frame or fill of their own, just the glyph, so the dial
- * stays the loudest thing on screen. Black by default, red on hover.
+ * The corner controls are soft plastic: a flat disc of the surface colour with
+ * no shading of its own, lifted off the face by the light *around* it — a bright
+ * cast off the top-left, a soft shade off the bottom-right (`--control-soft-shadow`,
+ * see `tokens.css`) — and given an edge by a hairline rim in a single colour all
+ * the way round. The glyph stays black by default and red on hover, so the dial
+ * keeps the loudest ink.
  */
 .button {
     position: absolute;
@@ -46,9 +50,22 @@
     /* The percentage glyph below resolves against the content box, so the UA's
        default button padding has to go for it to be a fraction of the control. */
     padding: 0;
+    border-radius: 50%;
+    border: var(--control-border) solid var(--control-rim);
+    background: var(--surface);
+    box-shadow: var(--control-soft-shadow);
     color: var(--control-ink);
     pointer-events: auto;
     transition: color 160ms ease;
+}
+
+/*
+ * Pressed, two casts turn inwards and swap corners, so the disc sinks into the
+ * face — but the outer light that lifts it stays, so it reads as pressed rather
+ * than flattened. Not transitioned: a press wants to answer at once.
+ */
+.button:active:not(:disabled) {
+    box-shadow: var(--control-soft-shadow-pressed);
 }
 
 /* The glyph is a fraction of the control, so it scales with the dial with it. */
