@@ -7,7 +7,7 @@ import tseslint from 'typescript-eslint'
 
 export default tseslint.config(
     {
-        ignores: ['dist/', 'node_modules/', '.agents/', 'dashboard/', 'vector/'],
+        ignores: ['dist/', 'node_modules/', '.agents/', 'dashboard/'],
     },
 
     js.configs.recommended,
@@ -35,6 +35,15 @@ export default tseslint.config(
         files: ['scripts/**/*.mjs'],
         languageOptions: {
             globals: { ...globals.node, ...globals.browser },
+        },
+    },
+
+    {
+        // The build scripts only: the icon generator reads the source art and
+        // rasterises it, so `Buffer` and the `node:` modules are in scope.
+        files: ['scripts/**/*.ts'],
+        languageOptions: {
+            globals: { ...globals.node },
         },
     },
 

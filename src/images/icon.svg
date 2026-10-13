@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <rect x="4.964" y="5" width="90" height="90" rx="8.385" ry="8.385" style="fill: rgb(235, 226, 226);"/>
+  <path style="fill: rgb(255, 0, 0); stroke-width: 0.177;" d="M 50 50 L 50 19.027 C 26.157 19.027 11.255 44.838 23.177 65.487 C 23.177 65.487 23.177 65.487 23.177 65.487 L 50 50 Z"/>
+  <circle style="fill: none; stroke: rgb(0, 0, 0); stroke-width: 2.655;" cx="50" cy="50" r="25.412">
+    <title>Timer disc</title>
+  </circle>
+  <circle style="stroke: rgb(0, 0, 0); fill: rgb(255, 255, 255); stroke-width: 0.885;" cx="50" cy="50" r="5.31">
+    <title>Readout disc</title>
+  </circle>
+  <circle style="fill: rgb(30, 30, 30); stroke-width: 0.177;" cx="50" cy="12.832" r="2.832"/>
+  <circle style="fill: rgb(84, 84, 84); stroke-width: 0.177;" cx="68.584" cy="17.811" r="2.832"/>
+  <circle style="fill: rgb(84, 84, 84); stroke-width: 0.177;" cx="82.189" cy="31.416" r="2.832"/>
+  <circle style="fill: rgb(84, 84, 84); stroke-width: 0.177;" cx="87.168" cy="50" r="2.832"/>
+  <circle style="fill: rgb(84, 84, 84); stroke-width: 0.177;" cx="82.189" cy="68.584" r="2.832"/>
+  <circle style="fill: rgb(84, 84, 84); stroke-width: 0.177;" cx="68.584" cy="82.189" r="2.832"/>
+  <circle style="fill: rgb(84, 84, 84); stroke-width: 0.177;" cx="50" cy="87.168" r="2.832"/>
+  <circle style="fill: rgb(84, 84, 84); stroke-width: 0.177;" cx="31.416" cy="82.189" r="2.832"/>
+  <circle style="fill: rgb(84, 84, 84); stroke-width: 0.177;" cx="17.811" cy="68.584" r="2.832"/>
+  <circle style="fill: rgb(84, 84, 84); stroke-width: 0.177;" cx="12.832" cy="50" r="2.832"/>
+  <circle style="fill: rgb(84, 84, 84); stroke-width: 0.177;" cx="17.811" cy="31.416" r="2.832"/>
+  <circle style="fill: rgb(84, 84, 84); stroke-width: 0.177;" cx="31.416" cy="17.811" r="2.832"/>
+</svg>

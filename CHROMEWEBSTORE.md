@@ -87,7 +87,7 @@ English
 
 | Asset                   | Dimensions            | Status         | Filename                                |
 | ----------------------- | --------------------- | -------------- | --------------------------------------- |
-| Store Icon [REQUIRED]   | 128×128 PNG           | ✅ Ready       | `src/images/logo128.png`                |
+| Store Icon [REQUIRED]   | 128×128 PNG           | ✅ Ready       | `dist/images/icon128.png`               |
 | Screenshot 1 [REQUIRED] | 1280×800              | ✅ Ready       | `dashboard/screenshots/01-idle.png`     |
 | Screenshot 2 [RECOMMENDED] | 1280×800           | ✅ Ready       | `dashboard/screenshots/02-running.png`  |
 | Screenshot 3 [RECOMMENDED] | 1280×800           | ✅ Ready       | `dashboard/screenshots/03-preview.png`  |

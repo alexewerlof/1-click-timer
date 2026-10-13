@@ -39,6 +39,7 @@
     "homepage": "https://github.com/alexewerlof/1-click-timer#readme",
     "devDependencies": {
         "@eslint/js": "^10.0.1",
+        "@resvg/resvg-js": "^2.6.2",
         "@types/chrome": "^0.2.9",
         "@types/node": "^26.6.5",
         "@types/react": "^19.3.0",

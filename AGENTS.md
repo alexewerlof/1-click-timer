@@ -19,6 +19,8 @@ A Chrome extension that provides a one-click countdown timer with a visual dial 
 - **Lucide** (`lucide-react`) for control icons
 - **Manifest V3** with an ES module service worker
 - **Vitest** — node unit tests plus browser-mode visual (screenshot) tests
+- **`@resvg/resvg-js`** — rasterises the one committed icon SVG into every PNG
+  size Chrome asks for, at build time
 
 ## The other docs
 
@@ -96,8 +98,9 @@ termination. The UI never accumulates time.
   about once a minute at best, so a per-second badge would drift. The text is
   `floor(remaining / 60)` with no `m` suffix, and its colour is the fraction of
   the *running* timer that is left (green → orange → red), computed in
-  `background/badge.ts`. While `expired` the badge is cleared and the bell icon
-  rings instead.
+  `background/badge.ts`. While `expired` the badge is cleared and the toolbar
+  keeps its normal icon: the alert is the notification, plus the chime the UI
+  plays.
 - The dial counts **counter-clockwise**: 0 at 12 o'clock, 5 at 11, 55 at 1, and
   half the dial at the bottom. The uniform 0–60 mapping puts **30** there — not 40,
   which an earlier draft of the spec claimed while contradicting its own 5/55
@@ -147,10 +150,16 @@ termination. The UI never accumulates time.
   asset in the repo. `useAlarmSound` rings the chosen chime while the status is
   `expired` and not muted. The worker only raises the notification — it has no
   audio output.
-- `images/` holds only live files — the `logo*.png` set that the manifest, the
-  toolbar icon states in `background/index.ts` and the notification use. The
-  pre-React popup's `bell.svg`/`reset.svg` were removed; a ringing overlay should
-  use the Lucide `Bell` icon, like every other control.
+- **The app icon is generated, the UI icons are Lucide.** `images/icon.svg` is
+the only committed icon art (100×100). `npm run build` rasterises it into the six
+PNG sizes Chrome wants — 16, 19, 32, 38, 48 and 128 — straight into `dist/`, so
+the PNGs are build artifacts and not in the repo; `scripts/icons/render.ts` does
+the rasterising and `shared/icons.ts` is the one list of sizes and paths. The
+build fails if `manifest.json` names an icon it does not produce. `images/` holds
+nothing else now: the pre-React popup's `bell.svg`/`reset.svg` and the hand-made
+`logo*.png` set are gone, and so is the `vector/` folder they came from. A
+ringing overlay in the UI should use the Lucide `Bell` icon, like every other
+control.
 - `dist/` is the real extension now: load it unpacked and the timer persists,
   badges and rings.
 - `npm run dev` serves `src/` as the web root, so dev URLs match the built
@@ -175,16 +184,22 @@ Known loose ends, none blocking:
   puts 30 there.
 - The alarm rings only while a timer surface is open (audio is played in the UI,
   not the worker); with the popup closed only the notification fires.
+- **`chrome.action.setIcon` wants absolute URLs.** `background/index.ts` wraps its
+  paths in `chrome.runtime.getURL()`: a path relative to the install directory is
+  rejected with "Failed to fetch" for an unpacked extension, even though the same
+  file fetches fine from the worker. The rejection is caught and logged rather
+  than thrown, so a regression here is quiet — the manifest's `default_icon`
+  covers for it and the toolbar keeps its normal art.
+- **The icon's ring is a hairline.** At 100 units the stroke is 2.655 wide, so it
+  rasterises to well under a pixel at 16 and 19 — the red sector carries those
+  sizes and the dial reads only as a suggestion. Redrawing the source with a
+  heavier ring is the fix; a thicker stroke would change the 128px art too.
 
 Decisions still open, none blocking:
 
 - **The store link.** `README.md` says to install from the Chrome Web Store but
   carries no URL: the listing was never recorded in the repo, and 5.0.0 is not
   published yet. Add the link once it is.
-- **`vector/` still holds pre-v5 art** (`bell.svg`, `reset.svg`, `prototype.ai`).
-  The ringing overlay will use the Lucide `Bell` and the hand-drawn controls are
-  gone, so these are probably dead — but `vector/logo.ai` is the only editable
-  source of the live logo, so the folder was left alone.
 - **`dashboard/` is now empty** apart from the gitignored `package/` folder that
   `npm run deploy` writes. Either keep it (the v4 convention) or move the release
   ZIPs to a root `packages/`.

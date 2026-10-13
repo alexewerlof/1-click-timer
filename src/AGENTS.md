@@ -2,8 +2,9 @@
 
 Layers, deliberately separate:
 
-1. **`shared/`** — the timer protocol (record, reducer, storage keys) shared by
-   the worker and the UI, so both agree on what an action does.
+1. **`shared/`** — what the worker and the UI must agree on: the timer protocol
+   (record, reducer, storage keys), so both agree on what an action does, and the
+   icon set (`icons.ts`), so the worker and the build name the same files.
 2. **`background/`** — the service worker. Framework-free TypeScript; no React.
 3. **`app/runtime/`** — the contracts the UI talks to (time, and settings).
 4. **`app/`** — the React UI. Presentation only; it never keeps time itself.
@@ -38,7 +39,8 @@ one dial face; the multi-variant experiment is over.
 | `app/runtime/useTimerState.ts`      | `useSyncExternalStore` binding.                                                                                           |
 | `background/index.ts`               | Service worker: the single writer of the timer record, alarms, badge/icon, notifications, messages.          |
 | `background/badge.ts`               | The toolbar badge: whole minutes left as text, and the green→orange→red colour for the fraction of the running timer that is left. Pure (no `chrome.*`), so `npm test` covers it; the worker only applies the plan. |
-| `images/`                           | Extension icons (toolbar/store). Copied verbatim into `dist/`.                                              |
+| `images/`                           | The app icon's source art, `icon.svg` — the only committed icon file. The PNGs Chrome loads are rasterised from it at build time (see "Build pipeline").                                              |
+| `shared/icons.ts`                   | The icon sizes (`ICON_SIZES`), the tool 19/38 split, and the paths both the worker and the build resolve through `iconPathFor`.                                               |
 
 ### Added in Phase 3
 
@@ -132,7 +134,15 @@ one dial face; the multi-variant experiment is over.
   `TimerApp`; only `data-surface` changes the sizing.
 - **Icons are Lucide**, not hand-drawn SVG — conventional glyphs and one source
   of truth for stroke weight. Lucide carries no brand marks, so the source-code
-  button uses `SquareCode`: there is no `Github` icon to reach for.
+  button uses `SquareCode`: there is no `Github` icon to reach for. The one
+  exception is the *app* icon, which is a brand mark: it is `images/icon.svg`, the
+  art the build rasterises.
+- **One icon source, generated sizes.** `images/icon.svg` is committed; the six
+  PNGs Chrome asks for are build artifacts in `dist/`. Sizes and paths live in
+  `shared/icons.ts`, and `vite.config.ts`'s `iconAssets` plugin rasterises them
+  (`scripts/icons/render.ts`) and refuses to build if `manifest.json` names an
+  icon it did not produce. In dev the plugin serves the same URLs from memory,
+  so the pages' favicon works without a build.
 - **The creator mark is inlined art.** `CreatorMark` embeds the Alex Ewerlöf
   wordmark's paths (from the old `alexewerlof-logo.svg`, now deleted) and fills
   them with `--dial-mark`, so it recolours with the numerals and ticks. Filled,
@@ -177,3 +187,10 @@ one dial face; the multi-variant experiment is over.
 bundles `popup.html`, `fullscreen.html`, `settings.html` and `background/index.ts`, then the
 `extensionAssets` plugin copies `manifest.json` and `images/` into
 `dist/`.
+
+The `iconAssets` plugin runs alongside it: it rasterises `images/icon.svg` into
+`images/icon<n>.png` for every size in `ICON_SIZES` (`scripts/icons/render.ts`),
+writes them into `dist/images/`, and fails the build if `manifest.json` names an
+icon it does not produce, or names one whose size key disagrees with the file. The
+dev server answers those same URLs from memory, because `src/` is the web root
+there and a page requests its favicon whether or not anything was built.

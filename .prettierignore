@@ -2,7 +2,7 @@ node_modules/
 dist/
 .agents/
 dashboard/
-vector/
 **/*.md
 **/*.html
+**/*.svg
 package-lock.json

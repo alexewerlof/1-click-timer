@@ -8,6 +8,7 @@
  * the split the README describes.
  */
 
+import { iconPathFor } from '../shared/icons'
 import {
     expireIfElapsed,
     normalizeTimerRecord,
@@ -29,10 +30,23 @@ const NOTIFICATION_ID = '1ct-timeup'
 /** 30 s is the shortest repeating alarm Chrome allows; the badge is minute-accurate. */
 const TICK_PERIOD_MINUTES = 0.5
 
-/** The bell glyph flips on this cadence while the alarm rings. */
-const BELL_MS = 500
-
 const BASE_TITLE = '1-click timer'
+
+/**
+ * The toolbar icon, in both the 1x and the 2x size, so Chrome picks the file
+ * that matches the display instead of scaling the small one.
+ *
+ * The paths are absolute: `setIcon` rejects a path relative to the install
+ * directory with "Failed to fetch" when the extension is loaded unpacked, even
+ * though the same file fetches fine from the worker.
+ */
+const TOOLBAR_ICON: Record<number, string> = {
+    19: chrome.runtime.getURL(iconPathFor(19)),
+    38: chrome.runtime.getURL(iconPathFor(38)),
+}
+
+/** The icon the "time is up" notification carries. */
+const NOTIFICATION_ICON = iconPathFor(128)
 
 // ---- Storage --------------------------------------------------------
 
@@ -65,30 +79,10 @@ function setTitle(title: string): void {
     })
 }
 
-function setIcon(name: string): void {
-    chrome.action.setIcon({ path: `images/${name}.png` }).catch((error: Error) => {
-        console.warn(LOG_PREFIX, `setIcon failed for "${name}":`, error.message)
+function setToolbarIcon(): void {
+    chrome.action.setIcon({ path: TOOLBAR_ICON }).catch((error: Error) => {
+        console.warn(LOG_PREFIX, 'setIcon failed:', error.message)
     })
-}
-
-let bellTimer: ReturnType<typeof setInterval> | null = null
-let bellInverse = false
-
-function stopBell(): void {
-    if (bellTimer !== null) {
-        clearInterval(bellTimer)
-        bellTimer = null
-    }
-}
-
-function startBell(): void {
-    if (bellTimer !== null) return
-    bellInverse = false
-    setIcon('logo19_bell')
-    bellTimer = setInterval(() => {
-        bellInverse = !bellInverse
-        setIcon(bellInverse ? 'logo19_bell_inverse' : 'logo19_bell')
-    }, BELL_MS)
 }
 
 function formatMMSS(seconds: number): string {
@@ -116,26 +110,24 @@ function describeBadge(record: TimerRecord, remaining: number): void {
     const badge = badgePlanFor(record, remaining)
     setBadge(badge.text)
     setBadgeColor(badge.color)
+    setToolbarIcon()
 
     switch (record.status) {
         case 'running':
-            setIcon('logo19')
             setTitle(formatMMSS(remaining))
             return
 
         case 'paused':
-            setIcon('logo19')
             setTitle(`Paused · ${formatMMSS(remaining)}`)
             return
 
         case 'expired':
-            // The bell is the "time is up" signal; the badge itself is cleared.
-            startBell()
+            // The badge is already cleared; the cue is the notification, plus the
+            // chime the UI plays while a timer surface is open.
             setTitle('Time is up')
             return
 
         default:
-            setIcon('logo19')
             setTitle(BASE_TITLE)
     }
 }
@@ -143,7 +135,6 @@ function describeBadge(record: TimerRecord, remaining: number): void {
 async function updateBadge(record: TimerRecord): Promise<void> {
     const now = Date.now()
     const resolved = expireIfElapsed(record, now)
-    if (resolved.status !== 'expired') stopBell()
     describeBadge(resolved, remainingFrom(resolved, now))
 }
 
@@ -164,7 +155,7 @@ function notifyElapsed(record: TimerRecord): void {
     chrome.notifications
         .create(NOTIFICATION_ID, {
             type: 'basic' as chrome.notifications.TemplateType,
-            iconUrl: chrome.runtime.getURL('images/logo128.png'),
+            iconUrl: chrome.runtime.getURL(NOTIFICATION_ICON),
             title: BASE_TITLE,
             message: `Time is up — ${describeDuration(record.durationSeconds)}.`,
             priority: 2,
@@ -235,10 +226,9 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 })
 
 chrome.notifications.onClicked.addListener(() => {
-    console.log(LOG_PREFIX, 'notification clicked → dismiss the bell')
-    stopBell()
+    console.log(LOG_PREFIX, 'notification clicked → restore the quiet toolbar')
     setBadge('')
-    setIcon('logo19')
+    setToolbarIcon()
     setTitle(BASE_TITLE)
 })
 
@@ -260,10 +250,9 @@ async function startup(): Promise<void> {
     }
 
     if (record.status === 'expired') {
-        // Already rang earlier; restore the quiet icon rather than alarming again.
-        stopBell()
+        // Already rang earlier; restore the quiet toolbar rather than alarming again.
         setBadge('')
-        setIcon('logo19')
+        setToolbarIcon()
         setTitle(BASE_TITLE)
         return
     }

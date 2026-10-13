@@ -63,7 +63,8 @@ src/
                        chrome and a mock implementation each
   shared/              the timer protocol shared by the UI and the worker
   background/          the service worker (framework-free TypeScript)
-  images/              toolbar and store icons
+  images/              icon.svg — the source art the build rasterises into
+                       every PNG size Chrome loads
 ```
 
 `src/AGENTS.md` documents the files in detail, and `AGENTS.md` covers the
