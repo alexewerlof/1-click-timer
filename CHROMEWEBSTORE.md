@@ -115,7 +115,7 @@ order to upload.
    the readout showing the time left. This is the shot that explains the product.
 3. **Previewing** — the pointer on the disc mid-hover, showing the preview arc,
    the preview numeral, and the ring it replaces gone.
-4. **The popup** — the face at its true 380×420 on a plain backdrop, so the
+4. **The popup** — the face at its true 380×380 on a plain backdrop, so the
    listing shows the panel a user actually clicks. No browser or device chrome is
    drawn around it.
 5. **Settings screen** — appearance, alarm and the colour slots, which also shows

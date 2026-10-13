@@ -41,7 +41,7 @@ const AWAY = { x: 6, y: SHOT.height - 6 }
 
 /**
  * The screenshots sit on a plain backdrop rather than in a browser frame: the
- * popup is a real 380×420 panel, and no device mockup is added around it (the
+ * popup is a real 380×380 panel, and no device mockup is added around it (the
  * store's review checklist counts invented chrome as misleading).
  */
 const POPUP_FRAME = `
@@ -191,7 +191,7 @@ try {
     await face.mouse.move(AWAY.x, AWAY.y)
     await face.close()
 
-    // 4 — the popup at its true 380×420, on a plain backdrop. The timer is still
+    // 4 — the popup at its true 380×380, on a plain backdrop. The timer is still
     // running, because the timer lives in the worker and both surfaces read it.
     const popup = await context.newPage()
     await popup.setViewportSize(SHOT)

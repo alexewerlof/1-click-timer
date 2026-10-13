@@ -48,9 +48,14 @@ button {
     height: 100%;
 }
 
+/*
+ * The popup panel is square, like the dial's viewBox: the SVG fits its square
+ * into the slot and centres the leftover, so any extra height becomes dead
+ * space above 0 and below 30. A square panel leaves the dial flush.
+ */
 [data-surface='popup'] #root {
     width: 380px;
-    height: 420px;
+    height: 380px;
 }
 
 [data-surface='fullscreen'] #root {

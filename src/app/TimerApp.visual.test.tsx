@@ -17,9 +17,9 @@ import { SECONDS_PER_MINUTE } from './lib/time'
 import { createMockRuntime } from './runtime/mockRuntime'
 import type { TimerStatus } from './runtime/types'
 
-/** The popup panel size from `design/global.css`. */
+/** The square popup panel size from `design/global.css`. */
 const POPUP_WIDTH = 380
-const POPUP_HEIGHT = 420
+const POPUP_HEIGHT = 380
 
 /**
  * The face is the one thing that must be judged visually, so each state gets a
