@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Expand, Maximize, Settings, Shrink, TimerOff, Volume2, VolumeOff } from 'lucide-react'
+import { Expand, FolderPlus, Settings, Shrink, TimerOff, Volume2, VolumeOff } from 'lucide-react'
 import type { Surface } from '../../lib/surface'
 import { useDocumentFullscreen } from '../../lib/useDocumentFullscreen'
 import type { TimerStatus } from '../../runtime/types'
@@ -41,7 +41,7 @@ interface FullscreenAction {
  * expand on the way in, shrink on the way back (AGENTS.md "Full screen").
  */
 function fullscreenAction(surface: Surface, nativeFullscreen: boolean): FullscreenAction {
-    if (surface === 'popup') return { label: 'Open in a tab', Icon: Maximize }
+    if (surface === 'popup') return { label: 'Open in a tab', Icon: FolderPlus }
     if (nativeFullscreen) return { label: 'Exit full screen', Icon: Shrink }
     return { label: 'Full screen', Icon: Expand }
 }
