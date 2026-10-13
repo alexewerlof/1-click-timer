@@ -208,21 +208,38 @@ test('starts a timer for the clicked numeral', async () => {
 })
 
 /**
- * The 0 numeral marks a whole turn — it sits where the preview numeral shows 60
- * — so clicking it starts 60 minutes rather than the nothing a 0-minute timer
- * would be.
+ * The 0 numeral marks where a whole turn ends, so it is the reset control: a
+ * click resets the timer — the same action as the corner Reset — rather than
+ * starting a 0-minute one (AGENTS.md "Set a custom timer").
  */
-test('starts 60 minutes from the 0 numeral', async () => {
+test('resets the timer from the 0 numeral', async () => {
     const runtime = createMockRuntime()
-    runtime.forceStatus('idle')
+    runtime.forceStatus('running')
     const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} />))
 
     const svg = screen.getByRole('slider').element() as SVGSVGElement
     await page.elementLocator(numeralElement(svg, 0)).click()
 
-    expect(runtime.getState().status).toBe('running')
-    expect(runtime.getState().durationSeconds).toBe(60 * SECONDS_PER_MINUTE)
-    runtime.reset()
+    expect(runtime.getState().status).toBe('idle')
+    expect(runtime.getState().remainingSeconds).toBe(0)
+    expect(runtime.getState().lastDurationSeconds).toBeNull()
+})
+
+/**
+ * Reset from the 0 numeral silences a ringing alarm too, like the corner Reset:
+ * the record's `ringUntil` is cleared, so the sound stops (AGENTS.md "Set a
+ * custom timer").
+ */
+test('resets a ringing alarm from the 0 numeral', async () => {
+    const runtime = createMockRuntime()
+    runtime.forceStatus('expired')
+    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} />))
+
+    const svg = screen.getByRole('slider').element() as SVGSVGElement
+    await page.elementLocator(numeralElement(svg, 0)).click()
+
+    expect(runtime.getState().status).toBe('idle')
+    expect(runtime.getState().lastDurationSeconds).toBeNull()
 })
 
 /**

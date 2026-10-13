@@ -111,10 +111,12 @@ and the `offscreen` permission to the manifest.
   the numerals sit outside the disc, on their own ring, so the fill can never
   reach them.
 - **One click sets a timer.** Clicking the disc starts the previewed duration;
-  clicking a numeral starts that many minutes outright (the 0 numeral marks a
-  whole turn, so it starts 60). A numeral carries `data-numeral-minutes`, which
-  is how the click is resolved (`handleClick` in `TimerFace`) — the pointer's
-  position cannot identify a numeral because it sits off the disc.
+  clicking a numeral starts that many minutes outright. The 0 numeral is the
+  exception: it marks where a whole turn ends, so it resets the timer — the same
+  action as the corner Reset — rather than starting a 0-minute one. A numeral
+  carries `data-numeral-minutes`, which is how the click is resolved
+  (`handleClick` in `TimerFace`) — the pointer's position cannot identify a
+  numeral because it sits off the disc.
   `pointer-events: bounding-box` (see `TimerFace.module.css`) gives each numeral
   a solid hit area, and hovering one takes `--remaining` — the same interactive
   signal the preview arc and preview numeral use. Nothing asks for confirmation,

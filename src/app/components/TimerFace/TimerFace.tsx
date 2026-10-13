@@ -31,6 +31,12 @@ import styles from './TimerFace.module.css'
 const FINE_STEP = 1
 const COARSE_STEP = 5
 
+/**
+ * The 0 numeral marks where a whole turn ends, so it is the reset control
+ * rather than a 0-minute timer (AGENTS.md "Set a custom timer").
+ */
+const RESET_NUMERAL_MINUTES = 0
+
 export interface TimerFaceProps {
     status: TimerStatus
     remainingSeconds: number
@@ -40,6 +46,8 @@ export interface TimerFaceProps {
     onTogglePause: () => void
     /** Re-run the last duration, from the control shown while ringing. */
     onRestart: () => void
+    /** Reset to idle and silence any ringing alarm, from the 0 numeral. */
+    onReset: () => void
 }
 
 function clampMinutes(minutes: number): number {
@@ -48,8 +56,9 @@ function clampMinutes(minutes: number): number {
 
 /**
  * The face: hover or click the dial to set a timer, or click a numeral to start
- * that many minutes outright — the 0 numeral, which marks a whole turn, starts
- * 60 (AGENTS.md "Set a custom timer").
+ * that many minutes outright. The 0 numeral marks where a whole turn ends, so it
+ * resets the timer instead — the same action as the corner Reset (AGENTS.md "Set
+ * a custom timer").
  *
  * Exposed as a slider so the disc action is reachable from the keyboard —
  * arrows move counter-clockwise (more time) and clockwise (less time), shift
@@ -58,7 +67,7 @@ function clampMinutes(minutes: number): number {
  * The readout disc carries its own control (`ReadoutControl`), a real HTML button
  * overlaid on the face rather than drawn in it.
  */
-export function TimerFace({ status, remainingSeconds, onPick, onTogglePause, onRestart }: TimerFaceProps) {
+export function TimerFace({ status, remainingSeconds, onPick, onTogglePause, onRestart, onReset }: TimerFaceProps) {
     const svgRef = useRef<SVGSVGElement>(null)
     const [previewMinutes, setPreviewMinutes] = useState<number | null>(null)
 
@@ -81,21 +90,15 @@ export function TimerFace({ status, remainingSeconds, onPick, onTogglePause, onR
     }
 
     /**
-     * The duration in minutes of the numeral a click landed on, or null when it
-     * did not land on one. Read from `data-numeral-minutes` rather than the
-     * pointer's position, because a numeral sits outside the disc (see
-     * `dialChrome`).
-     *
-     * The 0 numeral marks a whole turn: it sits where the preview numeral shows
-     * 60 (AGENTS.md "Preview numeral"), so it starts 60 minutes rather than the
-     * nothing a 0-minute timer would be.
+     * The minute of the numeral a click landed on, or null when it did not land
+     * on one. Read from `data-numeral-minutes` rather than the pointer's
+     * position, because a numeral sits outside the disc (see `dialChrome`).
      */
-    function numeralDurationAt(target: EventTarget | null): number | null {
+    function numeralMinutesAt(target: EventTarget | null): number | null {
         if (!(target instanceof Element)) return null
         const label = target.closest('[data-numeral-minutes]')?.getAttribute('data-numeral-minutes')
         if (label === null || label === undefined) return null
-        const minutes = Number(label)
-        return minutes === 0 ? MINUTES_PER_TURN : minutes
+        return Number(label)
     }
 
     function handlePointerMove(event: PointerEventType<SVGSVGElement>) {
@@ -107,9 +110,15 @@ export function TimerFace({ status, remainingSeconds, onPick, onTogglePause, onR
     }
 
     function handleClick(event: ReactMouseEvent<SVGSVGElement>) {
-        const numeral = numeralDurationAt(event.target)
+        const numeral = numeralMinutesAt(event.target)
         if (numeral !== null) {
-            // A numeral is a one-click shortcut to its own duration.
+            // The 0 numeral marks a whole turn, where a timer would end, so it
+            // resets. Every other numeral is a one-click shortcut to its own
+            // duration.
+            if (numeral === RESET_NUMERAL_MINUTES) {
+                onReset()
+                return
+            }
             pick(numeral)
             return
         }

@@ -41,6 +41,7 @@ export function TimerApp({ surface, runtime }: TimerAppProps) {
                         onPick={startTimer}
                         onTogglePause={() => runtime.togglePause()}
                         onRestart={() => runtime.restart()}
+                        onReset={() => runtime.reset()}
                     />
                 </div>
 

@@ -30,7 +30,8 @@ middle. The face draws a preview arc showing the duration you are choosing, with
 its numeral at the end of the arc. Click to start it.
 
 To skip the dial, click a numeral on the ring and the timer starts at that many
-minutes. The 0 marks a whole turn, so it starts 60 minutes.
+minutes. The 0 is the exception: it marks where a whole turn ends, so clicking it
+resets the timer, like the reset control in the corner.
 
 Setting a timer is always one click, even while another timer is already running.
 

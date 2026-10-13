@@ -57,7 +57,7 @@ face.
 | **Tick**             | A short line marking a single minute.                                                                                                                                          |
 | **Minor tick**       | A tick on a minute that is not a multiple of five.                                                                                                                             |
 | **Major tick**       | The thicker tick on each multiple of five (0, 5, 10, … 55).                                                                                                                    |
-| **Numeral**          | The number printed beside a major tick: 0, 5, 10, … 55. Each is itself a one-click shortcut to its own duration.                                                                 |
+| **Numeral**          | The number printed beside a major tick: 0, 5, 10, … 55. Each is itself a one-click shortcut to its own duration — except 0, which resets the timer, like the Reset control.                                                                 |
 | **Numeral ring**     | The circle the numerals sit on, just outside the ticks.                                                                                                                        |
 | **Remaining sector** | The filled wedge. It runs from 12 o'clock counter-clockwise to the current remaining time and reaches the centre, so its size is the time left.                                 |
 | **Preview arc**      | The unfilled outline from 12 o'clock to the minute under the pointer. It shows what a click would start.                                                                        |
