@@ -13,10 +13,15 @@ import { startChime } from '../app/lib/chimes'
 import { isOffscreenMessage, WORKER_TARGET, type RingEndedMessage } from '../shared/offscreen'
 
 let stopRing: (() => void) | null = null
+let ringTimeout: number | null = null
 
 function silence(): void {
     stopRing?.()
     stopRing = null
+    if (ringTimeout !== null) {
+        window.clearTimeout(ringTimeout)
+        ringTimeout = null
+    }
 }
 
 function reportEnded(): void {
@@ -36,7 +41,8 @@ chrome.runtime.onMessage.addListener((message: unknown) => {
 
     silence()
     stopRing = startChime(message.chime, message.volume)
-    window.setTimeout(() => {
+    ringTimeout = window.setTimeout(() => {
+        ringTimeout = null
         silence()
         reportEnded()
     }, message.seconds * 1000)

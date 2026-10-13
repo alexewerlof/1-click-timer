@@ -55,11 +55,14 @@ to normal when it stops.
 A notification appears, and the timer window — or a new one, if none is open —
 comes to the front so you can see what is ringing.
 
-To silence the alarm, close the notification, or use the timer's own controls (the
-restart glyph on the readout disc, or the reset button in the bottom-left corner).
-Any of these stops the sound and resets the timer, so it will not ring again for
-one you have already acknowledged. Closing the notification or resetting the timer
-also dismisses the notification if it is still showing.
+To silence the alarm you can use the notification's own buttons: **Stop**, and
+**Restart**. Stop silences the alarm and resets the timer — exactly what closing
+the notification does. Restart silences it too, and immediately starts a new
+countdown of the same length. The timer's own controls do the same: the restart
+glyph on the readout disc, or the reset button in the bottom-left corner. Whichever
+you use, the sound stops at once, so an alarm you have acknowledged never rings on.
+Resetting the timer — or dismissing the notification — also clears the notification
+if it is still showing.
 
 ### Mute, reset and full screen
 
@@ -89,7 +92,7 @@ Your settings sync across your own Chrome profiles.
 - Keeps counting when you close the popup or restart Chrome
 - Remaining minutes on the toolbar badge, moving from green through orange to red as time runs out
 - An alarm that rings for a length you choose and sounds even with the popup closed
-- A notification, plus the timer brought to the front, so it is clear what is ringing and how to stop it
+- A notification with **Stop** and **Restart** buttons, plus the timer brought to the front, so it is clear what is ringing and how to stop or repeat it
 - Light and dark appearance, following your system by default
 - A full-screen view for a timer you can watch from across the room
 

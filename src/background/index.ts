@@ -26,6 +26,7 @@ import {
     reduceTimer,
     remainingFrom,
     TIMER_STORAGE_KEY,
+    type TimerAction,
     type TimerRecord,
     type TimerRequest,
     type TimerResponse,
@@ -68,6 +69,17 @@ const ALERT_ICON: Record<number, string> = {
 
 /** The icon the "time is up" notification carries. */
 const NOTIFICATION_ICON = iconPathFor(128)
+
+/**
+ * The "time is up" notification's action buttons, each with the timer action its
+ * click applies. Chrome allows at most two. The order here is the order the OS
+ * lays them out, and the `buttonIndex` `onButtonClicked` reports
+ * (AGENTS.md "Notification").
+ */
+const NOTIFICATION_BUTTONS: ReadonlyArray<{ title: string; action: TimerAction }> = [
+    { title: 'Stop', action: 'reset' },
+    { title: 'Restart', action: 'restart' },
+]
 
 // ---- Storage --------------------------------------------------------
 
@@ -203,7 +215,17 @@ async function syncAlarms(record: TimerRecord): Promise<void> {
 
 // ---- Notification ---------------------------------------------------
 
+/**
+ * Set synchronously when a notification button is pressed. The press dismisses
+ * the notice, which fires `onClosed` right after `onButtonClicked`; this flag
+ * keeps that close from also running the close handler — which would, for
+ * Restart, immediately undo the timer the button just started. Reset when a
+ * fresh notice is raised.
+ */
+let notificationButtonHandled = false
+
 function notifyElapsed(record: TimerRecord, ring: boolean): void {
+    notificationButtonHandled = false
     chrome.notifications
         .create(NOTIFICATION_ID, {
             type: 'basic' as chrome.notifications.TemplateType,
@@ -215,6 +237,9 @@ function notifyElapsed(record: TimerRecord, ring: boolean): void {
             // resets the timer, and clicking it brings the timer to the front.
             priority: 2,
             requireInteraction: true,
+            // Stop and Restart — the same two choices the timer's own controls
+            // offer, without needing a surface.
+            buttons: NOTIFICATION_BUTTONS.map(({ title }) => ({ title })),
             // Suppress the system sound only when our own chime is playing.
             silent: ring,
         })
@@ -230,6 +255,13 @@ function clearNotification(): void {
 }
 
 // ---- Offscreen audio ------------------------------------------------
+
+/**
+ * How long to wait before closing the offscreen document after silencing it.
+ * Long enough for the chime's own fade to finish (`chimes.ts` fades the master
+ * gain out over ~200 ms), because tearing the document down mid-fade clicks.
+ */
+const OFFSCREEN_CLOSE_DELAY_MS = 300
 
 let creatingOffscreen: Promise<void> | null = null
 
@@ -277,7 +309,25 @@ async function startRing(record: TimerRecord, settings: TimerSettings): Promise<
     }
 }
 
-/** Silences the alarm if an offscreen document is open to silence. */
+/**
+ * Closes the offscreen document once the chime's fade has finished, so the
+ * extension is not left holding an audio-capable page after the alarm is done.
+ * A document that outlives its ring only lingers: Chrome keeps an
+ * `AUDIO_PLAYBACK` document for 30 s without audio, and the page's own ring-end
+ * timer would wake the worker for a ring that is already over.
+ */
+function scheduleOffscreenClose(): void {
+    setTimeout(() => {
+        void chrome.offscreen.closeDocument().catch(() => {
+            // Nothing open to close: already gone, or never created.
+        })
+    }, OFFSCREEN_CLOSE_DELAY_MS)
+}
+
+/**
+ * Silences the alarm and schedules the offscreen document to close, so the
+ * extension is idle once the alarm has been acknowledged.
+ */
 async function stopRing(): Promise<void> {
     try {
         if (!(await hasOffscreenDocument())) return
@@ -286,6 +336,7 @@ async function stopRing(): Promise<void> {
     } catch (error) {
         console.warn(LOG_PREFIX, 'could not stop the alarm:', (error as Error).message)
     }
+    scheduleOffscreenClose()
 }
 
 // ---- Surfaces -------------------------------------------------------
@@ -360,6 +411,9 @@ async function handleTick(): Promise<void> {
 /** The offscreen document finished its ring on its own: drop the alert. */
 async function handleRingEnded(): Promise<void> {
     const record = await readRecord()
+    // Nothing left to silence — the page already stopped — but close it so the
+    // extension is not left holding an audio-capable document.
+    scheduleOffscreenClose()
     if (record.ringUntil === null) return
     const next: TimerRecord = { ...record, ringUntil: null }
     await writeRecord(next)
@@ -367,13 +421,14 @@ async function handleRingEnded(): Promise<void> {
 }
 
 /**
- * The user dismissed the alarm (by closing its notification): stop the sound,
- * clear the notification and reset the timer to idle, so it never rings again
- * for a timer they have already acknowledged.
+ * Acknowledges the alarm: apply `action` to the expired timer, silence the sound
+ * and dismiss the notice. Stop (and simply closing the notification) resets the
+ * timer, so it never rings again for a timer already acknowledged; Restart runs
+ * the last duration again. Either way the ring is stopped immediately.
  */
-async function dismissAlarm(): Promise<void> {
+async function resolveAlarm(action: TimerAction): Promise<void> {
     const record = await readRecord()
-    const next = disarmRing(reduceTimer(record, { action: 'reset' }, Date.now()))
+    const next = disarmRing(reduceTimer(record, { action }, Date.now()))
     await writeRecord(next)
     await syncAlarms(next)
     await stopRing()
@@ -443,12 +498,30 @@ chrome.notifications.onClicked.addListener(() => {
     void bringSurfaceForward()
 })
 
+chrome.notifications.onButtonClicked.addListener((notificationId, buttonIndex) => {
+    if (notificationId !== NOTIFICATION_ID) return
+    const button = NOTIFICATION_BUTTONS[buttonIndex]
+    if (button === undefined) return
+    // Set before the async work so the close that follows the press is swallowed.
+    notificationButtonHandled = true
+    console.log(LOG_PREFIX, `notification button → ${button.title}`)
+    void resolveAlarm(button.action)
+})
+
 chrome.notifications.onClosed.addListener((notificationId, byUser) => {
+    if (notificationId !== NOTIFICATION_ID) return
+    // A button press dismisses the notice too. It has already acted (Stop or
+    // Restart), so swallow the close that follows instead of resetting over it.
+    // `onButtonClicked` fires first, so the flag is already set.
+    if (notificationButtonHandled) {
+        notificationButtonHandled = false
+        return
+    }
     // `byUser` is false when the extension itself clears the notification, so
     // only a real dismissal resets the timer.
-    if (notificationId !== NOTIFICATION_ID || !byUser) return
-    console.log(LOG_PREFIX, 'notification dismissed → dismiss the alarm')
-    void dismissAlarm()
+    if (!byUser) return
+    console.log(LOG_PREFIX, 'notification dismissed → stop the alarm and reset')
+    void resolveAlarm('reset')
 })
 
 // ---- Startup --------------------------------------------------------

@@ -7,8 +7,10 @@ A Chrome extension that provides a one-click countdown timer with a visual dial 
 > popup and restarting Chrome; the toolbar badge counts down and `chrome.alarms`
 > raise the notification. The alarm sound is played by an offscreen document, so
 > it rings even with no timer surface open, for a length the settings choose; the
-> notification stays until it is closed, and closing it — or the timer's own
-> controls — silences the alarm and resets the timer. On expiry the worker brings a
+> notification stays until it is closed; its **Stop** and **Restart** buttons let the
+> alarm be handled without opening a surface — Stop, like closing the notice,
+> silences the ring and resets the timer, while Restart silences it and runs the
+> last duration again. On expiry the worker brings a
 > timer surface to the front (focusing the fullscreen tab if one is open, raising
 > its window), and the toolbar shows a red alert icon while the alarm rings. The UI
 > talks to the runtime through `TimerRuntime`; a plain browser (`npm run dev`) falls
@@ -160,14 +162,25 @@ termination. The UI never accumulates time.
   (`offscreen/offscreen.ts`), which the worker creates, because an MV3 worker has
   no `AudioContext`. The worker sends a `ring` message for the settings' ring
   length; the page stops itself and reports `ring-ended`, so the alert icon is
-  dropped without anything polling. The settings screen previews a chime in its own
+  dropped without anything polling. The worker closes that document once the ring
+  is over — on `ring-ended`, or `OFFSCREEN_CLOSE_DELAY_MS` after it silences the
+  alarm — because an `AUDIO_PLAYBACK` document otherwise lingers (Chrome keeps it
+  for 30 s without audio) and its pending end timer would wake the worker for a
+  ring that is already finished. The delay lets the chime's own fade finish, since
+  closing the page mid-fade clicks. The settings screen previews a chime in its own
   page, from a real click.
 - **The notification is the control when no surface is open.** It sets
-  `requireInteraction` so it stays put until the user acts: closing it resets the
-  timer, and clicking its body brings the timer to the front. `onClosed` (only when
+  `requireInteraction` so it stays put until the user acts, and carries two
+  buttons — **Stop** (reset) and **Restart** (run the last duration again) — both
+  of which stop the ring at once; clicking its body brings the timer to the front.
+  Dismissing the notice is the Stop action. `onClosed` (only when
   `byUser`, so our own `clear` is ignored) **resets the timer to idle** — so
   dismissing the notice can never leave a ring for a timer the user has
-  acknowledged. The ring's end time is the record's `ringUntil`, an absolute ms
+  acknowledged. A button press dismisses the notice too, so `onButtonClicked` sets
+  an in-memory `notificationButtonHandled` flag (cleared when a fresh notice is
+  raised) that `onClosed` consumes instead of resetting — without it, Restart's own
+  close would immediately undo the timer it just started (`onButtonClicked` fires
+  before `onClosed`). The ring's end time is the record's `ringUntil`, an absolute ms
   stamp (not a countdown), so it survives service-worker termination like `endTime`.
 - **Expiry is handled once.** `handleTimeup` guards against the timeup alarm and
   the periodic tick both noticing the same expiry (they run across `await`s, so

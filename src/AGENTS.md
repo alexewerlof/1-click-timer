@@ -71,7 +71,7 @@ one dial face; the multi-variant experiment is over.
 
 | Path                                          | Role                                                                       |
 | --------------------------------------------- | -------------------------------------------------------------------------- |
-| `offscreen/offscreen.ts`                      | The hidden page that plays the alarm. Imports `startChime` from `app/lib/chimes.ts`, rings for the requested seconds, then reports `ring-ended`. |
+| `offscreen/offscreen.ts`                      | The hidden page that plays the alarm. Imports `startChime` from `app/lib/chimes.ts`, rings for the requested seconds, then reports `ring-ended`. A `stop` silences it and cancels that end timer, so a stopped ring never reports a stale `ring-ended`. |
 | `images/icon-alert.svg`                       | The toolbar's alert art, shown while the alarm rings.                       |
 
 The alarm work also added `ringUntil` to the record, `alarmSeconds` to `TimerSettings`,
@@ -176,7 +176,9 @@ and the `offscreen` permission to the manifest.
   `ringUntil` from the settings, tells the offscreen document to ring
   (`shared/offscreen.ts`), and brings a timer surface forward. The UI plays no
   alarm sound at all — so there is exactly one ring, and no double sound when a
-  surface happens to be open.
+  surface happens to be open. The notification's Stop and Restart buttons, and its
+  dismissal, are handled here too, through `resolveAlarm`, so a button and the
+  timer's own controls share one path.
 - **The timer is an absolute `endTime`.** Remaining seconds are always derived,
   never accumulated, so it survives service-worker termination;
   `expireIfElapsed` resolves a run-out timer to `expired` at read time on both
