@@ -44,6 +44,18 @@ button {
     outline-offset: 2px;
 }
 
+/*
+ * Only keyboard focus draws a ring. A mouse click focuses whatever it lands on,
+ * and the browser then paints its own default ring — an unrounded amber
+ * rectangle, not the app's rounded accent one above. The `:focus-visible` rules
+ * deliberately reserve the ring for the keyboard, so cancel the UA ring wherever
+ * focus is not `:focus-visible` (the timer face is a `role="slider"` `<svg>`,
+ * which is focused by every click on the dial).
+ */
+:focus:not(:focus-visible) {
+    outline: none;
+}
+
 #root {
     height: 100%;
 }

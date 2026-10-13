@@ -146,6 +146,13 @@ termination. The UI never accumulates time.
   code and the issue tracker. The outbound URLs and the tab-opening primitive for
   them live in `app/lib/links.ts`; extension pages are opened through
   `shared/surfaces.ts`'s `revealSurface` (which the worker's alarm uses too).
+- **Focus rings are keyboard-only.** The face is a `role="slider"` `<svg>` with
+  `tabindex=0`, so every click focuses it. `design/global.css` draws a ring on
+  `:focus-visible` only and cancels the browser's own default ring with
+  `:focus:not(:focus-visible) { outline: none }` — without that, a mouse click drew
+  the UA's unrounded amber rectangle around the face, on top of the app's rounded
+  accent ring the dial defines in `TimerFace.module.css`. The visual suite pins it
+  (`draws no focus ring on the face when clicked`).
 - **Two runtimes behind one seam.** `runtime.ts` picks `createChromeRuntime()`
   when `isExtension()` (see `app/runtime/platform.ts`) and the mock otherwise;
   `settingsRuntime.ts` does the same for settings. Build the chrome runtimes

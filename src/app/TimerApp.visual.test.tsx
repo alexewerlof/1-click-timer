@@ -592,3 +592,26 @@ test('draws the creator mark in the numerals’ ink', async () => {
 
     expect(getComputedStyle(art).fill).toBe(getComputedStyle(numeralElement(svg, 15)).fill)
 })
+
+/**
+ * Clicking the dial focuses the face (it is a `role="slider"` with `tabindex=0`),
+ * and focus alone must not draw a ring. The `<svg>` used to get the browser's own
+ * default outline — an unrounded amber rectangle, distinct from the app's rounded
+ * accent ring — because only `:focus-visible` was styled; `global.css` now cancels
+ * the default wherever focus is not `:focus-visible`. The ring is reserved for the
+ * keyboard, so clicking the middle of the face leaves it bare.
+ */
+test('draws no focus ring on the face when clicked', async () => {
+    const runtime = createMockRuntime()
+    runtime.forceStatus('idle')
+    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} />))
+
+    const svg = screen.getByRole('slider').element() as SVGSVGElement
+    // The readout disc at the centre starts no timer while idle, so the click
+    // only focuses the face.
+    await page.elementLocator(svg).click()
+
+    expect(document.activeElement).toBe(svg)
+    expect(svg.matches(':focus-visible')).toBe(false)
+    expect(getComputedStyle(svg).outlineStyle).toBe('none')
+})
