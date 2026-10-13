@@ -1,6 +1,6 @@
 {
     "name": "1-click-timer",
-    "version": "5.0.0",
+    "version": "5.1.0",
     "description": "One-click countdown timer: click the dial to start, watch the minutes left on the toolbar badge, and get notified when time is up.",
     "scripts": {
         "dev": "vite",

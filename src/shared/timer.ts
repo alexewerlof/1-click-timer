@@ -24,6 +24,13 @@ export interface TimerRecord {
     durationSeconds: number
     lastDurationSeconds: number | null
     muted: boolean
+    /**
+     * Absolute ms the alarm should stop ringing at, or `null` when it is not
+     * ringing. Armed when the timer runs out, cleared when the user dismisses,
+     * resets or mutes — a timestamp rather than a countdown, so it survives
+     * service-worker termination like `endTime` does.
+     */
+    ringUntil: number | null
 }
 
 export const IDLE_TIMER: TimerRecord = {
@@ -33,9 +40,12 @@ export const IDLE_TIMER: TimerRecord = {
     durationSeconds: 0,
     lastDurationSeconds: null,
     muted: false,
+    ringUntil: null,
 }
 
-export type TimerAction = 'start' | 'pause' | 'resume' | 'togglePause' | 'reset' | 'restart' | 'toggleMute'
+const TIMER_ACTIONS = ['start', 'pause', 'resume', 'togglePause', 'reset', 'restart', 'toggleMute'] as const
+
+export type TimerAction = (typeof TIMER_ACTIONS)[number]
 
 export interface TimerRequest {
     action: TimerAction
@@ -45,6 +55,18 @@ export interface TimerRequest {
 export interface TimerResponse {
     ok: boolean
     error?: string
+}
+
+export function isTimerAction(value: unknown): value is TimerAction {
+    return typeof value === 'string' && (TIMER_ACTIONS as readonly string[]).includes(value)
+}
+
+/**
+ * Whether a message (which may be anything broadcast across the extension's
+ * contexts) is a timer action for the worker to apply.
+ */
+export function isTimerRequest(value: unknown): value is TimerRequest {
+    return typeof value === 'object' && value !== null && isTimerAction((value as Record<string, unknown>).action)
 }
 
 const STATUSES: readonly TimerStatus[] = ['idle', 'running', 'paused', 'expired']
@@ -71,6 +93,7 @@ export function normalizeTimerRecord(raw: unknown): TimerRecord {
                 ? source.lastDurationSeconds
                 : null,
         muted: source.muted === true,
+        ringUntil: typeof source.ringUntil === 'number' && Number.isFinite(source.ringUntil) ? source.ringUntil : null,
     }
 }
 
@@ -102,6 +125,7 @@ function startRecord(record: TimerRecord, seconds: number, now: number): TimerRe
         durationSeconds: duration,
         lastDurationSeconds: duration,
         muted: record.muted,
+        ringUntil: null,
     }
 }
 

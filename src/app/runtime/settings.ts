@@ -8,6 +8,7 @@
  * the same way.
  */
 
+import { DEFAULT_ALARM_SECONDS, isAlarmSeconds, type AlarmSeconds } from '../lib/alarm'
 import { CHIME_OPTIONS, DEFAULT_CHIME, type ChimeId } from '../lib/chimes'
 
 /** Light, dark, or follow the OS preference (the default). */
@@ -24,6 +25,8 @@ export interface TimerSettings {
     /** Alarm volume, 0..1. Maxed by default (AGENTS.md "Settings"). */
     volume: number
     chime: ChimeId
+    /** How long the alarm rings for, in seconds (AGENTS.md "Notification"). */
+    alarmSeconds: AlarmSeconds
     /** A hex colour for the face, or `null` to follow the theme (Auto). */
     face: string | null
     /** A hex colour for the dial ink — ticks, numerals, mark — or Auto. */
@@ -36,6 +39,7 @@ export const DEFAULT_SETTINGS: TimerSettings = {
     mode: 'auto',
     volume: 1,
     chime: DEFAULT_CHIME,
+    alarmSeconds: DEFAULT_ALARM_SECONDS,
     face: null,
     ticks: null,
     remaining: null,
@@ -70,6 +74,11 @@ function isChime(value: unknown): value is ChimeId {
     return CHIME_OPTIONS.some((option) => option.id === value)
 }
 
+/** The stored alarm length, coerced onto the offered menu. */
+function alarmSecondsOr(value: unknown): AlarmSeconds {
+    return isAlarmSeconds(value) ? value : DEFAULT_SETTINGS.alarmSeconds
+}
+
 function colorOrNull(value: unknown): string | null {
     return typeof value === 'string' && value.length > 0 ? value : null
 }
@@ -81,6 +90,7 @@ export function normalizeSettings(raw: unknown): TimerSettings {
         mode: isThemeMode(source.mode) ? source.mode : DEFAULT_SETTINGS.mode,
         volume: clampVolume(source.volume),
         chime: isChime(source.chime) ? source.chime : DEFAULT_SETTINGS.chime,
+        alarmSeconds: alarmSecondsOr(source.alarmSeconds),
         face: colorOrNull(source.face),
         ticks: colorOrNull(source.ticks),
         remaining: colorOrNull(source.remaining),

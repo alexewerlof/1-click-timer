@@ -1,5 +1,5 @@
 import { SettingsApp } from './SettingsApp'
-import { TimerSurface } from './TimerSurface'
+import { TimerApp } from './TimerApp'
 import { readSurface } from './lib/surface'
 import { timerRuntime } from './runtime/runtime'
 import { settingsStore } from './runtime/settingsRuntime'
@@ -12,5 +12,5 @@ export function App() {
     useSettingsTheme(settingsStore)
 
     if (surface === 'settings') return <SettingsApp settingsStore={settingsStore} />
-    return <TimerSurface surface={surface} runtime={timerRuntime} settingsStore={settingsStore} />
+    return <TimerApp surface={surface} runtime={timerRuntime} />
 }

@@ -2,13 +2,18 @@
 
 A Chrome extension that provides a one-click countdown timer with a visual dial UI.
 
-> **Status: Phase 3 — the real runtime.** The service worker owns the timer in
+> **Status: Phase 4 — the alarm.** The service worker owns the timer in
 > `chrome.storage.local` as an absolute `endTime`, so it survives closing the
 > popup and restarting Chrome; the toolbar badge counts down and `chrome.alarms`
-> raise the notification. The UI talks to it through `TimerRuntime`; a plain
-> browser (`npm run dev`) falls back to the in-memory mock. A settings screen
-> (`settings.html`) covers appearance (light/dark/auto), the alarm chime, the
-> three colours and reset.
+> raise the notification. The alarm sound is played by an offscreen document, so
+> it rings even with no timer surface open, for a length the settings choose; the
+> notification stays until it is closed, and closing it — or the timer's own
+> controls — silences the alarm and resets the timer. On expiry the worker brings a
+> timer surface to the front (focusing the fullscreen tab if one is open, raising
+> its window), and the toolbar shows a red alert icon while the alarm rings. The UI
+> talks to the runtime through `TimerRuntime`; a plain browser (`npm run dev`) falls
+> back to the in-memory mock. A settings screen (`settings.html`) covers appearance
+> (light/dark/auto), the alarm chime and ring length, the three colours and reset.
 
 ## Tech stack
 
@@ -76,16 +81,17 @@ for users in `README.md`, under "How to use" and "Features".
 
 ```
 popup.html / fullscreen.html / settings.html
-  └─ app/main.tsx → App
-       ├─ TimerSurface ──> TimerApp ──uses──> TimerRuntime (runtime/runtime.ts)
-       │     ├─ useAlarmSound (lib/chimes)      ├─ mockRuntime        (plain browser)
-       │     └─ useSettingsTheme                └─ createChromeRuntime (extension)
+  └─ app/main.tsx → App (theme via useSettingsTheme)
+       ├─ TimerApp ──uses──> TimerRuntime (runtime/runtime.ts)
+       │                          ├─ mockRuntime         (plain browser)
+       │                          └─ createChromeRuntime (extension)
        └─ SettingsApp ──uses──> SettingsStore (runtime/settingsRuntime.ts)
               ├─ mockSettings   (localStorage)
               └─ chromeSettings (storage.sync, local fallback)
 app/ and background/ both import shared/timer.ts (record + reducer + protocol)
 background/index.ts (service worker) — the single writer
-  ├─ chrome.storage.local (truth)   └─ chrome.alarms, chrome.action, chrome.notifications
+  ├─ chrome.storage.local (truth)   └─ chrome.alarms, chrome.action, chrome.notifications, chrome.tabs
+  └─ offscreen.html (offscreen/offscreen.ts) — the alarm audio, over shared/offscreen.ts
 ```
 
 The countdown stores an absolute `endTime`; remaining seconds are always computed
@@ -98,9 +104,9 @@ termination. The UI never accumulates time.
   about once a minute at best, so a per-second badge would drift. The text is
   `floor(remaining / 60)` with no `m` suffix, and its colour is the fraction of
   the *running* timer that is left (green → orange → red), computed in
-  `background/badge.ts`. While `expired` the badge is cleared and the toolbar
-  keeps its normal icon: the alert is the notification, plus the chime the UI
-  plays.
+  `background/badge.ts`. While `expired` the badge is cleared; for as long as the
+  alarm rings the toolbar then shows the alert icon (`background/alarm.ts`), so the
+  icon and the sound cannot drift apart.
 - The dial counts **counter-clockwise**: 0 at 12 o'clock, 5 at 11, 55 at 1, and
   half the dial at the bottom. The uniform 0–60 mapping puts **30** there — not 40,
   which an earlier draft of the spec claimed while contradicting its own 5/55
@@ -130,11 +136,14 @@ termination. The UI never accumulates time.
   viewBox, so the overlay offsets itself by half the letterbox margin, and their
   sizes are `cqmin` tokens so they scale with the dial. While the dial is
   previewed they fade out with the numerals, keyed off the face's `data-pickable`
-  signal, and fade back when the pointer leaves the disc. The settings control
-  (bottom right) opens `settings.html` in a new tab. That screen's footer holds
-  the only three ways out — the author's site, the source code and the issue
-  tracker. The URLs and the tab-opening primitive live in `app/lib/links.ts`,
-  which is the only place that opens a tab.
+  signal, and fade back when the pointer leaves the disc. The fullscreen control
+  (top right) opens the fullscreen timer, or focuses the tab that already has it
+  (in whatever window), so there is a single fullscreen view at a time. The
+  settings control (bottom right) opens `settings.html` in a new tab. That
+  screen's footer holds the only three ways out — the author's site, the source
+  code and the issue tracker. The outbound URLs and the tab-opening primitive for
+  them live in `app/lib/links.ts`; extension pages are opened through
+  `shared/surfaces.ts`'s `revealSurface` (which the worker's alarm uses too).
 - **Two runtimes behind one seam.** `runtime.ts` picks `createChromeRuntime()`
   when `isExtension()` (see `app/runtime/platform.ts`) and the mock otherwise;
   `settingsRuntime.ts` does the same for settings. Build the chrome runtimes
@@ -147,9 +156,32 @@ termination. The UI never accumulates time.
   in `[data-theme='dark']`; a timer surface left on Auto renders light in the
   screenshot tests, so the baselines only move if a colour actually changes.
 - **Chimes are synthesised**, not files (`app/lib/chimes.ts`) — there is no audio
-  asset in the repo. `useAlarmSound` rings the chosen chime while the status is
-  `expired` and not muted. The worker only raises the notification — it has no
-  audio output.
+  asset in the repo. The alarm is played by an **offscreen document**
+  (`offscreen/offscreen.ts`), which the worker creates, because an MV3 worker has
+  no `AudioContext`. The worker sends a `ring` message for the settings' ring
+  length; the page stops itself and reports `ring-ended`, so the alert icon is
+  dropped without anything polling. The settings screen previews a chime in its own
+  page, from a real click.
+- **The notification is the control when no surface is open.** It sets
+  `requireInteraction` so it stays put until the user acts: closing it resets the
+  timer, and clicking its body brings the timer to the front. `onClosed` (only when
+  `byUser`, so our own `clear` is ignored) **resets the timer to idle** — so
+  dismissing the notice can never leave a ring for a timer the user has
+  acknowledged. The ring's end time is the record's `ringUntil`, an absolute ms
+  stamp (not a countdown), so it survives service-worker termination like `endTime`.
+- **Expiry is handled once.** `handleTimeup` guards against the timeup alarm and
+  the periodic tick both noticing the same expiry (they run across `await`s, so
+  without the guard both fire): an in-memory flag plus a `status === 'running'`
+  check. Before that guard the alarm could raise two notifications and open two
+  tabs.
+- **Bringing the surface forward needs no `tabs` permission.**
+  `shared/surfaces.ts`'s `revealSurface` uses `chrome.runtime.getContexts({ contextTypes: ['TAB'] })`
+  (Chrome 116+) to find an open `fullscreen.html` or `popup.html` tab and focus it
+  (raising its window with `chrome.windows.update`), and `chrome.tabs.create` to
+  open the fullscreen page only when none is open — so there is a single fullscreen
+  view at a time. The UI's fullscreen control uses the same helper, so it focuses an
+  existing tab instead of opening a second. Opening and focusing tabs do not require
+  `tabs`. The `offscreen` permission is the only one this alarm work added.
 - **The app icon is generated, the UI icons are Lucide.** `images/icon.svg` is
 the only committed icon art (100×100). `npm run build` rasterises it into the six
 PNG sizes Chrome wants — 16, 19, 32, 38, 48 and 128 — straight into `dist/`, so
@@ -167,12 +199,13 @@ control.
 
 ## Roadmap
 
-Phases 1–3 are done: the interface (in a browser), the settings screen, and the
-real `chrome.storage` + `chrome.alarms` runtime. What is next:
+Phases 1–4 are done: the interface (in a browser), the settings screen, the real
+`chrome.storage` + `chrome.alarms` runtime, and the alarm — a configurable-length
+ring played from an offscreen document, dismissible from the notification, with a
+red alert toolbar icon and the timer brought to the front. What is next:
 
 1. Small UI tweaks (see the loose ends below).
-2. A ringing overlay for the UI (use the Lucide `Bell` icon).
-3. The store screenshots and the promo tile: `npm run screenshots` builds `dist/`,
+2. The store screenshots and the promo tile: `npm run screenshots` builds `dist/`,
    drives the packed extension in Chromium and writes the gallery to the
    gitignored `dashboard/screenshots/` (`scripts/store/`). The v4 set was deleted
    on 2026-10-11: it showed the pre-React interface.
@@ -182,8 +215,6 @@ Known loose ends, none blocking:
 - An earlier version of the spec said 40 sits at the bottom of the dial, while
   contradicting its own 5/55 statements. The implemented mapping (uniform 0–60)
   puts 30 there.
-- The alarm rings only while a timer surface is open (audio is played in the UI,
-  not the worker); with the popup closed only the notification fires.
 - **`chrome.action.setIcon` wants absolute URLs.** `background/index.ts` wraps its
   paths in `chrome.runtime.getURL()`: a path relative to the install directory is
   rejected with "Failed to fetch" for an unpacked extension, even though the same

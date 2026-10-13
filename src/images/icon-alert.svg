@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The toolbar's alert art: shown while the alarm is ringing, so a glance at the
+  toolbar says "something is ringing" even with no timer surface open
+  (AGENTS.md "Notification"). It keeps `icon.svg`'s rounded square so the shape
+  of the toolbar button never changes — only its colour and the glyph do. The
+  red is the same "time is up" red the badge and the dial's remaining sector use.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <rect x="4.964" y="5" width="90" height="90" rx="8.385" ry="8.385" style="fill: rgb(224, 32, 27);"/>
+  <path style="fill: rgb(255, 255, 255);" d="M 50 21 C 41 21 34 29 34 40 L 34 56 C 34 59 32 62 28 65 L 72 65 C 68 62 66 59 66 56 L 66 40 C 66 29 59 21 50 21 Z"/>
+  <rect x="26" y="65" width="48" height="6" rx="3" ry="3" style="fill: rgb(255, 255, 255);"/>
+  <circle style="fill: rgb(255, 255, 255);" cx="50" cy="78" r="5"/>
+</svg>

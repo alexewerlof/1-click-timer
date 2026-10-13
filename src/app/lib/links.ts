@@ -1,10 +1,11 @@
 /**
- * Outbound destinations, and the one way the app opens a new tab.
+ * Outbound destinations, and the one way the app opens a tab to them.
  *
  * All three are on the settings screen (AGENTS.md "Settings"), which is the
  * extension's only route out: the author's site, the source code, and the issue
  * tracker. A curious user can find out who is behind the timer, read how it
- * works, and report a bug.
+ * works, and report a bug. (Extension pages are opened separately, through
+ * `shared/surfaces.ts`.)
  */
 
 /** The author's site — the settings screen's "About the author" button. */

@@ -8,10 +8,10 @@
  */
 
 import { openTab } from './links'
+import { FULLSCREEN_PAGE, revealSurface } from '../../shared/surfaces'
 
 export type Surface = 'popup' | 'fullscreen' | 'settings'
 
-const FULLSCREEN_PAGE = 'fullscreen.html'
 const SETTINGS_PAGE = 'settings.html'
 
 export function readSurface(): Surface {
@@ -29,6 +29,20 @@ export function toggleFullscreenSurface(surface: Surface): void {
     if (surface === 'fullscreen') {
         void toggleDocumentFullscreen()
         return
+    }
+    void revealFullscreen()
+}
+
+/**
+ * Opens the fullscreen timer in a tab — or, when one is already open, focuses
+ * that tab (raising its window) rather than opening a second, so there is a
+ * single fullscreen view at a time (AGENTS.md "Full screen").
+ */
+async function revealFullscreen(): Promise<void> {
+    try {
+        if (await revealSurface([FULLSCREEN_PAGE])) return
+    } catch {
+        // No extension, or the tab APIs rejected; fall through to a plain open.
     }
     openExtensionTab(FULLSCREEN_PAGE)
 }

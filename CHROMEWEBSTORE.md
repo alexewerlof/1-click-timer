@@ -39,6 +39,8 @@ FEATURES
 • Keeps counting when you close the popup or restart Chrome
 • The minutes left stay on the toolbar badge, turning from green to red as time runs out
 • A notification when the time is up, plus a chime of your choosing
+• The alarm rings for as long as you choose — 5 seconds to 5 minutes — and sounds even when the popup is closed
+• The timer comes to the front when the time is up, so you can see and stop the alarm
 • Pause, resume and restart from the control in the middle of the dial
 • Light and dark appearance, following your system by default
 • Three colours you can change, and a choice of alarm chimes
@@ -48,22 +50,25 @@ HOW TO USE
 1. Click the 1-click timer icon in the toolbar
 2. Move the pointer over the dial to preview a duration, then click to start it — or click a numeral to start that many minutes
 3. Close the popup if you like: the badge keeps counting down
-4. When the time is up a notification appears, and the chime plays if the timer is on screen
+4. When the time is up, the alarm chimes and the timer comes to the front
+5. The alarm chimes and the timer comes to the front
+6. Close the notification (or use the timer's own reset) to silence the alarm and reset the timer
 
 PRIVACY
 No account, no sign-in, no analytics, no network requests. Your timer and your preferences stay on your own device. Appearance and alarm preferences sync through your own Chrome profile so they follow you to your other computers — they are never sent to the developer.
 
 PERMISSIONS
-• Notifications — shows the "time is up" alert when a countdown finishes.
+• Notifications — shows the "time is up" alert when a countdown finishes; it stays visible until you close it, which silences the alarm.
 • Alarms — wakes the timer at the moment the countdown ends, so the alert arrives on time even when the popup is closed.
 • Storage — remembers a running timer across browser restarts, and saves your appearance and alarm preferences.
+• Offscreen — plays the alarm sound from a hidden page inside the extension, so the alarm can ring even when no timer window is open. It never runs code from, or reads, any web page.
 
 SUPPORT
 Found a bug, or have an idea? Open an issue at https://github.com/alexewerlof/1-click-timer/issues
 
 Open source (GPL-3.0). Made in Sweden.
 
-Version 5.0.0 — rebuilt for the current Chrome extension platform, with a new dial interface and a settings screen.
+Version 5.1.0 — adds an alarm that rings for a length you choose and sounds even when no timer window is open, and brings the timer to the front when the time is up.
 ```
 
 <!-- The Chrome Web Store strips markdown, so this is plain text with • bullets. -->
@@ -130,6 +135,7 @@ order to upload.
 | `alarms`        | permissions   | Wakes the extension when a countdown ends so the "time is up" notification fires on time, even after the popup is closed or Chrome has restarted. Without it the alarm would only fire while the popup is open. |
 | `notifications` | permissions   | Shows the desktop notification that tells the user their countdown has finished. It is the only way the extension can get attention when the timer ends and the popup is closed.             |
 | `storage`       | permissions   | Remembers the running countdown across popup closes and browser restarts, and saves the user's appearance, alarm and colour preferences.                                                    |
+| `offscreen`     | permissions   | Runs a hidden page that plays the alarm chime. An MV3 service worker has no way to play audio, so without this the alarm could only sound while a timer window happened to be open. The page plays audio and nothing else. |
 | *(none)*        | host_permissions | The extension requests no host permissions. It does not read, change or observe any web page, and it makes no network requests.                                                          |
 
 <!-- Each of these is also explained to the user in the listing's PERMISSIONS
@@ -216,6 +222,7 @@ https://www.alexewerlof.com/
 
 | Version | Date       | Changes                                                                                                                                                                   | Status |
 | ------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| 5.1.0   | 2026-10-13 | Configurable alarm length (5 seconds to 5 minutes, 10 seconds by default). The alarm now plays from an offscreen document, so it rings even when no timer window is open. Closing the notification silences the alarm and resets the timer. A red alert icon and a focused (or newly opened) timer window make it clear what is ringing. | Draft  |
 | 5.0.0   | 2026-10-12 | Rewritten as a Manifest V3 extension. New dial interface with one-click duration setting, a toolbar badge that counts the minutes down, a notification when the time is up, and a settings screen for appearance, alarm and colours. Replaces the v4 background-page build, which had no badge and no settings screen. | Draft  |
 | 4.0     | —          | Last version published to the store. Manifest V2.                                                                                                                          | Published |
 

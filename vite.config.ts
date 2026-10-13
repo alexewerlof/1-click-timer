@@ -3,8 +3,8 @@ import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import react from '@vitejs/plugin-react-swc'
 import { defineConfig, type Plugin } from 'vite'
-import { renderIcons } from './scripts/icons/render'
-import { iconPathFor, iconSizeFromPath, type IconSize } from './src/shared/icons'
+import { renderAlertIcons, renderIcons } from './scripts/icons/render'
+import { alertIconPathFor, iconPathFor, iconSizeFromPath, type IconSize } from './src/shared/icons'
 
 const ROOT = dirname(fileURLToPath(import.meta.url))
 const SRC = resolve(ROOT, 'src')
@@ -93,6 +93,13 @@ function iconAssets(): Plugin {
                 mkdirSync(dirname(file), { recursive: true })
                 writeFileSync(file, png)
             }
+            // The toolbar alert icon is swapped in at runtime, not named in the
+            // manifest, so it is written without the manifest check above.
+            for (const [size, png] of renderAlertIcons()) {
+                const file = resolve(DIST, alertIconPathFor(size))
+                mkdirSync(dirname(file), { recursive: true })
+                writeFileSync(file, png)
+            }
         },
     }
 }
@@ -118,6 +125,7 @@ export default defineConfig({
                 popup: resolve(SRC, 'popup.html'),
                 fullscreen: resolve(SRC, 'fullscreen.html'),
                 settings: resolve(SRC, 'settings.html'),
+                offscreen: resolve(SRC, 'offscreen.html'),
                 background: resolve(SRC, 'background/index.ts'),
             },
             output: {

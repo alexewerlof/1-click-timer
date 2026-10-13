@@ -4,6 +4,7 @@ import {
     expireIfElapsed,
     IDLE_TIMER,
     isElapsed,
+    isTimerRequest,
     normalizeTimerRecord,
     reduceTimer,
     remainingFrom,
@@ -92,5 +93,46 @@ describe('timer record', () => {
     it('treats a zero duration as a reset', () => {
         const running = reduceTimer(IDLE_TIMER, { action: 'start', seconds: FIVE_MINUTES }, 0)
         expect(reduceTimer(running, { action: 'start', seconds: 0 }, 0)).toEqual(IDLE_TIMER)
+    })
+
+    it('coerces and drops an invalid ring time', () => {
+        expect(normalizeTimerRecord({}).ringUntil).toBeNull()
+        expect(normalizeTimerRecord({ ringUntil: 'soon' }).ringUntil).toBeNull()
+        expect(normalizeTimerRecord({ ringUntil: Number.NaN }).ringUntil).toBeNull()
+        expect(normalizeTimerRecord({ ringUntil: 12_345 }).ringUntil).toBe(12_345)
+    })
+
+    it('keeps the ring time when an expired record is resolved again', () => {
+        const running = reduceTimer(IDLE_TIMER, { action: 'start', seconds: 60 }, 0)
+        const ringing: TimerRecord = { ...running, ringUntil: 60_000 }
+        expect(expireIfElapsed(ringing, 60_000).ringUntil).toBe(60_000)
+    })
+
+    it('arms no alarm when a new timer starts or a timer is reset', () => {
+        const ringing: TimerRecord = { ...IDLE_TIMER, status: 'expired', ringUntil: 5_000 }
+        expect(reduceTimer(ringing, { action: 'start', seconds: 60 }, 0).ringUntil).toBeNull()
+        expect(reduceTimer(ringing, { action: 'reset' }, 0).ringUntil).toBeNull()
+    })
+})
+
+describe('timer requests', () => {
+    it('recognizes every action the UI can send', () => {
+        for (const action of ['start', 'pause', 'resume', 'togglePause', 'reset', 'restart', 'toggleMute']) {
+            expect(isTimerRequest({ action })).toBe(true)
+        }
+        expect(isTimerRequest({ action: 'start', seconds: 60 })).toBe(true)
+    })
+
+    it('rejects anything that is not a timer request', () => {
+        const notRequests = [
+            null,
+            undefined,
+            'start',
+            {},
+            { action: 'nope' },
+            { target: 'offscreen', type: 'ring' },
+            { target: 'worker', type: 'ring-ended' },
+        ]
+        for (const value of notRequests) expect(isTimerRequest(value)).toBe(false)
     })
 })

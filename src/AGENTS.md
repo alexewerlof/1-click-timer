@@ -19,9 +19,10 @@ one dial face; the multi-variant experiment is over.
 
 | Path                                | Role                                                                                                       |
 | ----------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `manifest.json`                     | Extension manifest (MV3). Service worker runs as an ES module.                                              |
+| `manifest.json`                     | Extension manifest (MV3). Service worker runs as an ES module; declares the `offscreen` permission.         |
 | `popup.html`                        | Popup entry. Sets `data-surface="popup"`.                                                                   |
 | `fullscreen.html`                   | Tab entry for the big view. Sets `data-surface="fullscreen"`.                                               |
+| `offscreen.html`                    | Offscreen entry for the alarm audio. Sets `data-surface="offscreen"`; holds no UI.                          |
 | `app/main.tsx`                      | Mounts `App`; imports the global CSS.                                                 |
 | `app/TimerApp.tsx`                  | The timer composition shared by the popup and the tab.                                                      |
 | `app/components/TimerFace/`         | The dial. Geometry in `lib/dial.ts`; one component per element (`Disc`, `RemainingTime`, `PreviewArc`, `PreviewTicks`, `PreviewNumeral`, `CenterReadout`, `ReadoutControl`, `Caption`, `CreatorMark`); static chrome in `dialChrome.tsx` (`DIAL_TICKS`, `DIAL_NUMERALS`, and the `Tick` both tick groups share). `ReadoutControl` is the one non-SVG element — an HTML `<button>` overlaid on the face. |
@@ -30,26 +31,29 @@ one dial face; the multi-variant experiment is over.
 | `app/design/global.css`             | Resets, body, and the popup/tab/settings sizing per `[data-surface]`.                                                |
 | `app/lib/dial.ts`                   | Dial geometry: counter-clockwise mapping, sector/arc paths, pointer → dial point/minute, disc/readout-disc regions, and the derived readout size. |
 | `app/lib/time.ts`                   | `MAX_MINUTES` clamp and `formatClock`.                                                                     |
-| `app/lib/surface.ts`                | Surface type, `readSurface`, `openSettings`, and the fullscreen button behaviour.                                           |
+| `app/lib/alarm.ts`                  | The alarm-length menu (`AlarmSeconds`, `ALARM_DURATION_OPTIONS`, default 10 s) the settings store and screen share. |
+| `app/lib/surface.ts`                | Surface type, `readSurface`, `openSettings`, and the fullscreen button behaviour (focus an open fullscreen tab, else open one).                                           |
 | `app/lib/links.ts`                  | Outbound destinations (`AUTHOR_SITE_URL`, `REPOSITORY_URL`, `ISSUES_URL`) and `openTab`, the one way the app opens a new tab: `chrome.tabs` in the extension, `window.open` in the design preview. |
 | `app/lib/useDocumentFullscreen.ts`  | `useSyncExternalStore` binding to the Fullscreen API's `fullscreenchange` event.                            |
 | `app/runtime/types.ts`              | `TimerState` / `TimerRuntime` contract (the timer seam).                                                     |
 | `app/runtime/mockRuntime.ts`        | In-memory implementation (interval-driven) + `forceStatus`, the mock-only parking helper (`MockRuntime`) the visual tests use to freeze a state.                                              |
 | `app/runtime/runtime.ts`            | Picks the chrome runtime in the extension, the mock in a plain browser.                                                                         |
 | `app/runtime/useTimerState.ts`      | `useSyncExternalStore` binding.                                                                                           |
-| `background/index.ts`               | Service worker: the single writer of the timer record, alarms, badge/icon, notifications, messages.          |
+| `background/index.ts`               | Service worker: the single writer of the timer record, alarms, badge/icon, the offscreen alarm, notifications, surface focus and messages. |
 | `background/badge.ts`               | The toolbar badge: whole minutes left as text, and the green→orange→red colour for the fraction of the running timer that is left. Pure (no `chrome.*`), so `npm test` covers it; the worker only applies the plan. |
-| `images/`                           | The app icon's source art, `icon.svg` — the only committed icon file. The PNGs Chrome loads are rasterised from it at build time (see "Build pipeline").                                              |
-| `shared/icons.ts`                   | The icon sizes (`ICON_SIZES`), the tool 19/38 split, and the paths both the worker and the build resolve through `iconPathFor`.                                               |
+| `background/alarm.ts`               | The toolbar's alert icon: whether the alarm is ringing now (`ringingNow`) and which art the toolbar shows (`toolbarIconFor`). Pure (no `chrome.*`), the sibling `badge.ts`. |
+| `images/`                           | The icon source art: `icon.svg` (the dial) and `icon-alert.svg` (the ringing toolbar icon). The PNGs Chrome loads are rasterised from them at build time (see "Build pipeline"). |
+| `shared/icons.ts`                   | The icon sizes (`ICON_SIZES`), the tool 19/38 split, the toolbar alert sizes (`ALERT_ICON_SIZES`), and the paths both the worker and the build resolve through `iconPathFor` / `alertIconPathFor`. |
+| `shared/offscreen.ts`               | The worker ⇄ offscreen message protocol (`ring` / `stop` / `ring-ended`) and the offscreen document's path. |
+| `shared/surfaces.ts`                | The page paths (`FULLSCREEN_PAGE`, `POPUP_PAGE`, `TIMER_PAGES`) and `revealSurface` — focus an open surface tab, else open one — used by both the worker and the UI. |
 
 ### Added in Phase 3
 
 | Path                                          | Role                                                                       |
 | --------------------------------------------- | -------------------------------------------------------------------------- |
 | `settings.html`                               | Settings-screen entry. Sets `data-surface="settings"`.                     |
-| `app/App.tsx`                                 | Picks `SettingsApp` or `TimerSurface`; applies the theme.                  |
-| `app/TimerSurface.tsx`                        | Wires `useAlarmSound` + audio priming + theme around `TimerApp`.           |
-| `app/SettingsApp.tsx`                         | The settings screen (appearance, volume, chime, colours) and its icon footer: reset to defaults, plus the three ways out (the author, the source code, the bug tracker). |
+| `app/App.tsx`                                 | Picks `SettingsApp` or `TimerApp`; applies the theme.                      |
+| `app/SettingsApp.tsx`                         | The settings screen (appearance, volume, chime, ring length, colours) and its icon footer: reset to defaults, plus the three ways out (the author, the source code, the bug tracker). |
 | `app/design/palette.ts`                       | The colour swatches and the custom properties each slot drives.            |
 | `app/lib/chimes.ts`                           | Synthesised chimes (`Chime`/`Beep`/`Bell`/`Silent`) and audio priming.      |
 | `app/runtime/settings.ts`                     | `TimerSettings` / `SettingsStore` contract, defaults, normalization.       |
@@ -58,11 +62,20 @@ one dial face; the multi-variant experiment is over.
 | `app/runtime/settingsRuntime.ts`              | The settings seam (chrome vs mock).                                        |
 | `app/runtime/useSettings.ts`                  | `useSyncExternalStore` binding for settings.                               |
 | `app/runtime/useSettingsTheme.ts`             | Resolves the theme and writes the colour overrides to `<html>`.            |
-| `app/runtime/useAlarmSound.ts`                | Rings the chosen chime while the timer is `expired`.                       |
 | `app/runtime/platform.ts`                     | `isExtension()` — the chrome-or-mock switch both seams use.                |
 | `app/runtime/chromeRuntime.ts`                | The `chrome.storage` + messaging `TimerRuntime`.                           |
 | `app/runtime/timerState.ts`                   | Maps a stored record to the UI `TimerState`.                               |
-| `shared/timer.ts`                             | The timer record, the pure reducer, and the worker/UI message protocol.    |
+| `shared/timer.ts`                             | The timer record (including the ring's `ringUntil`), the pure reducer, the request guard and the worker/UI message protocol. |
+
+### Added in Phase 4
+
+| Path                                          | Role                                                                       |
+| --------------------------------------------- | -------------------------------------------------------------------------- |
+| `offscreen/offscreen.ts`                      | The hidden page that plays the alarm. Imports `startChime` from `app/lib/chimes.ts`, rings for the requested seconds, then reports `ring-ended`. |
+| `images/icon-alert.svg`                       | The toolbar's alert art, shown while the alarm rings.                       |
+
+The alarm work also added `ringUntil` to the record, `alarmSeconds` to `TimerSettings`,
+and the `offscreen` permission to the manifest.
 
 ## Key patterns
 
@@ -131,7 +144,11 @@ one dial face; the multi-variant experiment is over.
 - **Pointer maths uses `getScreenCTM()`**, so scaling or letterboxing of the
   element cannot skew the selected minute.
 - **Two surfaces, one app.** `popup.html` and `fullscreen.html` mount the same
-  `TimerApp`; only `data-surface` changes the sizing.
+  `TimerApp`; only `data-surface` changes the sizing. Both the fullscreen control
+  (in the popup) and the worker's alarm bring the fullscreen tab forward through
+  `shared/surfaces.ts`'s `revealSurface`, which focuses an open tab in its own
+  window (via `chrome.runtime.getContexts`, no `tabs` permission) rather than
+  opening a second — so there is a single fullscreen view at a time.
 - **Icons are Lucide**, not hand-drawn SVG — conventional glyphs and one source
   of truth for stroke weight. Lucide carries no brand marks, so the source-code
   button uses `SquareCode`: there is no `Github` icon to reach for. The one
@@ -155,6 +172,11 @@ one dial face; the multi-variant experiment is over.
   `chrome.storage.local` and reschedules alarms. The UI reads state back through
   `chrome.storage.onChanged`, never by writing. `chromeRuntime` adds a 250 ms
   interval while running so the dial stays smooth.
+- **The worker owns the alarm, not the UI.** On expiry it arms the record's
+  `ringUntil` from the settings, tells the offscreen document to ring
+  (`shared/offscreen.ts`), and brings a timer surface forward. The UI plays no
+  alarm sound at all — so there is exactly one ring, and no double sound when a
+  surface happens to be open.
 - **The timer is an absolute `endTime`.** Remaining seconds are always derived,
   never accumulated, so it survives service-worker termination;
   `expireIfElapsed` resolves a run-out timer to `expired` at read time on both
@@ -170,8 +192,9 @@ one dial face; the multi-variant experiment is over.
 
 ## Tests
 
-- `app/lib/*.test.ts`, `app/runtime/*.test.ts`, `background/badge.test.ts` — node
-  project (`npm test`).
+- `app/lib/*.test.ts`, `app/runtime/*.test.ts`, `background/badge.test.ts`,
+  `background/alarm.test.ts`, `shared/offscreen.test.ts` and
+  `shared/surfaces.test.ts` — node project (`npm test`).
 - `manifest.test.ts` — the metadata guard: `manifest.json` and `package.json` must
   agree on the name, the version and the description, and the description must
   fit the Web Store's 132-character limit. Fix the divergence, not the test.
@@ -184,9 +207,9 @@ one dial face; the multi-variant experiment is over.
 ## Build pipeline
 
 `vite.config.ts` sets `root: src`, so dev URLs match the built extension. Vite
-bundles `popup.html`, `fullscreen.html`, `settings.html` and `background/index.ts`, then the
-`extensionAssets` plugin copies `manifest.json` and `images/` into
-`dist/`.
+bundles `popup.html`, `fullscreen.html`, `settings.html`, `offscreen.html` and
+`background/index.ts`, then the `extensionAssets` plugin copies `manifest.json`
+and `images/` into `dist/`.
 
 The `iconAssets` plugin runs alongside it: it rasterises `images/icon.svg` into
 `images/icon<n>.png` for every size in `ICON_SIZES` (`scripts/icons/render.ts`),
@@ -194,3 +217,7 @@ writes them into `dist/images/`, and fails the build if `manifest.json` names an
 icon it does not produce, or names one whose size key disagrees with the file. The
 dev server answers those same URLs from memory, because `src/` is the web root
 there and a page requests its favicon whether or not anything was built.
+
+It also rasterises `images/icon-alert.svg` into `images/icon-alert<n>.png` for the
+toolbar's alert icon. That icon is not named in the manifest — the worker swaps to
+it at runtime — so it skips the manifest check the dial icons get.

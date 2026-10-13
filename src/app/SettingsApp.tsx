@@ -1,6 +1,7 @@
 import type { CSSProperties, ReactNode } from 'react'
 import { Bug, RotateCcw, SquareCode, User, X } from 'lucide-react'
 import { SLOT_LABELS, SWATCHES, type Swatch } from './design/palette'
+import { ALARM_DURATION_OPTIONS, isAlarmSeconds } from './lib/alarm'
 import { CHIME_OPTIONS, previewChime, primeAudio, type ChimeId } from './lib/chimes'
 import { AUTHOR_SITE_URL, ISSUES_URL, REPOSITORY_URL, openTab } from './lib/links'
 import {
@@ -139,6 +140,27 @@ export function SettingsApp({ settingsStore }: SettingsAppProps) {
                     >
                         Preview
                     </button>
+                </div>
+
+                <div className={styles.fieldRow}>
+                    <label className={styles.fieldLabel} htmlFor="alarm-seconds">
+                        Ring for
+                    </label>
+                    <select
+                        id="alarm-seconds"
+                        className={styles.select}
+                        value={settings.alarmSeconds}
+                        onChange={(event) => {
+                            const seconds = Number(event.target.value)
+                            if (isAlarmSeconds(seconds)) update({ alarmSeconds: seconds })
+                        }}
+                    >
+                        {ALARM_DURATION_OPTIONS.map((option) => (
+                            <option key={option.seconds} value={option.seconds}>
+                                {option.label}
+                            </option>
+                        ))}
+                    </select>
                 </div>
             </section>
 

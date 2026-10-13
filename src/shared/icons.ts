@@ -46,3 +46,21 @@ export function iconSizeFromPath(path: string): IconSize | null {
     const size = match === null ? Number.NaN : Number(match[1])
     return isIconSize(size) ? size : null
 }
+
+/**
+ * The alert icon the toolbar shows while the alarm rings (AGENTS.md
+ * "Notification"). It is drawn from its own source rather than the dial, so it
+ * needs its own sizes — only the two the toolbar uses, and only in 1x/2x.
+ */
+export const ALERT_ICON_SIZES = [19, 38] as const
+
+export type AlertIconSize = (typeof ALERT_ICON_SIZES)[number]
+
+export function alertIconFileName(size: AlertIconSize): string {
+    return `icon-alert${size}.png`
+}
+
+/** An alert icon's path inside the extension, e.g. `images/icon-alert19.png`. */
+export function alertIconPathFor(size: AlertIconSize): string {
+    return `${ICON_DIRECTORY}/${alertIconFileName(size)}`
+}

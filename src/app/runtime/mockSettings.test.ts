@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { ALARM_DURATION_OPTIONS, DEFAULT_ALARM_SECONDS } from '../lib/alarm'
 import { CHIME_OPTIONS, DEFAULT_CHIME } from '../lib/chimes'
 import { createMockSettings } from './mockSettings'
 import { DEFAULT_SETTINGS, normalizeSettings } from './settings'
@@ -9,6 +10,7 @@ describe('settings', () => {
         expect(DEFAULT_SETTINGS.mode).toBe('auto')
         expect(DEFAULT_SETTINGS.volume).toBe(1)
         expect(DEFAULT_CHIME).toBe('chime')
+        expect(DEFAULT_SETTINGS.alarmSeconds).toBe(DEFAULT_ALARM_SECONDS)
     })
 
     it('merges a patch and notifies subscribers', () => {
@@ -43,6 +45,18 @@ describe('settings', () => {
         for (const option of CHIME_OPTIONS) {
             expect(normalizeSettings({ chime: option.id }).chime).toBe(option.id)
         }
+    })
+
+    it('accepts every alarm duration the settings screen offers', () => {
+        for (const option of ALARM_DURATION_OPTIONS) {
+            expect(normalizeSettings({ alarmSeconds: option.seconds }).alarmSeconds).toBe(option.seconds)
+        }
+    })
+
+    it('coerces an unknown alarm duration back to the default', () => {
+        expect(normalizeSettings({ alarmSeconds: 42 }).alarmSeconds).toBe(DEFAULT_ALARM_SECONDS)
+        expect(normalizeSettings({ alarmSeconds: 'soon' }).alarmSeconds).toBe(DEFAULT_ALARM_SECONDS)
+        expect(normalizeSettings({}).alarmSeconds).toBe(DEFAULT_ALARM_SECONDS)
     })
 
     it('clamps a volume below zero', () => {
