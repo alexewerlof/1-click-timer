@@ -1,12 +1,13 @@
 {
     "name": "1-click-timer",
-    "version": "5.1.0",
+    "version": "9.0.0",
     "description": "One-click countdown timer: click the dial to start, watch the minutes left on the toolbar badge, and get notified when time is up.",
     "scripts": {
         "dev": "vite",
         "build": "vite build",
         "preview": "vite preview",
         "deploy": "npm run lint && npm run typecheck && npm test && npm run build && bash scripts/package.sh",
+        "release": "npm run deploy && node scripts/store/capture.mjs",
         "lint": "eslint .",
         "lint:fix": "eslint . --fix",
         "format": "prettier --write .",

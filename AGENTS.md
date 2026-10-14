@@ -280,9 +280,6 @@ Known loose ends, none blocking:
 
 Decisions still open, none blocking:
 
-- **The store link.** `README.md` says to install from the Chrome Web Store but
-  carries no URL: the listing was never recorded in the repo, and 5.0.0 is not
-  published yet. Add the link once it is.
 - **`dashboard/` is now empty** apart from the gitignored `package/` folder that
   `npm run deploy` writes. Either keep it (the v4 convention) or move the release
   ZIPs to a root `packages/`.
@@ -302,6 +299,7 @@ Decisions still open, none blocking:
 ```bash
 npm run build     # unpacked extension → dist/
 npm run deploy    # lint + typecheck + test + build, then ZIP the release
+npm run release   # deploy, then refresh the store gallery (Playwright's Chromium)
 ```
 
 Load `dist/` as an unpacked extension at `chrome://extensions` (Developer mode).
@@ -313,6 +311,19 @@ service-worker inspector).
 so `manifest.json` sits at the archive root. It prefers `zip(1)` and falls back to
 `python3` — this machine has no `zip`, so it uses Python. The output folder is
 gitignored.
+
+The store item is `igloknlllonknnbkfgggfkigmeegmakf`, listed at
+`https://chromewebstore.google.com/detail/igloknlllonknnbkfgggfkigmeegmakf`. Its
+last published package is **8.3.1**, and the dashboard rejects an upload whose
+`manifest.json` version is not numerically higher — so a release must outrank
+8.3.1, which is what 9.0.0 does. That is *not* the same as beating the previous
+release recorded in this repo: the old MV2 line climbed further than these docs
+assumed, and 5.1.0 was rejected for exactly that reason on 2026-10-14.
+
+`npm run release` is `npm run deploy` followed by the gallery capture. The two are
+separate commands on purpose: the capture needs Playwright's own Chromium (a
+one-off `npx playwright install chromium` per machine), and `deploy` — which only
+produces the ZIP — should not.
 
 `CHROMEWEBSTORE.md` is the copy-paste source for the listing, the permission
 justifications and the privacy disclosure; `PRIVACY.md` is the policy that listing

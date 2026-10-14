@@ -16,8 +16,10 @@ notification tells you — even when no timer is on screen.
 
 ## Install
 
-Install it from the Chrome Web Store. The store version is still v4; the interface
-in this repository (v5) is on its way.
+[Install it from the Chrome Web Store](https://chromewebstore.google.com/detail/igloknlllonknnbkfgggfkigmeegmakf).
+The store still serves the previous generation of the timer (8.3.1); the rewrite in
+this repository (9.0.0) is submitted and awaiting review. To run it now, build from
+source — see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 1-click timer needs Chrome 116 or newer. It uses `chrome.runtime.getContexts` to
 bring an open timer tab to the front when the alarm rings.

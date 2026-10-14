@@ -34,6 +34,7 @@ loop a fast way to work on the interface.
 | `npm run dev`                | Vite dev server → `/popup.html`, `/fullscreen.html`, `/settings.html` |
 | `npm run build`              | build the unpacked extension into `dist/`          |
 | `npm run deploy`             | lint + typecheck + test + build, then ZIP the release into `dashboard/package/` |
+| `npm run release`            | `deploy`, then capture the store gallery (needs Playwright's Chromium) |
 | `npm run lint`               | ESLint (flat config)                               |
 | `npm run lint:fix`           | ESLint with `--fix`                                |
 | `npm run typecheck`          | `tsc --noEmit`                                     |
@@ -105,25 +106,47 @@ Baselines live in `src/app/__screenshots__/`. Rewrite them with
 ## Release
 
 ```bash
-npm run deploy
+npm run release
 ```
 
-That runs the checks, builds, and writes
-`dashboard/package/1-click-timer-<version>.zip` — the archive to upload to the
-Chrome Web Store. It holds the contents of `dist/`, so `manifest.json` sits at the
-archive root. Packaging prefers `zip(1)` and falls back to `python3`.
+That is `npm run deploy` — the checks, the build, and
+`dashboard/package/1-click-timer-<version>.zip`, the archive to upload to the Chrome
+Web Store — followed by the store gallery capture (below), so what you upload and
+what the listing shows are refreshed in one step.
+
+Use plain `npm run deploy` when you only need the ZIP. It stops after packaging, so
+it needs nothing but Node, while the gallery capture launches Playwright's own
+Chromium — which is why the two are separate commands and not one.
+
+The ZIP holds the contents of `dist/`, so `manifest.json` sits at the archive root.
+Packaging prefers `zip(1)` and falls back to `python3`.
 
 `CHROMEWEBSTORE.md` is the source of truth for the store listing, the permission
 justifications and the privacy disclosure; `PRIVACY.md` is the policy the listing
 links to. Bump the version in **both** `src/manifest.json` and `package.json` —
 `src/manifest.test.ts` fails if they drift apart.
 
-The listing's screenshots and the promo tiles come from `npm run screenshots`,
-which builds `dist/`, loads the packed extension in Playwright's Chromium and
-drives it into each state at 1280×800 (440×280 and 1400×560 for the tiles). The
-images land in
-`dashboard/screenshots/`, which is gitignored — reproducible on demand, and never
-a gallery that lies about the current interface.
+The version must also be **numerically higher than the one already published** to
+the store (8.3.1 as of 2026-10-14), or the dashboard rejects the upload with
+"Please make sure the newly uploaded package has a larger version in file
+manifest.json than the published package". Being higher than the last *release in
+this repo* is not the same thing — check the dashboard.
+
+## The store gallery
+
+```bash
+npm run release
+```
+
+The listing's screenshots and the promo tiles are captured by
+`scripts/store/capture.mjs` (run for you by `npm run release`): it loads the packed
+extension in Playwright's Chromium and drives the timer into each state, so a shot
+can never show an interface that no longer exists. It writes six screenshots plus
+the two tiles — the six at 1280×800, which is the size the store prefers, and the
+tiles at 440×280 and 1400×560. The store accepts **at most five screenshots**, so
+`01-idle.png` is deliberately not uploaded; see `CHROMEWEBSTORE.md` for the upload
+order. The images land in `dashboard/screenshots/`, which is gitignored —
+reproducible on demand, and never a gallery that lies about the current interface.
 
 ## Try it in Chrome
 
