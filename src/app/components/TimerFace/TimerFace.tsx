@@ -10,6 +10,7 @@ import {
     clientPointToDialPoint,
     isPointInsideReadoutDisc,
     isPointOnDisc,
+    nearestMinute,
     pointToMinutes,
 } from '../../lib/dial'
 import type { Point } from '../../lib/dial'
@@ -79,14 +80,19 @@ export function TimerFace({ status, remainingSeconds, onPick, onTogglePause, onR
     }
 
     /**
-     * The whole minute at a dial-space point, clamped to the dial's range — or
-     * null when the point is not on the disc, or sits over the readout disc at
-     * its centre. The readout disc reads as a layer above the dial, so both
-     * hover and click ignore it; off the disc there is nothing to show either.
+     * The minute a dial-space point marks — the nearest whole minute, so every
+     * minute is a full wedge of half a minute either side of its tick — or null
+     * when the point is not on the disc, or sits over the readout disc at its
+     * centre. The readout disc reads as a layer above the dial, so both hover
+     * and click ignore it; off the disc there is nothing to show either.
+     *
+     * The half-minute either side of 12 o'clock belongs to the minute that
+     * rounds to 0, which `nearestMinute` reports as a whole turn (60) rather
+     * than an empty timer — so the pointer can never pick "nothing".
      */
     function durationAt(point: Point | null): number | null {
         if (!point || !isPointOnDisc(point) || isPointInsideReadoutDisc(point)) return null
-        return clampMinutes(Math.round(pointToMinutes(point)))
+        return nearestMinute(pointToMinutes(point))
     }
 
     /**

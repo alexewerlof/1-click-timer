@@ -283,6 +283,24 @@ export function pointToMinutes(point: Point): number {
 }
 
 /**
+ * The whole minute nearest a continuous dial reading, in 1..60. Rounding makes
+ * every minute a full wedge: a pointer anywhere from half a minute before its
+ * tick to half a minute after it picks that minute, so the disc is fully
+ * covered and there are no dead slivers between the marks.
+ *
+ * 0 and 60 are the same mark, 12 o'clock, and it stands for a whole turn rather
+ * than no timer, so a reading that rounds to 0 — the half-minute either side of
+ * the top — reports 60. That keeps the whole disc live: the pointer can never
+ * ask for an empty timer, and the idle state is reached by taking the pointer
+ * off the disc, not by a minute. Only the keyboard still sets 0 (see
+ * `TimerFace`), by way of the reset-and-idle state.
+ */
+export function nearestMinute(minutes: number): number {
+    const rounded = Math.round(minutes) % MINUTES_PER_TURN
+    return rounded === 0 ? MINUTES_PER_TURN : rounded
+}
+
+/**
  * The dial-space point under a client coordinate. Uses the SVG's own screen
  * matrix, so scaling or letterboxing of the element cannot skew the result.
  * Null before the element has a layout, when the matrix is unavailable.

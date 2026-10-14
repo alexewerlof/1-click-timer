@@ -128,6 +128,11 @@ and the `offscreen` permission to the manifest.
   fades and the arc and preview numeral appear, so the shortcut shows what it
   will set before it is clicked. Nothing asks for confirmation, even when a timer
   is already running.
+  Every minute is a full wedge of half a minute either side of its tick
+  (`nearestMinute` in `dial.ts`), and 0 and 60 are the same mark, so the
+  half-minute either side of 12 o'clock is a whole turn rather than an empty
+  timer — the pointer can never ask for "nothing". Only the keyboard still sets
+  0, by way of the reset-and-idle state.
 - **The readout control is HTML, not SVG.** Pause/resume (and restart, while
   ringing) is a real `<button>` (`ReadoutControl`) overlaid on the readout disc as
   a *sibling* of the `<svg>` — a `<button>` is not valid in the SVG namespace, and

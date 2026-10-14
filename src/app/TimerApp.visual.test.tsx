@@ -130,6 +130,40 @@ test('previews a full circle at a whole turn', async () => {
 })
 
 /**
+ * 0 and 60 are the same mark, so the half-minute just counter-clockwise of 12
+ * o'clock — the minute that reads as 0 — has to preview the whole turn, exactly
+ * as its clockwise twin does. It used to preview nothing (0 minutes is the idle
+ * state), leaving a dead wedge at the top of the disc (see `nearestMinute`).
+ */
+test('previews a whole turn just counter-clockwise of 12 o’clock', async () => {
+    const runtime = createMockRuntime()
+    runtime.forceStatus('idle')
+    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} settingsStore={settings} />))
+
+    const svg = screen.getByRole('slider').element() as SVGSVGElement
+    // A hair counter-clockwise of 12 o'clock, whose minute rounds down to 0 —
+    // and so up to a whole turn. Slightly inside the rim so rounding through the
+    // screen matrix cannot land it a hair outside the disc.
+    const onDisc = pointOnDial(0.1, DISC_RADIUS - 1)
+    const matrix = svg.getScreenCTM()
+    if (!matrix) throw new Error('the slider has no screen CTM')
+    const at = new DOMPoint(onDisc.x, onDisc.y).matrixTransform(matrix)
+
+    svg.dispatchEvent(new PointerEvent('pointermove', { clientX: at.x, clientY: at.y, bubbles: true }))
+
+    const preview = await vi.waitFor(() => {
+        const circle = svg.querySelector('circle[class*="previewArc"]')
+        if (!circle) throw new Error('the minute either side of 12 o’clock has not previewed a full circle yet')
+        return circle
+    })
+    await expect.element(page.elementLocator(preview)).toBeVisible()
+
+    // It previews the same whole turn, labelled 60 where the 0 numeral sits.
+    const numeral = svg.querySelector('text[class*="previewNumeral"]')
+    expect(numeral?.textContent).toBe('60')
+})
+
+/**
  * The previewed minute used to appear in the readout. Now it is drawn as a
  * numeral on the numeral ring, at the end of the arc, and the whole ring steps
  * aside so it is the only number on the face (AGENTS.md "Preview numeral"). The
@@ -272,6 +306,30 @@ test('starts a timer for the clicked numeral', async () => {
 
     expect(runtime.getState().status).toBe('running')
     expect(runtime.getState().durationSeconds).toBe(55 * SECONDS_PER_MINUTE)
+    runtime.reset()
+})
+
+/**
+ * The minute either side of 12 o'clock is a whole turn, so clicking the disc
+ * just counter-clockwise of the top starts a 60-minute timer — not the 0-minute
+ * no-op it used to be. The 0 numeral above it still resets: the disc is a
+ * duration, the numeral is the reset control (AGENTS.md "Set a custom timer").
+ */
+test('starts a whole turn when the disc is clicked beside 12 o’clock', async () => {
+    const runtime = createMockRuntime()
+    runtime.forceStatus('idle')
+    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} settingsStore={settings} />))
+
+    const svg = screen.getByRole('slider').element() as SVGSVGElement
+    const onDisc = pointOnDial(0.1, DISC_RADIUS - 1)
+    const matrix = svg.getScreenCTM()
+    if (!matrix) throw new Error('the slider has no screen CTM')
+    const at = new DOMPoint(onDisc.x, onDisc.y).matrixTransform(matrix)
+
+    svg.dispatchEvent(new MouseEvent('click', { clientX: at.x, clientY: at.y, bubbles: true }))
+
+    expect(runtime.getState().status).toBe('running')
+    expect(runtime.getState().durationSeconds).toBe(MINUTES_PER_TURN * SECONDS_PER_MINUTE)
     runtime.reset()
 })
 

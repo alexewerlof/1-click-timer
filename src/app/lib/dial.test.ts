@@ -20,6 +20,7 @@ import {
     dialRadiusOf,
     isPointInsideReadoutDisc,
     isPointOnDisc,
+    nearestMinute,
     pointOnDial,
     pointToMinutes,
     remainingArcPath,
@@ -70,6 +71,36 @@ describe('pointToMinutes', () => {
 
     it('reads the left of the dial as a quarter turn in', () => {
         expect(pointToMinutes({ x: 0, y: DIAL_CENTER_Y })).toBeCloseTo(15, 3)
+    })
+})
+
+describe('nearestMinute', () => {
+    it('rounds a reading onto the nearest whole minute', () => {
+        expect(nearestMinute(13.5)).toBe(14)
+        expect(nearestMinute(14.49)).toBe(14)
+        expect(nearestMinute(14.5)).toBe(15)
+    })
+
+    it('gives every minute a wedge of half a minute either side of its tick', () => {
+        // The point a hair inside either edge rounds to that minute, so the
+        // disc is fully covered and no sliver is left unpreviewed.
+        expect(nearestMinute(14 - 0.49)).toBe(14)
+        expect(nearestMinute(14 + 0.49)).toBe(14)
+    })
+
+    it('reports a whole turn for either side of 12 o’clock', () => {
+        // 0 and 60 are the same mark, so both halves of its wedge ask for a
+        // whole turn rather than an empty timer.
+        expect(nearestMinute(0)).toBe(MINUTES_PER_TURN)
+        expect(nearestMinute(0.49)).toBe(MINUTES_PER_TURN)
+        expect(nearestMinute(59.5)).toBe(MINUTES_PER_TURN)
+        expect(nearestMinute(60)).toBe(MINUTES_PER_TURN)
+    })
+
+    it('never returns 0, so the pointer can always ask for a timer', () => {
+        for (let reading = 0; reading < MINUTES_PER_TURN; reading += 0.1) {
+            expect(nearestMinute(reading)).toBeGreaterThan(0)
+        }
     })
 })
 
