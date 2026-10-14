@@ -1,0 +1,115 @@
+/*
+ * The controls live on the four corners of the dial's square, not in a row of
+ * their own. The square is the letterboxed face (a square viewBox with the
+ * default `xMidYMid meet`), so its edges sit half the letterbox margin in from
+ * the slot's edges: `cqw`/`cqh` are the slot (the size container is `.faceSlot`
+ * in `TimerApp.module.css`) and `cqmin` is the square's side.
+ */
+.corners {
+    position: absolute;
+    top: calc(50cqh - 50cqmin);
+    left: calc(50cqw - 50cqmin);
+    width: 100cqmin;
+    height: 100cqmin;
+    /* The overlay spans the whole face, so it takes the pointer only on its
+       buttons; everything else stays with the dial underneath. */
+    pointer-events: none;
+    transition: opacity 160ms ease;
+}
+
+/*
+ * While the dial is being previewed the corner controls fade out with the
+ * numeral ring, so the face shows nothing but the choice being made (AGENTS.md
+ * "Set a custom timer"). `data-pickable` is the signal the face already sets to
+ * change its cursor and to fade these controls (the ring itself fades off
+ * `data-previewing`), so keying off it here keeps the two from drifting apart.
+ * The pointer can only reach a control after it has left the disc — and the
+ * numeral ring beyond it — which is exactly when `data-pickable` goes false, so
+ * the controls always fade back before a click can land. A control that holds
+ * keyboard focus stays put, so the group is never hidden out from under the
+ * keyboard.
+ */
+*:has([data-pickable='true']) + .corners:not(:has(:focus-visible)) {
+    opacity: 0;
+}
+
+/*
+ * The corner controls are soft plastic: a flat disc of the surface colour with
+ * no shading of its own, lifted off the face by the light *around* it — a bright
+ * cast off the top-left, a soft shade off the bottom-right (`--control-soft-shadow`,
+ * see `tokens.css`) — and given an edge by a hairline rim in a single colour all
+ * the way round. The glyph stays black by default and red on hover, so the dial
+ * keeps the loudest ink.
+ */
+.button {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--size-corner-control);
+    height: var(--size-corner-control);
+    /* The percentage glyph below resolves against the content box, so the UA's
+       default button padding has to go for it to be a fraction of the control. */
+    padding: 0;
+    border-radius: 50%;
+    border: var(--control-border) solid var(--control-rim);
+    background: var(--surface);
+    box-shadow: var(--control-soft-shadow);
+    color: var(--control-ink);
+    pointer-events: auto;
+    transition: color 160ms ease;
+}
+
+/*
+ * Pressed, two casts turn inwards and swap corners, so the disc sinks into the
+ * face — but the outer light that lifts it stays, so it reads as pressed rather
+ * than flattened. Not transitioned: a press wants to answer at once.
+ */
+.button:active:not(:disabled) {
+    box-shadow: var(--control-soft-shadow-pressed);
+}
+
+/* The glyph is a fraction of the control, so it scales with the dial with it. */
+.button svg {
+    inline-size: var(--size-corner-icon);
+    block-size: var(--size-corner-icon);
+}
+
+.button:hover:not(:disabled),
+.button:focus-visible,
+.button[aria-pressed='true'] {
+    color: var(--accent);
+}
+
+.button:disabled {
+    opacity: var(--disabled-opacity);
+    cursor: default;
+}
+
+/* One corner each, set in from the square's edge by `--corner-inset`. */
+.button[data-corner='top-left'] {
+    top: var(--corner-inset);
+    left: var(--corner-inset);
+}
+
+.button[data-corner='top-right'] {
+    top: var(--corner-inset);
+    right: var(--corner-inset);
+}
+
+.button[data-corner='bottom-left'] {
+    bottom: var(--corner-inset);
+    left: var(--corner-inset);
+}
+
+.button[data-corner='bottom-right'] {
+    bottom: var(--corner-inset);
+    right: var(--corner-inset);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .corners,
+    .button {
+        transition: none;
+    }
+}

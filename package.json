@@ -1,0 +1,68 @@
+{
+    "name": "1-click-timer",
+    "version": "5.1.0",
+    "description": "One-click countdown timer: click the dial to start, watch the minutes left on the toolbar badge, and get notified when time is up.",
+    "scripts": {
+        "dev": "vite",
+        "build": "vite build",
+        "preview": "vite preview",
+        "deploy": "npm run lint && npm run typecheck && npm test && npm run build && bash scripts/package.sh",
+        "lint": "eslint .",
+        "lint:fix": "eslint . --fix",
+        "format": "prettier --write .",
+        "format:check": "prettier --check .",
+        "typecheck": "tsc --noEmit",
+        "test": "vitest run --project unit",
+        "test:watch": "vitest --project unit",
+        "test:visual": "vitest run --project visual",
+        "test:visual:update": "vitest run --project visual --update",
+        "screenshots": "npm run build && node scripts/store/capture.mjs"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/alexewerlof/1-click-timer.git"
+    },
+    "keywords": [
+        "chrome-extension",
+        "timer",
+        "countdown"
+    ],
+    "author": "Alex Ewerlöf",
+    "license": "GPL-3.0",
+    "type": "module",
+    "engines": {
+        "node": ">=22.13"
+    },
+    "bugs": {
+        "url": "https://github.com/alexewerlof/1-click-timer/issues"
+    },
+    "homepage": "https://github.com/alexewerlof/1-click-timer#readme",
+    "devDependencies": {
+        "@eslint/js": "^10.0.1",
+        "@resvg/resvg-js": "^2.6.2",
+        "@types/chrome": "^0.2.9",
+        "@types/node": "^26.6.5",
+        "@types/react": "^19.3.0",
+        "@types/react-dom": "^19.3.0",
+        "@vitejs/plugin-react-swc": "^4.3.3",
+        "@vitest/browser": "^5.0.3",
+        "@vitest/browser-playwright": "^5.0.3",
+        "eslint": "^10.12.0",
+        "eslint-config-prettier": "^10.1.8",
+        "eslint-plugin-react-hooks": "^7.1.1",
+        "eslint-plugin-react-refresh": "^0.5.7",
+        "globals": "^17.13.0",
+        "playwright": "^1.64.0",
+        "prettier": "^3.9.10",
+        "typescript": "^6.0.3",
+        "typescript-eslint": "^8.71.1",
+        "vite": "^8.1.0",
+        "vitest": "^5.0.3",
+        "vitest-browser-react": "^2.3.0"
+    },
+    "dependencies": {
+        "lucide-react": "^1.55.0",
+        "react": "^19.3.0",
+        "react-dom": "^19.3.0"
+    }
+}

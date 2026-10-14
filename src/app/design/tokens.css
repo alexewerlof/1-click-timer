@@ -1,0 +1,167 @@
+/**
+ * Design tokens.
+ *
+ * Every colour and size the UI uses resolves through a custom property.
+ * Components never name a colour directly. The light palette is the `:root`
+ * default; `[data-theme='dark']` overrides it (AGENTS.md "Settings" — Appearance).
+ * The remaining-colour setting writes over these custom properties at runtime
+ * (`useRemainingColor`), so `design/palette.ts` and the theme here are the only
+ * sources of colour.
+ */
+
+:root {
+    color-scheme: light;
+
+    /* ---- typography ---- */
+    --font-ui: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --font-numeric: var(--font-ui);
+
+    /* ---- shape ---- */
+    /* The corner controls scale with the dial rather than sitting at a fixed
+       size: `cqmin` is the dial square's side (the `.faceSlot` size container),
+       so these values are only meaningful inside it. 34px on the 352px popup
+       face, and proportionally larger on a big fullscreen dial. */
+    --size-corner-control: 9.66cqmin;
+    /* The glyph, as a fraction of the control — the same shape as
+       `--size-readout-control-icon`. 18px on the 34px control. */
+    --size-corner-icon: 53%;
+    /* How far a corner control is set in from the corner of the dial's square. */
+    --corner-inset: 1.14cqmin;
+    /*
+     * The corner controls read as soft plastic: each is a flat disc of the
+     * surface colour, and it is the light *around* it that gives it its shape —
+     * a bright cast off the top-left, a soft shade off the bottom-right — so it
+     * pops off the face with no frame and a flat face of its own. Every colour
+     * is translucent, so the recipe reads on whatever colour the theme (or the
+     * Face slot) gives the surface.
+     */
+    --control-sheen: rgb(255 255 255 / 90%);
+    --control-cast: rgb(15 23 42 / 22%);
+    --control-press-shade: rgb(15 23 42 / 26%);
+    /* The light around the disc — a bright cast off the top-left, a shade off the
+       bottom-right — is what lifts it off the face, and it stays put in both
+       states, so a pressed control still reads as a piece on the face. */
+    --control-light-cast: -0.8cqmin -0.9cqmin 2cqmin var(--control-sheen);
+    --control-shade-cast: 0.9cqmin 1.1cqmin 2.4cqmin var(--control-cast);
+    --control-soft-shadow: var(--control-light-cast), var(--control-shade-cast);
+    /* Pressed, two casts are added *inside* and swap corners — a shade from the
+       top-left, a catch-light from the bottom-right — so the disc reads as pushed
+       into the face while the outer light that lifts it stays. */
+    --control-soft-shadow-pressed:
+        var(--control-light-cast), var(--control-shade-cast),
+        inset 0.65cqmin 0.65cqmin 1.5cqmin var(--control-press-shade),
+        inset -0.5cqmin -0.5cqmin 1cqmin var(--control-sheen);
+    /*
+     * The control's rim: the surface colour, all the way round, so no line ever
+     * shows at rest and the disc's shape comes from the light around it. The rim
+     * only reads while pressed, where the press-in shadow draws inside the
+     * padding box and leaves this surface-coloured ring showing as a lit edge
+     * around the recess. `--control-border` is `cqmin`, like every size that
+     * scales with the dial (~1.5px on the popup face, larger fullscreen).
+     */
+    --control-border: 0.42cqmin;
+    --control-rim: var(--surface);
+    --gap-row: 10px;
+    --pad: 14px;
+    /* The glyph inside a settings-screen button. A plain size, not `cqmin`: the
+       settings screen is an ordinary page, not a dial container. */
+    --size-settings-icon: 16px;
+    /* Ticks are short hairlines; the strokes shrink with their length so they
+       don't read as dots. */
+    --stroke-tick-minor: 0.35;
+    --stroke-tick-major: 0.8;
+    /* Slight transparency lets the ticks show through the remaining sector. */
+    --remaining-alpha: 0.9;
+    /* A disabled control and a paused sector recede rather than changing ink. */
+    --disabled-opacity: 0.3;
+    --paused-opacity: 0.45;
+
+    /* ---- dial typography (px here means SVG user units) ---- */
+    --size-numeral: 8px;
+    --weight-numeral: 700;
+    --tracking-numeral: -0.03em;
+    /* Was 4.4px in a 106-unit-tall viewBox; the viewBox is now taller, so this
+       is a shade over four times smaller on screen than it used to be. */
+    --size-caption: 1.4px;
+    /* Readout sizes are not tokens: they are derived from the readout disc
+       radius in `lib/dial.ts`, so the text always fits its circle. */
+    --weight-readout: 700;
+    --tracking-readout: 0;
+    /* The readout control's icon, as a fraction of the readout disc, so the
+       glyph scales with the disc instead of being a fixed size. */
+    --size-readout-control-icon: 56%;
+
+    /* ---- palette ---- */
+    /* A milky off-white, like sun-bleached white plastic, rather than pure
+       white: it leaves the corner controls room to catch a lighter light along
+       one rim and fall into shade along the other (`--control-soft-shadow`),
+       which is what gives them their soft, raised look. */
+    --surface: #e2dccf;
+    /* The face is the page background; only the disc is drawn. */
+    --face: transparent;
+
+    --ink: #14181f;
+    --ink-soft: rgb(20 24 31 / 55%);
+    /* Ticks and numerals: one solid ink, no graduated greys. */
+    --dial-mark: #000000;
+
+    /*
+     * The remaining ink. `--remaining-base` is the theme's own red — the colour
+     * the toolbar badge shows when the time is up — and the base for the three
+     * values the “Remaining” setting writes at runtime (see `useRemainingColor`).
+     *
+     * `--remaining` is the live colour: the badge's ramp while Gradient is
+     * chosen, so the sector and the readout control follow the time left.
+     * `--preview` is the colour a click would start, so it never follows the grey
+     * a paused timer shows. `--accent` is the controls' hover and focus colour.
+     */
+    --remaining-base: #e0201b;
+    --remaining: var(--remaining-base);
+    --preview: var(--remaining-base);
+    /* Solid ink, like the numerals. */
+    --readout: #000000;
+    /* The readout disc is the same material as the face — a layer of the surface
+       raised by its own shadow, like the corner controls — so it follows the
+       theme and the Face slot instead of sitting on the face as a white blob. */
+    --readout-surface: var(--surface);
+    /* Soft drop shadow under the readout disc: translucent black-blue, like a
+       CSS box-shadow. */
+    --readout-shadow: rgb(15 23 42 / 30%);
+    /* Cast inwards from the disc's rim, so the disc reads as a recess that the
+       ticks and the readout gather around. Deliberately the same shadow as the
+       readout disc's: one light, two directions. */
+    --disc-inner-shadow: var(--readout-shadow);
+
+    /* The controls' interactive signal (hover and focus). Written from the
+       “Remaining” choice at runtime; this is the Gradient default. */
+    --accent: var(--remaining-base);
+    --control-ink: #14181f;
+
+    /* ---- settings screen ---- */
+    --panel: #ffffff;
+    --panel-border: rgb(20 24 31 / 12%);
+}
+
+/*
+ * Dark theme (AGENTS.md "Settings" — Appearance). Set from `data-theme` on <html>,
+ * which `useSettingsTheme` resolves from the mode; Auto follows the OS
+ * `prefers-color-scheme`. Only the palette flips — every size stays put.
+ */
+[data-theme='dark'] {
+    color-scheme: dark;
+    --surface: #1d1b17;
+    --ink: #e8eaee;
+    --ink-soft: rgb(232 234 238 / 55%);
+    --dial-mark: #e8eaee;
+    --remaining-base: #ff4a3d;
+    --readout: #f2f4f7;
+    --readout-shadow: rgb(0 0 0 / 55%);
+    --control-ink: #e8eaee;
+    /* Soft plastic in the dark: a faint cast off the top-left, a deeper shade
+       off the bottom-right, so the control still pops off a dark surface. */
+    --control-sheen: rgb(255 255 255 / 16%);
+    --control-cast: rgb(0 0 0 / 60%);
+    --control-press-shade: rgb(0 0 0 / 58%);
+    --panel: #181b21;
+    --panel-border: rgb(232 234 238 / 14%);
+}

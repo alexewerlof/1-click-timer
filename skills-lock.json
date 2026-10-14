@@ -1,0 +1,17 @@
+{
+    "version": 1,
+    "skills": {
+        "chrome-extensions": {
+            "source": "googlechrome/modern-web-guidance",
+            "sourceType": "github",
+            "skillPath": "skills/chrome-extensions/SKILL.md",
+            "computedHash": "1373f573799adad2a98c158b0c1a068e9f3bdef07c728b55b2be3f1c8ae0c2b0"
+        },
+        "vercel-react-best-practices": {
+            "source": "vercel-labs/agent-skills",
+            "sourceType": "github",
+            "skillPath": "skills/react-best-practices/SKILL.md",
+            "computedHash": "ca7b0c0c6e5f2750043f7f0cd72d16ac4e2abc48f9b5500d047a4b77a2506212"
+        }
+    }
+}

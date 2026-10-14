@@ -1,0 +1,98 @@
+/**
+ * Page-level setup shared by both surfaces (popup and fullscreen tab).
+ *
+ * `[data-surface]` is set on `<html>` by each HTML entry and decides how much
+ * room the app gets: a fixed popup panel, or the whole tab.
+ */
+
+@import './tokens.css';
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background: var(--surface);
+    color: var(--ink);
+    font-family: var(--font-ui);
+    overflow: hidden;
+    transition: background-color 240ms ease;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+button {
+    margin: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+}
+
+:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+/*
+ * Only keyboard focus draws a ring. A mouse click focuses whatever it lands on,
+ * and the browser then paints its own default ring — an unrounded amber
+ * rectangle, not the app's rounded accent one above. The `:focus-visible` rules
+ * deliberately reserve the ring for the keyboard, so cancel the UA ring wherever
+ * focus is not `:focus-visible` (the timer face is a `role="slider"` `<svg>`,
+ * which is focused by every click on the dial).
+ *
+ * `:where()` holds this at zero specificity, so it cancels only the UA's default
+ * ring and loses to any outline a component writes for itself. The settings
+ * swatchs draw their selection ring with `outline`, and a bare
+ * `:focus:not(:focus-visible)` out-specified that rule and erased the ring for as
+ * long as the clicked swatch kept focus.
+ */
+:where(:focus:not(:focus-visible)) {
+    outline: none;
+}
+
+#root {
+    height: 100%;
+}
+
+/*
+ * The popup panel is square, like the dial's viewBox: the SVG fits its square
+ * into the slot and centres the leftover, so any extra height becomes dead
+ * space above 0 and below 30. A square panel leaves the dial flush.
+ */
+[data-surface='popup'] #root {
+    width: 380px;
+    height: 380px;
+}
+
+[data-surface='fullscreen'] #root {
+    width: 100vw;
+    height: 100vh;
+}
+
+/* The settings screen is a full page and may scroll; the timer surfaces don't. */
+html[data-surface='settings'] body {
+    overflow-y: auto;
+}
+
+[data-surface='settings'] #root {
+    width: 100%;
+    min-height: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body {
+        transition: none;
+    }
+}

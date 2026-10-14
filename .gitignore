@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.vitest/
+
+# Release artifacts (`npm run deploy`). The ZIP is uploaded to the Chrome Web
+# Store, never committed.
+dashboard/package/
+
+# Store gallery (`npm run screenshots`). Reproducible from the script, and a
+# committed gallery goes stale whenever the interface moves.
+dashboard/screenshots/

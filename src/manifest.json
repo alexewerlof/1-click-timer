@@ -1,23 +1,30 @@
 {
-	"name": "1-click timer",
-	"description": "A Simple, Slick and Practical timer for Chrome",
-	"version": "4.0",
-	"manifest_version": 2,
-	"browser_action": {
-		"default_icon": "images/logo19.png",
-		"default_title": "1-click timer",
-		"default_popup": "popup.html"
-	},
-	"permissions": [
-		"background",
-		"notifications"
-	],
-	"icons":{
-		"16":"images/logo16.png",
-		"48":"images/logo48.png",
-		"128":"images/logo128.png"
-	},
-	"background": {
-		"page": "background.html"
-	}
+    "name": "1-click timer",
+    "description": "One-click countdown timer: click the dial to start, watch the minutes left on the toolbar badge, and get notified when time is up.",
+    "version": "5.1.0",
+    "manifest_version": 3,
+    "minimum_chrome_version": "116",
+    "action": {
+        "default_icon": {
+            "16": "images/icon16.png",
+            "19": "images/icon19.png",
+            "32": "images/icon32.png",
+            "38": "images/icon38.png",
+            "48": "images/icon48.png",
+            "128": "images/icon128.png"
+        },
+        "default_title": "1-click timer",
+        "default_popup": "popup.html"
+    },
+    "permissions": ["alarms", "notifications", "storage", "offscreen"],
+    "icons": {
+        "16": "images/icon16.png",
+        "32": "images/icon32.png",
+        "48": "images/icon48.png",
+        "128": "images/icon128.png"
+    },
+    "background": {
+        "service_worker": "js/background.js",
+        "type": "module"
+    }
 }
