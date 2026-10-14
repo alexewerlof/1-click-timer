@@ -1,6 +1,6 @@
 # Chrome Web Store Listing — 1-click timer
 
-> Last Updated: 2026-10-12
+> Last Updated: 2026-10-14
 
 The single source of truth for everything typed into the Chrome Developer
 Dashboard. Copy from here, not from memory. `PRIVACY.md` and `dashboard/` are the
@@ -36,6 +36,7 @@ Move the pointer over the dial to preview a duration, then click to set it. Or c
 FEATURES
 • One click to start: hover the dial to preview a duration, click to set it
 • Or click a numeral to start that many minutes
+• Setting a timer is always one click, even while another timer is already running
 • Keeps counting when you close the popup or restart Chrome
 • The minutes left stay on the toolbar badge, turning from green to red as time runs out
 • A notification when the time is up, with Stop and Restart buttons, plus a chime of your choosing
@@ -99,12 +100,13 @@ English
 | Screenshot 5            | 1280×800              | ✅ Ready       | `dashboard/screenshots/05-settings.png` |
 | Screenshot 6            | 1280×800              | ✅ Ready       | `dashboard/screenshots/06-dark.png`     |
 | Small Promo Tile [RECOMMENDED] | 440×280        | ✅ Ready       | `dashboard/screenshots/promo-440x280.png` |
-| Marquee Promo Tile      | 1400×560              | ⬜ Not created |                                         |
+| Marquee Promo Tile      | 1400×560              | ✅ Ready       | `dashboard/screenshots/promo-1400x560.png` |
 
 All of them come from `npm run screenshots` (`scripts/store/capture.mjs`), which
 builds `dist/`, loads the packed extension in Chromium and drives it into each
-state, so a shot cannot show an interface that no longer exists. Everything is
-1280×800 — the size the store prefers. `dashboard/screenshots/` is gitignored:
+state, so a shot cannot show an interface that no longer exists. The six
+screenshots are all 1280×800 — the size the store prefers — and the two tiles are
+440×280 and 1400×560. `dashboard/screenshots/` is gitignored:
 the captures are reproducible, and the v4 set was deleted on 2026-10-11 for going
 stale in the repo.
 
@@ -122,8 +124,8 @@ order to upload.
 4. **The popup** — the face at its true 380×380 on a plain backdrop, so the
    listing shows the panel a user actually clicks. No browser or device chrome is
    drawn around it.
-5. **Settings screen** — appearance, alarm and the colour slots, which also shows
-   the icon footer.
+5. **Settings screen** — appearance (the mode and the remaining-time colour) and
+   the alarm (volume, sound and ring length), above the footer of actions.
 6. **Dark theme** — the same running timer in the dark appearance, since a lot of
    people run dark mode and it is worth showing that it is supported.
 
@@ -229,18 +231,19 @@ https://www.alexewerlof.com/
 
 ### Known Issues / Limitations
 
-- **The alarm chime needs a timer on screen.** Sound is played by the open popup
-  or tab, not by the background service worker, so with the popup closed the user
-  gets the notification but not the sound. The listing states this explicitly
-  rather than implying a sound always plays. A fix is on the roadmap.
+- **The toolbar badge counts whole minutes, never seconds.** Chrome wakes a
+  background extension about once a minute, so a per-second badge would drift;
+  the badge shows whole minutes left and its colour tracks the time remaining.
+  The second-by-second countdown is on the timer face itself.
 - **No ring/limits.** The dial starts a timer on a single click with no
   confirmation, including while another timer is running. That is intended, and
-  stated in the listing: setting a timer is always one click.
+  stated in the listing: setting a timer is always one click, even while another
+  timer is already running.
 
 ### Pre-submission checklist
 
 - [x] Manifest V3
-- [x] Version bumped above the published one (5.0.0 > 4.0)
+- [x] Version bumped above the published one (5.1.0 > 4.0)
 - [x] Name in `manifest.json` matches the listing (enforced by `src/manifest.test.ts`)
 - [x] Short description ≤ 132 characters (same test)
 - [x] Every permission justified
@@ -248,10 +251,11 @@ https://www.alexewerlof.com/
 - [x] Privacy policy written and consistent with the disclosure
 - [x] `npm run deploy` produces a clean ZIP containing only `dist/`
 - [ ] **Privacy policy pushed**, so the URL resolves
-- [x] **Screenshots captured** — `npm run screenshots`, all 1280×800
-- [x] **Promo tiles refreshed** — the 440×280 tile (the marquee is optional)
+- [x] **Screenshots captured** — `npm run screenshots`, all six at 1280×800
+- [x] **Promo tiles refreshed** — the 440×280 and 1400×560 tiles
 - [x] **Contact email supplied** — `hello@alexewerlof.com`, also in `PRIVACY.md`
-- [ ] Loaded unpacked in Chrome and exercised once more before uploading
+- [x] **Minimum Chrome version declared** — `minimum_chrome_version: "116"` in the manifest
+- [x] Loaded unpacked in Chrome and exercised once more before uploading
 
 ### Rejection History
 

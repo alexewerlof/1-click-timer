@@ -5,7 +5,8 @@
  * It loads `dist/` into Playwright's own Chromium (Chrome-branded builds refuse
  * `--load-extension`), drives the timer into each state through the real UI, and
  * writes the images into `dashboard/screenshots/`: the screenshots at 1280×800,
- * which is the size the store asks for, and the promo tile at 440×280. That
+ * which is the size the store asks for, and the two promo tiles at 440×280 and
+ * 1400×560. That
  * folder is gitignored — the captures are reproducible from this script, and a
  * committed gallery goes stale the moment the interface moves (the v4 set was
  * deleted for exactly that).
@@ -25,11 +26,14 @@ const DIST = join(ROOT, 'dist')
 const OUT = join(ROOT, 'dashboard', 'screenshots')
 const TOKENS = join(ROOT, 'src', 'app', 'design', 'tokens.css')
 const TILE_PAGE = join(ROOT, 'scripts', 'store', 'promo-tile.html')
+const MARQUEE_PAGE = join(ROOT, 'scripts', 'store', 'promo-marquee.html')
 
 /** 1280×800: the size the store prefers for screenshots. */
 const SHOT = { width: 1280, height: 800 }
-/** The one promo-tile size worth having — the small tile, for placements. */
+/** The small promo tile, for placements. */
 const TILE = { width: 440, height: 280 }
+/** The marquee promo tile, for the store's wide banner slot. */
+const MARQUEE = { width: 1400, height: 560 }
 
 /** The gallery shows a timer part-way through, because that is the product. */
 const HERO_MINUTES = 25
@@ -57,9 +61,9 @@ const POPUP_FRAME = `
     }
 `
 
-// The promo tile's artwork is the same dial with the corner controls and the
+// The promo tiles' artwork is the same dial with the corner controls and the
 // numeral ring hidden: a marketing tile wants the instrument, not the buttons,
-// and the numerals would collide with the tile's own copy.
+// and the numerals would collide with each tile's own copy.
 const DIAL_ONLY = '[aria-label="Timer controls"], [data-dial-numerals] { visibility: hidden !important; }'
 
 /**
@@ -114,10 +118,30 @@ async function openFace(context, id) {
     return page
 }
 
-/** Crops a screenshot to a fixed size, so the tile is exactly 440×280. */
+/** Crops a screenshot to a fixed size, so a tile is exactly the size it claims. */
 async function shoot(page, name, { clip } = {}) {
     await page.screenshot({ path: join(OUT, name), ...(clip ? { clip } : {}) })
     console.log(`screenshots: wrote ${name}`)
+}
+
+/**
+ * Renders one promo tile: a layout-only page from `scripts/store/`, given the
+ * app's own `tokens.css` and a screenshot of the dial, then cropped to the
+ * tile's size. The page is authored at the tile's dimensions, so the viewport
+ * matches unless the caller is the small tile, which is shot from the standard
+ * surface and cropped down.
+ */
+async function shootTile(context, { source, viewport, size, name, dialSource }) {
+    const tile = await context.newPage()
+    await tile.setViewportSize(viewport)
+    await tile.goto(pathToFileURL(source).href)
+    await tile.addStyleTag({ path: TOKENS })
+    await tile.evaluate((dial) => {
+        document.querySelector('#dial').src = dial
+    }, dialSource)
+    await tile.evaluate(() => document.fonts.ready)
+    await shoot(tile, name, { clip: { x: 0, y: 0, ...size } })
+    await tile.close()
 }
 
 if (!existsSync(join(DIST, 'manifest.json'))) {
@@ -213,8 +237,8 @@ try {
     // 6 — the dark theme, chosen the way a user chooses it (the same `sync`
     // store the extension ships), so the shot cannot show a theme it cannot
     // reach.
-    const appearance = settings.getByRole('radiogroup', { name: 'Appearance' })
-    await appearance.getByRole('radio', { name: 'Dark' }).click()
+    const mode = settings.getByLabel('Mode')
+    await mode.selectOption('dark')
     await settings.waitForTimeout(200)
 
     const dark = await openFace(context, id)
@@ -223,8 +247,8 @@ try {
     await shoot(dark, '06-dark.png')
     await dark.close()
 
-    // Back to the light theme for the tile, then take its artwork.
-    await appearance.getByRole('radio', { name: 'Light' }).click()
+    // Back to the light theme for the tiles, then take its artwork.
+    await mode.selectOption('light')
     await settings.waitForTimeout(200)
     await settings.close()
 
@@ -235,21 +259,24 @@ try {
     await art.screenshot({ path: artwork })
     await art.close()
 
-    // 7 — the promo tile. Colours and type come from the app's own tokens, and
-    // the dial arrives as a data URL so the tile depends on nothing but itself.
-    const tile = await context.newPage()
-    await tile.setViewportSize(SHOT)
-    await tile.goto(pathToFileURL(TILE_PAGE).href)
-    await tile.addStyleTag({ path: TOKENS })
-    await tile.evaluate(
-        (source) => {
-            document.querySelector('#dial').src = source
-        },
-        `data:image/png;base64,${readFileSync(artwork).toString('base64')}`,
-    )
-    await tile.evaluate(() => document.fonts.ready)
-    await shoot(tile, 'promo-440x280.png', { clip: { x: 0, y: 0, ...TILE } })
-    await tile.close()
+    // 7 — the promo tiles. Colours and type come from the app's own tokens, and
+    // the dial arrives as a data URL so each tile depends on nothing but itself.
+    const dialSource = `data:image/png;base64,${readFileSync(artwork).toString('base64')}`
+
+    await shootTile(context, {
+        source: TILE_PAGE,
+        viewport: SHOT,
+        size: TILE,
+        name: 'promo-440x280.png',
+        dialSource,
+    })
+    await shootTile(context, {
+        source: MARQUEE_PAGE,
+        viewport: MARQUEE,
+        size: MARQUEE,
+        name: 'promo-1400x560.png',
+        dialSource,
+    })
 
     unlinkSync(artwork)
 

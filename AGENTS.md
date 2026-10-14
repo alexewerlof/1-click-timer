@@ -216,7 +216,10 @@ termination. The UI never accumulates time.
   open the fullscreen page only when none is open — so there is a single fullscreen
   view at a time. The UI's fullscreen control uses the same helper, so it focuses an
   existing tab instead of opening a second. Opening and focusing tabs do not require
-  `tabs`. The `offscreen` permission is the only one this alarm work added.
+  `tabs`. The `offscreen` permission is the only one this alarm work added. The
+  manifest declares `minimum_chrome_version: "116"` because of this call — a
+  browser below it cannot run the extension, and `src/manifest.test.ts` fails if
+  the floor is set lower.
 - **The app icon is generated, the UI icons are Lucide.** `images/icon.svg` is
 the only committed icon art (100×100). `npm run build` rasterises it into the six
 PNG sizes Chrome wants — 16, 19, 32, 38, 48 and 128 — straight into `dist/`, so
@@ -240,7 +243,7 @@ ring played from an offscreen document, dismissible from the notification, with 
 red alert toolbar icon and the timer brought to the front. What is next:
 
 1. Small UI tweaks (see the loose ends below).
-2. The store screenshots and the promo tile: `npm run screenshots` builds `dist/`,
+2. The store screenshots and the promo tiles: `npm run screenshots` builds `dist/`,
    drives the packed extension in Chromium and writes the gallery to the
    gitignored `dashboard/screenshots/` (`scripts/store/`). The v4 set was deleted
    on 2026-10-11: it showed the pre-React interface.

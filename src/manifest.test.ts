@@ -17,6 +17,16 @@ import { describe, expect, it } from 'vitest'
 /** The Web Store's limit for the short description, which the manifest carries. */
 const SHORT_DESCRIPTION_MAX = 132
 
+/**
+ * The oldest Chrome the extension can run on. `chrome.runtime.getContexts` is
+ * Chrome 116+ (used to find an open timer tab and the offscreen document), and
+ * `chrome.notifications.create/clear` only return the promises the worker
+ * awaits from 116 — on an older browser the alarm would ring but the call would
+ * throw. Declaring the floor is what keeps such a browser from installing the
+ * extension and failing quietly.
+ */
+const MINIMUM_CHROME_VERSION = 116
+
 /** A version Chrome accepts: one to four dot-separated numbers. */
 const CHROME_VERSION = /^\d+(\.\d+){0,3}$/
 
@@ -24,6 +34,7 @@ interface Manifest {
     name: string
     version: string
     description: string
+    minimum_chrome_version?: string
 }
 
 interface PackageJson {
@@ -65,5 +76,14 @@ describe('manifest.json and package.json agree', () => {
 
     it('use a version Chrome accepts', () => {
         expect(manifest.version).toMatch(CHROME_VERSION)
+    })
+
+    it('declare a minimum Chrome version Chrome accepts', () => {
+        expect(manifest.minimum_chrome_version).toMatch(CHROME_VERSION)
+    })
+
+    it('keep the minimum Chrome version at least as high as the APIs need', () => {
+        const declared = Number.parseInt(manifest.minimum_chrome_version ?? '', 10)
+        expect(declared).toBeGreaterThanOrEqual(MINIMUM_CHROME_VERSION)
     })
 })

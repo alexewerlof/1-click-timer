@@ -19,6 +19,9 @@ notification tells you — even when no timer is on screen.
 Install it from the Chrome Web Store. The store version is still v4; the interface
 in this repository (v5) is on its way.
 
+1-click timer needs Chrome 116 or newer. It uses `chrome.runtime.getContexts` to
+bring an open timer tab to the front when the alarm rings.
+
 To run the current source instead, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## How to use

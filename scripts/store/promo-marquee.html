@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>1-click timer — promo marquee 1400×560</title>
+    <style>
+        /*
+             * Layout only. The colours and the type come from the app's own
+             * `design/tokens.css`, which the capture script injects into this
+             * page, so the marquee cannot drift from the product it advertises.
+             * The dial is a screenshot of the built extension, handed in as a
+             * data URL by the same script.
+             *
+             * The small tile (`promo-tile.html`) is 440×280 and stacks the
+             * wordmark; this one is 1400×560, so the dial is scaled larger and
+             * the copy sits beside it rather than under it.
+             */
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            width: 1400px;
+            height: 560px;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        body {
+            position: relative;
+            background: var(--surface);
+            color: var(--ink);
+            font-family: var(--font-ui);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /*
+             * The dial bleeds off the left edge. Size is 0.6 of the 1280×800
+             * capture it comes from: 768×480, whose dial is centred at (384,
+             * 240). Sitting the image at (-214, 40) puts the dial's centre at
+             * (170, 280) — the tile's vertical middle — so its left rim runs off
+             * the canvas and the copy keeps the right two thirds.
+             */
+        .dial {
+            position: absolute;
+            left: -214px;
+            top: 40px;
+            width: 768px;
+            height: 480px;
+        }
+
+        .dial img {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Softens the dial's right edge into the copy's side of the tile. */
+        .fade {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 560px;
+            height: 560px;
+            background: linear-gradient(90deg, transparent 45%, var(--surface) 88%);
+        }
+
+        .copy {
+            position: absolute;
+            top: 0;
+            left: 620px;
+            width: 700px;
+            height: 560px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .rule {
+            width: 48px;
+            height: 4px;
+            border-radius: 2px;
+            background: var(--remaining);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 68px;
+            line-height: 1.02;
+            letter-spacing: -0.03em;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        p {
+            margin: 0;
+            max-width: 620px;
+            font-size: 19px;
+            line-height: 1.5;
+            color: var(--ink-soft);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dial"><img id="dial" alt="" /></div>
+    <div class="fade"></div>
+    <div class="copy">
+        <span class="rule"></span>
+        <h1>1-click timer</h1>
+        <p>Set a countdown timer in one click. It keeps counting with the popup closed, and rings when the time is up.
+        </p>
+    </div>
+</body>
+
+</html>

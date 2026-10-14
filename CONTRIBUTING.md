@@ -118,9 +118,10 @@ justifications and the privacy disclosure; `PRIVACY.md` is the policy the listin
 links to. Bump the version in **both** `src/manifest.json` and `package.json` —
 `src/manifest.test.ts` fails if they drift apart.
 
-The listing's screenshots and the promo tile come from `npm run screenshots`,
+The listing's screenshots and the promo tiles come from `npm run screenshots`,
 which builds `dist/`, loads the packed extension in Playwright's Chromium and
-drives it into each state at 1280×800 (440×280 for the tile). The images land in
+drives it into each state at 1280×800 (440×280 and 1400×560 for the tiles). The
+images land in
 `dashboard/screenshots/`, which is gitignored — reproducible on demand, and never
 a gallery that lies about the current interface.
 
