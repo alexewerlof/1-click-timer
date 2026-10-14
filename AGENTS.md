@@ -59,7 +59,7 @@ face.
 | **Tick**             | A short line marking a single minute.                                                                                                                                          |
 | **Minor tick**       | A tick on a minute that is not a multiple of five.                                                                                                                             |
 | **Major tick**       | The thicker tick on each multiple of five (0, 5, 10, … 55).                                                                                                                    |
-| **Numeral**          | The number printed beside a major tick: 0, 5, 10, … 55. Each is itself a one-click shortcut to its own duration — except 0, which resets the timer, like the Reset control. Hovering one previews it exactly as hovering the disc at that minute does. |
+| **Numeral**          | The number printed beside a major tick: 0, 5, 10, … 55. Each is itself a one-click shortcut to its own duration — except 0, which resets the timer. Hovering one previews it exactly as hovering the disc at that minute does. |
 | **Numeral ring**     | The circle the numerals sit on, just outside the ticks.                                                                                                                        |
 | **Remaining sector** | The filled wedge. It runs from 12 o'clock counter-clockwise to the current remaining time, between the disc's rim and a circular cut-out the size of the readout disc, so its inner edge is a circle rather than a sharp corner at the centre, and its size is the time left. Its colour is the **Remaining** setting: the toolbar badge's ramp while Gradient is chosen (grey while the timer is paused), or a pinned red or green.                                                 |
 | **Preview arc**      | The unfilled outline from 12 o'clock to the previewed minute. It shows what a click would start, in the **preview colour** — the chosen **Remaining** colour, or the theme's red under Gradient — so it never follows the live colour (a paused timer still previews in colour). |
@@ -67,11 +67,11 @@ face.
 | **Preview numeral**  | The single numeral shown while previewing, on the numeral ring at the end of the preview arc, in the numerals' style and the **preview colour**. It fades the whole numeral ring out, so it is the only number on the face. A whole turn (60) is labelled where the 0 numeral sits. |
 | **Readout**          | The digital `M:SS` in the middle of the disc, e.g. `1:05`. It always shows the remaining time, except while the timer is idle — when it is left blank, because a standing `0:00` only adds noise — and while the **Readout control** replaces it. |
 | **Readout disc**     | The small circle behind the readout, at the centre of the dial. The surface colour, raised by a soft shadow, so it reads as a layer of the face above the dial rather than a white blob or a hole in it. |
-| **Readout control**  | The round button on the readout disc, whose click surface is the whole disc. Pause while the timer runs, resume while it is paused, restart while the alarm is ringing. Revealed on hover or focus, and always shown where there is no hover. |
+| **Readout control**  | The round button on the readout disc, whose click surface is the whole disc. Restart — re-run the last duration — while the timer is paused or the alarm is ringing; hidden while the timer runs (play/pause is a corner control) or is idle (there is nothing to restore). Revealed on hover or focus, and always shown where there is no hover. |
 | **Caption**          | The text "Made in Sweden", inscribed inside the disc on a circular path just above the bottom rim.                                                                             |
 | **Creator mark**     | The "Alex Ewerlöf" wordmark, drawn in the dial's ink, in the band between the readout disc and the 0 numeral. It fades out while the timer runs and returns when it stops: a countdown on a projector is the room's instrument, so only the remaining sector should hold the eye.                                                    |
 | **Face slot**        | The region that holds the face. The **Transport** controls overlay it, so the face gets the whole slot.                                                                         |
-| **Transport**        | The four corner controls, one per corner of the dial's square: mute (top left), fullscreen (top right), reset (bottom left) and settings (bottom right). Soft-plastic discs of the surface colour, lit along the top-left rim and shaded to the bottom-right, with the glyph black by default and the **accent** colour on hover (the theme's red under Gradient, the calm green under a pinned Red or Green), sinking under a press, and fading out while the dial is previewed. The rim is the surface colour too, so it shows only where a press-in shadow darkens the disc around it. Pause/resume and restart live on the **Readout control**. |
+| **Transport**        | The four corner controls, one per corner of the dial's square: mute (top left), fullscreen (top right), play/pause (bottom left) and settings (bottom right). Soft-plastic discs of the surface colour, lit along the top-left rim and shaded to the bottom-right, with the glyph black by default and the **accent** colour on hover (the theme's red under Gradient, the calm green under a pinned Red or Green), sinking under a press, and fading out while the dial is previewed. The rim is the surface colour too, so it shows only where a press-in shadow darkens the disc around it. The bottom-left control pauses a running timer, resumes a paused one, and — while the alarm rings — stops the timer (resetting it, which silences the ring); restart lives on the **Readout control**. |
 | **Settings control** | The bottom-right corner control: a gear that opens the settings screen in a tab of its own.                                                                                     |
 
 Three measures run through the geometry: **disc radius**, **tick length** (how far
@@ -137,19 +137,23 @@ termination. The UI never accumulates time.
   two settings that are easy to get wrong (`sRGB` interpolation, and a filter
   region wide enough not to clip). The disc has no outline — the inner shadow is
   what draws its edge.
-- The readout disc carries its own pause/resume control (`ReadoutControl`) — the
+- The readout disc carries its own restart control (`ReadoutControl`) — the
   only HTML element in the face. It is a `<button>` overlaid on the SVG (never
   *in* it), sized from `READOUT_DISC_DIAMETER_RATIO` × `cqmin`, revealed on
-  hover/focus and always visible where there is no hover.
-- The mute, fullscreen, reset and settings buttons are the **corner controls**:
-  soft-plastic discs (the surface colour, lit from the top left, shaded to the
-  bottom right) pinned to the corners of the dial's square rather than a row of
-  their own, so the face gets the whole slot. They live in
+  hover/focus and always visible where there is no hover. It offers Restart only
+  while the timer is paused or ringing.
+- The mute, fullscreen, play/pause and settings buttons are the **corner
+  controls**: soft-plastic discs (the surface colour, lit from the top left,
+  shaded to the bottom right) pinned to the corners of the dial's square rather
+  than a row of their own, so the face gets the whole slot. They live in
   `TransportControls` as a sibling of the face; the square is the letterboxed SVG
   viewBox, so the overlay offsets itself by half the letterbox margin, and their
   sizes are `cqmin` tokens so they scale with the dial. While the dial is
   previewed they fade out with the numerals, keyed off the face's `data-pickable`
-  signal, and fade back when the pointer leaves the disc. The fullscreen control
+  signal, and fade back when the pointer leaves the disc. The bottom-left control
+  (play/pause) pauses a running timer, resumes a paused one, and stops a ringing
+  alarm — resetting the timer, which silences it (its glyph is a Stop square
+  there); restart lives on the readout disc. The fullscreen control
   (top right) opens the fullscreen timer, or focuses the tab that already has it
   (in whatever window), so there is a single fullscreen view at a time. The
   settings control (bottom right) opens `settings.html` in a new tab. That

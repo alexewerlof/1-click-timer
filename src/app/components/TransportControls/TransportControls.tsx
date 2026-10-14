@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Expand, FolderPlus, Settings, Shrink, TimerOff, Volume2, VolumeOff } from 'lucide-react'
+import { Expand, FolderPlus, Pause, Play, Settings, Shrink, Square, Volume2, VolumeOff } from 'lucide-react'
 import type { Surface } from '../../lib/surface'
 import { useDocumentFullscreen } from '../../lib/useDocumentFullscreen'
 import type { TimerStatus } from '../../runtime/types'
@@ -13,6 +13,8 @@ export interface TransportControlsProps {
     muted: boolean
     surface: Surface
     onToggleMute: () => void
+    /** Stop or resume the running timer (AGENTS.md "Stop a timer"). */
+    onTogglePause: () => void
     onReset: () => void
     onToggleFullscreen: () => void
     /** Opens the settings screen (AGENTS.md "Settings"). */
@@ -46,6 +48,33 @@ function fullscreenAction(surface: Surface, nativeFullscreen: boolean): Fullscre
     return { label: 'Full screen', Icon: Expand }
 }
 
+interface PauseAction {
+    label: string
+    Icon: typeof Pause
+    run: () => void
+    disabled?: boolean
+}
+
+/**
+ * What the bottom-left control offers in a given state. It has one job — pause a
+ * running timer, resume a paused one — and, while the alarm is ringing, stops the
+ * timer: resetting it also silences the ring, so a Stop glyph is what a ringing
+ * timer is asking for (AGENTS.md "Stop a timer", "Restart the timer"). An idle
+ * timer has nothing to act on, so the control is disabled.
+ */
+function pauseAction(status: TimerStatus, onTogglePause: () => void, onReset: () => void): PauseAction {
+    switch (status) {
+        case 'running':
+            return { label: 'Pause', Icon: Pause, run: onTogglePause }
+        case 'paused':
+            return { label: 'Resume', Icon: Play, run: onTogglePause }
+        case 'expired':
+            return { label: 'Stop', Icon: Square, run: onReset }
+        default:
+            return { label: 'Play', Icon: Play, run: onTogglePause, disabled: true }
+    }
+}
+
 /** A single soft-plastic control, pinned to one corner of the dial's square. */
 function CornerButton({ corner, label, onClick, pressed, disabled, children }: CornerButtonProps) {
     return (
@@ -66,25 +95,34 @@ function CornerButton({ corner, label, onClick, pressed, disabled, children }: C
 
 /**
  * The four corner controls (AGENTS.md "Transport"), one per corner of the dial's
- * square: mute (top left), fullscreen (top right), reset (bottom left) and
+ * square: mute (top left), fullscreen (top right), play/pause (bottom left) and
  * settings (bottom right).
  *
  * They are soft-plastic discs — the surface colour, lit from the top left and
  * shaded to the bottom right, with the glyph black by default and red on hover
- * — so the dial stays the loudest thing on the screen. Pause/resume and restart
- * are not here: they live on the readout disc (`ReadoutControl`).
+ * — so the dial stays the loudest thing on the screen. The bottom-left control
+ * pauses a running timer and resumes a paused one, and stops the alarm while it
+ * rings (resetting the timer silences it — AGENTS.md "Stop a timer"). Restart
+ * lives on the readout disc (`ReadoutControl`).
  */
 export function TransportControls({
     status,
     muted,
     surface,
     onToggleMute,
+    onTogglePause,
     onReset,
     onToggleFullscreen,
     onOpenSettings,
 }: TransportControlsProps) {
     const nativeFullscreen = useDocumentFullscreen()
     const { label: fullscreenLabel, Icon: FullscreenIcon } = fullscreenAction(surface, nativeFullscreen)
+    const {
+        label: pauseLabel,
+        Icon: PauseIcon,
+        run: runPause,
+        disabled: pauseDisabled,
+    } = pauseAction(status, onTogglePause, onReset)
 
     return (
         <div className={styles.corners} role="group" aria-label="Timer controls">
@@ -96,8 +134,8 @@ export function TransportControls({
                 <FullscreenIcon />
             </CornerButton>
 
-            <CornerButton corner="bottom-left" label="Reset" onClick={onReset} disabled={status === 'idle'}>
-                <TimerOff />
+            <CornerButton corner="bottom-left" label={pauseLabel} onClick={runPause} disabled={pauseDisabled}>
+                <PauseIcon />
             </CornerButton>
 
             {/* Settings (AGENTS.md "Settings"). */}

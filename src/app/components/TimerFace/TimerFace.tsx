@@ -43,9 +43,7 @@ export interface TimerFaceProps {
     remainingSeconds: number
     /** Receives the chosen duration in seconds. */
     onPick: (seconds: number) => void
-    /** Stop or resume the timer, from the control on the readout disc. */
-    onTogglePause: () => void
-    /** Re-run the last duration, from the control shown while ringing. */
+    /** Re-run the last duration, from the control the disc offers while paused or ringing. */
     onRestart: () => void
     /** Reset to idle and silence any ringing alarm, from the 0 numeral. */
     onReset: () => void
@@ -58,8 +56,7 @@ function clampMinutes(minutes: number): number {
 /**
  * The face: hover or click the dial to set a timer, or click a numeral to start
  * that many minutes outright. The 0 numeral marks where a whole turn ends, so it
- * resets the timer instead — the same action as the corner Reset (AGENTS.md "Set
- * a custom timer").
+ * resets the timer instead (AGENTS.md "Set a custom timer").
  *
  * Exposed as a slider so the disc action is reachable from the keyboard —
  * arrows move counter-clockwise (more time) and clockwise (less time), shift
@@ -68,7 +65,7 @@ function clampMinutes(minutes: number): number {
  * The readout disc carries its own control (`ReadoutControl`), a real HTML button
  * overlaid on the face rather than drawn in it.
  */
-export function TimerFace({ status, remainingSeconds, onPick, onTogglePause, onRestart, onReset }: TimerFaceProps) {
+export function TimerFace({ status, remainingSeconds, onPick, onRestart, onReset }: TimerFaceProps) {
     const svgRef = useRef<SVGSVGElement>(null)
     const [previewMinutes, setPreviewMinutes] = useState<number | null>(null)
 
@@ -261,7 +258,7 @@ export function TimerFace({ status, remainingSeconds, onPick, onTogglePause, onR
                 <CreatorMark />
                 <Caption />
             </svg>
-            <ReadoutControl status={status} onTogglePause={onTogglePause} onRestart={onRestart} />
+            <ReadoutControl status={status} onRestart={onRestart} />
         </div>
     )
 }

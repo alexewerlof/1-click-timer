@@ -31,20 +31,22 @@ its numeral at the end of the arc. Click to start it.
 
 To skip the dial, click a numeral on the ring and the timer starts at that many
 minutes. The 0 is the exception: it marks where a whole turn ends, so clicking it
-resets the timer, like the reset control in the corner.
+resets the timer.
 
 Setting a timer is always one click, even while another timer is already running.
 
 ### Stop and resume
 
-Hover the readout disc in the centre and a control appears: a pause glyph while the
-timer runs, a play glyph while it is paused. Clicking it stops or resumes.
+The play/pause control sits in the bottom-left corner of the dial: a pause glyph
+while the timer runs, a play glyph while it is paused. Clicking it stops or resumes.
 
 ### Restart
 
-While the alarm is ringing, the same disc offers a restart glyph, which runs the
-last duration again. Once you reset the timer there is nothing to restart, so the
-control is disabled.
+Hover the readout disc in the centre and a restart glyph appears while the timer is
+paused or the alarm is ringing. It runs the last duration again from the start: set
+a timer for 10 minutes, pause it at 5, and Restart runs the full 10 minutes. While
+the timer is running — use the corner control to pause it first — or once you have
+reset it, there is nothing to restart, so the disc stays bare.
 
 ### When the time is up
 
@@ -60,16 +62,17 @@ To silence the alarm you can use the notification's own buttons: **Stop**, and
 **Restart**. Stop silences the alarm and resets the timer — exactly what closing
 the notification does. Restart silences it too, and immediately starts a new
 countdown of the same length. The timer's own controls do the same: the restart
-glyph on the readout disc, or the reset button in the bottom-left corner. Whichever
+glyph on the readout disc, or the Stop control in the bottom-left corner. Whichever
 you use, the sound stops at once, so an alarm you have acknowledged never rings on.
 Resetting the timer — or dismissing the notification — also clears the notification
 if it is still showing.
 
-### Mute, reset and full screen
+### Mute, play/pause and full screen
 
 The corners of the dial's square hold four controls: mute (top left), fullscreen
-(top right), reset (bottom left) and settings (bottom right). Reset stops the timer
-and clears the remaining time.
+(top right), play/pause (bottom left) and settings (bottom right). To stop a timer
+and clear the remaining time, click the 0 numeral — or use the Stop control in the
+bottom-left corner while the alarm is ringing.
 
 The fullscreen control opens the same timer in a tab — or, if you already have that
 tab open, brings it to the front (even from another window) — and pressed again in

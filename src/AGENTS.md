@@ -26,7 +26,7 @@ one dial face; the multi-variant experiment is over.
 | `app/main.tsx`                      | Mounts `App`; imports the global CSS.                                                 |
 | `app/TimerApp.tsx`                  | The timer composition shared by the popup and the tab.                                                      |
 | `app/components/TimerFace/`         | The dial. Geometry in `lib/dial.ts`; one component per element (`Disc`, `RemainingTime`, `PreviewArc`, `PreviewTicks`, `PreviewNumeral`, `CenterReadout`, `ReadoutControl`, `Caption`, `CreatorMark`); static chrome in `dialChrome.tsx` (`DIAL_TICKS`, `DIAL_NUMERALS`, and the `Tick` both tick groups share). `ReadoutControl` is the one non-SVG element — an HTML `<button>` overlaid on the face. |
-| `app/components/TransportControls/` | The four corner controls (mute, fullscreen, reset, and settings), soft-plastic discs pinned to the corners of the dial's square: the surface colour, lit from the top left and shaded to the bottom right, with the glyph black by default and the accent colour on hover (the theme's red under Gradient, the calm green under a pinned Red or Green), and sinking under a press (its rim is the surface colour, so it only shows where the press-in shadow darkens the disc around it). Icons from Lucide. The fullscreen control shows expand or shrink with the document's own fullscreen state. The settings control opens `settings.html` in a new tab (`openSettings` in `app/lib/surface.ts`); that screen's footer holds the only three ways out — the author's site, the source code and the issue tracker (`*_URL` + `openTab`, both from `app/lib/links.ts`). The group fades out while the dial is previewed, so nothing competes with the choice being made. Pause/resume and restart are the `ReadoutControl` on the readout disc. |
+| `app/components/TransportControls/` | The four corner controls (mute, fullscreen, play/pause, and settings), soft-plastic discs pinned to the corners of the dial's square: the surface colour, lit from the top left and shaded to the bottom right, with the glyph black by default and the accent colour on hover (the theme's red under Gradient, the calm green under a pinned Red or Green), and sinking under a press (its rim is the surface colour, so it only shows where the press-in shadow darkens the disc around it). Icons from Lucide. The play/pause control pauses a running timer and resumes a paused one, and stops a ringing alarm (resetting the timer, which silences it — a Stop square glyph). The fullscreen control shows expand or shrink with the document's own fullscreen state. The settings control opens `settings.html` in a new tab (`openSettings` in `app/lib/surface.ts`); that screen's footer holds the only three ways out — the author's site, the source code and the issue tracker (`*_URL` + `openTab`, both from `app/lib/links.ts`). The group fades out while the dial is previewed, so nothing competes with the choice being made. Restart is the `ReadoutControl` on the readout disc. |
 | `app/design/tokens.css`             | Every colour, size and stroke weight. The light palette is `:root`; `[data-theme='dark']` overrides it. The light surface is a milky off-white, so the corner controls' sheen/shade recipe (`--control-soft-shadow`) has something to shade against.      |
 | `app/design/global.css`             | Resets, body, and the popup/tab/settings sizing per `[data-surface]`.                                                |
 | `app/lib/dial.ts`                   | Dial geometry: counter-clockwise mapping, sector/arc paths, pointer → dial point/minute, disc/readout-disc regions, and the derived readout size. |
@@ -119,8 +119,8 @@ and the `offscreen` permission to the manifest.
   to be painted over a sharp corner to hide it; see `SECTOR_INNER_RADIUS`.)
 - **One click sets a timer.** Clicking the disc starts the previewed duration;
   clicking a numeral starts that many minutes outright. The 0 numeral is the
-  exception: it marks where a whole turn ends, so it resets the timer — the same
-  action as the corner Reset — rather than starting a 0-minute one. A numeral
+  exception: it marks where a whole turn ends, so it resets the timer rather than
+  starting a 0-minute one. A numeral
   carries `data-numeral-minutes`, which is how the click is resolved
   (`handleClick` in `TimerFace`) — the pointer's position cannot identify a
   numeral because it sits off the disc.
@@ -136,8 +136,8 @@ and the `offscreen` permission to the manifest.
   half-minute either side of 12 o'clock is a whole turn rather than an empty
   timer — the pointer can never ask for "nothing". Only the keyboard still sets
   0, by way of the reset-and-idle state.
-- **The readout control is HTML, not SVG.** Pause/resume (and restart, while
-  ringing) is a real `<button>` (`ReadoutControl`) overlaid on the readout disc as
+- **The readout control is HTML, not SVG.** Restart (while the timer is paused
+  or ringing) is a real `<button>` (`ReadoutControl`) overlaid on the readout disc as
   a *sibling* of the `<svg>` — a `<button>` is not valid in the SVG namespace, and
   a focusable button nested in the face's `role="slider"` would make the
   accessibility tree ambiguous. Its click surface is the whole disc: the size is

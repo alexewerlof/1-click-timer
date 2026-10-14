@@ -335,8 +335,8 @@ test('starts a whole turn when the disc is clicked beside 12 o’clock', async (
 
 /**
  * The 0 numeral marks where a whole turn ends, so it is the reset control: a
- * click resets the timer — the same action as the corner Reset — rather than
- * starting a 0-minute one (AGENTS.md "Set a custom timer").
+ * click resets the timer rather than starting a 0-minute one (AGENTS.md "Set a
+ * custom timer").
  */
 test('resets the timer from the 0 numeral', async () => {
     const runtime = createMockRuntime()
@@ -352,9 +352,9 @@ test('resets the timer from the 0 numeral', async () => {
 })
 
 /**
- * Reset from the 0 numeral silences a ringing alarm too, like the corner Reset:
- * the record's `ringUntil` is cleared, so the sound stops (AGENTS.md "Set a
- * custom timer").
+ * Reset from the 0 numeral silences a ringing alarm too, like the corner's Stop
+ * control: the record's `ringUntil` is cleared, so the sound stops (AGENTS.md
+ * "Set a custom timer").
  */
 test('resets a ringing alarm from the 0 numeral', async () => {
     const runtime = createMockRuntime()
@@ -498,29 +498,32 @@ test('replaces a running timer from the dial without confirming', async () => {
 })
 
 /**
- * The readout control (AGENTS.md "Readout control"): pause/resume — and restart
- * while ringing — on the readout disc, revealed on hover. It is a real
+ * The readout control (AGENTS.md "Readout control"): restart, while the timer is
+ * paused or ringing, on the readout disc, revealed on hover. It is a real
  * `<button>` overlaid on the face, whose click surface is the whole disc.
  */
 const READOUT_CONTROL_STATES: readonly { status: TimerStatus; label: string }[] = [
-    { status: 'running', label: 'Pause' },
-    { status: 'paused', label: 'Resume' },
+    { status: 'paused', label: 'Restart timer' },
     { status: 'expired', label: 'Restart timer' },
 ]
 
 const transportGroup = { name: 'Timer controls', exact: true } as const
 
-/** Pause/resume and restart all moved off the corner controls, onto the disc. */
-test('leaves pause/resume and restart out of the corner controls', async () => {
+/**
+ * Play/pause now lives in the bottom-left corner, and Restart on the readout
+ * disc: the corner carries the four everyday controls, with nothing hidden behind
+ * a hover. One control per corner, in corner order — top left, top right, bottom
+ * left, bottom right. The popup's fullscreen button opens a tab instead (see
+ * `lib/surface.ts`).
+ */
+test('puts play/pause in the bottom-left corner', async () => {
     const runtime = createMockRuntime()
     runtime.forceStatus('running')
     const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} settingsStore={settings} />))
 
     const transport = screen.getByRole('group', transportGroup).element()
     const labels = [...transport.querySelectorAll('button')].map((button) => button.getAttribute('aria-label'))
-    // One per corner, in corner order: top left, top right, bottom left, bottom
-    // right. The popup's fullscreen button opens a tab instead (see `lib/surface.ts`).
-    expect(labels).toEqual(['Mute', 'Open in a tab', 'Reset', 'Settings'])
+    expect(labels).toEqual(['Mute', 'Open in a tab', 'Pause', 'Settings'])
 })
 
 /**
@@ -581,6 +584,67 @@ test('shows the volume-off glyph while the timer is muted', async () => {
         expect(screen.getByRole('button', { name: 'Unmute', exact: true }).element()).toBe(mute)
         expect(glyph(mute)).toBe('lucide-volume-off')
     })
+})
+
+/**
+ * The play/pause control says what pressing it will do: play while the timer is
+ * idle, pause while it runs, play while it is paused, and a Stop square while it
+ * rings — stopping resets the timer, which also silences the alarm (AGENTS.md
+ * "Stop a timer", "Restart the timer"). An idle timer has nothing to act on, so
+ * its control is disabled.
+ */
+const PAUSE_CONTROL_STATES: readonly {
+    status: TimerStatus
+    label: string
+    glyph: string
+    disabled?: boolean
+}[] = [
+    { status: 'idle', label: 'Play', glyph: 'lucide-play', disabled: true },
+    { status: 'running', label: 'Pause', glyph: 'lucide-pause' },
+    { status: 'paused', label: 'Resume', glyph: 'lucide-play' },
+    { status: 'expired', label: 'Stop', glyph: 'lucide-square' },
+]
+
+for (const { status, label, glyph: expected, disabled } of PAUSE_CONTROL_STATES) {
+    test(`shows the ${status} play/pause control`, async () => {
+        const runtime = createMockRuntime()
+        runtime.forceStatus(status)
+        const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} settingsStore={settings} />))
+
+        const control = screen.getByRole('button', { name: label, exact: true }).element() as HTMLButtonElement
+        expect(glyph(control)).toBe(expected)
+        expect(control.disabled).toBe(disabled ?? false)
+    })
+}
+
+test('pauses a running timer from the corner control', async () => {
+    const runtime = createMockRuntime()
+    runtime.forceStatus('running')
+    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} settingsStore={settings} />))
+
+    await screen.getByRole('button', { name: 'Pause', exact: true }).click()
+    expect(runtime.getState().status).toBe('paused')
+})
+
+test('resumes a paused timer from the corner control', async () => {
+    const runtime = createMockRuntime()
+    runtime.forceStatus('paused')
+    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} settingsStore={settings} />))
+
+    await screen.getByRole('button', { name: 'Resume', exact: true }).click()
+    expect(runtime.getState().status).toBe('running')
+    runtime.reset()
+})
+
+test('stops a ringing alarm from the corner control, resetting the timer', async () => {
+    const runtime = createMockRuntime()
+    runtime.forceStatus('expired')
+    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} settingsStore={settings} />))
+
+    await screen.getByRole('button', { name: 'Stop', exact: true }).click()
+    expect(runtime.getState().status).toBe('idle')
+    expect(runtime.getState().remainingSeconds).toBe(0)
+    expect(runtime.getState().lastDurationSeconds).toBeNull()
 })
 
 /**
@@ -665,7 +729,7 @@ test('pins one control to each corner of the dial square, clear of the dial', as
     const corners = [
         { name: 'Mute', across: -1, down: -1 },
         { name: 'Open in a tab', across: 1, down: -1 },
-        { name: 'Reset', across: -1, down: 1 },
+        { name: 'Play', across: -1, down: 1 },
         { name: 'Settings', across: 1, down: 1 },
     ] as const
 
@@ -688,25 +752,31 @@ test('pins one control to each corner of the dial square, clear of the dial', as
     }
 })
 
-/** An idle timer has nothing to pause, resume or restart, so the disc stays bare. */
-test('has no readout control while the timer is idle', async () => {
-    const runtime = createMockRuntime()
-    runtime.forceStatus('idle')
-    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} settingsStore={settings} />))
+/**
+ * The disc only offers Restart, and only when there is a duration to restore: an
+ * idle timer (nothing to restore) and a running one (play/pause is in the corner)
+ * both leave it bare.
+ */
+for (const status of ['idle', 'running'] as const) {
+    test(`has no readout control while the timer is ${status}`, async () => {
+        const runtime = createMockRuntime()
+        runtime.forceStatus(status)
+        const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} settingsStore={settings} />))
 
-    const stageElement = screen.getByRole('slider').element().parentElement
-    expect(stageElement?.querySelector('button')).toBeNull()
-})
+        const stageElement = screen.getByRole('slider').element().parentElement
+        expect(stageElement?.querySelector('button')).toBeNull()
+    })
+}
 
 test('reveals the readout control on hover, hiding the readout', async () => {
     const runtime = createMockRuntime()
-    runtime.forceStatus('running')
+    runtime.forceStatus('paused')
     const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} settingsStore={settings} />))
 
     const svg = screen.getByRole('slider').element() as SVGSVGElement
     const readout = svg.querySelector('text[class*="readout"]') as SVGTextElement
     const disc = svg.querySelector('circle[class*="readoutDisc"]') as SVGCircleElement
-    const control = screen.getByRole('button', { name: 'Pause', exact: true }).element() as HTMLButtonElement
+    const control = screen.getByRole('button', { name: 'Restart timer', exact: true }).element() as HTMLButtonElement
 
     // The click surface is the whole readout disc: same size, same centre.
     const discBox = disc.getBoundingClientRect()
@@ -729,7 +799,7 @@ test('reveals the readout control on hover, hiding the readout', async () => {
         expect(getComputedStyle(readout).opacity).toBe('1')
     })
 
-    await screen.getByRole('button', { name: 'Pause', exact: true }).hover()
+    await screen.getByRole('button', { name: 'Restart timer', exact: true }).hover()
     await vi.waitFor(() => {
         expect(getComputedStyle(control).opacity).toBe('1')
         expect(getComputedStyle(readout).opacity).toBe('0')
@@ -750,25 +820,6 @@ for (const { status, label } of READOUT_CONTROL_STATES) {
     })
 }
 
-test('pauses a running timer from the readout control', async () => {
-    const runtime = createMockRuntime()
-    runtime.forceStatus('running')
-    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} settingsStore={settings} />))
-
-    await screen.getByRole('button', { name: 'Pause', exact: true }).click()
-    expect(runtime.getState().status).toBe('paused')
-})
-
-test('resumes a paused timer from the readout control', async () => {
-    const runtime = createMockRuntime()
-    runtime.forceStatus('paused')
-    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} settingsStore={settings} />))
-
-    await screen.getByRole('button', { name: 'Resume', exact: true }).click()
-    expect(runtime.getState().status).toBe('running')
-    runtime.reset()
-})
-
 test('restarts the last timer from the readout control while ringing', async () => {
     const runtime = createMockRuntime()
     runtime.forceStatus('expired')
@@ -777,6 +828,22 @@ test('restarts the last timer from the readout control while ringing', async () 
     await screen.getByRole('button', { name: 'Restart timer', exact: true }).click()
     expect(runtime.getState().status).toBe('running')
     expect(runtime.getState().durationSeconds).toBe(7 * SECONDS_PER_MINUTE)
+    runtime.reset()
+})
+
+/**
+ * Restart is offered while the timer is paused too — a 10-minute timer paused at
+ * 5 minutes restarts at the full 10. It is the beginning-of-duration restart, not
+ * a resume of the time left.
+ */
+test('restarts the last duration from the readout control while paused', async () => {
+    const runtime = createMockRuntime()
+    runtime.forceStatus('paused')
+    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} settingsStore={settings} />))
+
+    await screen.getByRole('button', { name: 'Restart timer', exact: true }).click()
+    expect(runtime.getState().status).toBe('running')
+    expect(runtime.getState().durationSeconds).toBe(25 * SECONDS_PER_MINUTE)
     runtime.reset()
 })
 

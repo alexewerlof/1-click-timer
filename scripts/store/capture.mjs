@@ -94,7 +94,7 @@ async function waitForExtensionId(profile) {
  * Refuses to shoot a browser that reports no hover. The check is not decoration:
  * the face keeps its readout control visible where there is no hover
  * (`@media (hover: none)`), and headless Chromium reports exactly that — which
- * would put the pause glyph straight over the countdown in every shot. The
+ * would pin the readout control open over the countdown in every shot. The
  * launch flags claim a desktop pointer; this is what proves they took.
  */
 async function assertDesktopPointer(page) {

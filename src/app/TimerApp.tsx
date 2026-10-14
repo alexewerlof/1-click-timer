@@ -44,7 +44,6 @@ export function TimerApp({ surface, runtime, settingsStore }: TimerAppProps) {
                         status={state.status}
                         remainingSeconds={state.remainingSeconds}
                         onPick={startTimer}
-                        onTogglePause={() => runtime.togglePause()}
                         onRestart={() => runtime.restart()}
                         onReset={() => runtime.reset()}
                     />
@@ -55,6 +54,7 @@ export function TimerApp({ surface, runtime, settingsStore }: TimerAppProps) {
                     muted={state.muted}
                     surface={surface}
                     onToggleMute={() => runtime.toggleMute()}
+                    onTogglePause={() => runtime.togglePause()}
                     onReset={() => runtime.reset()}
                     onToggleFullscreen={() => toggleFullscreenSurface(surface)}
                     onOpenSettings={() => openSettings()}

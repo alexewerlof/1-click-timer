@@ -198,9 +198,9 @@
 }
 
 /*
- * The readout control: pause/resume, or restart while ringing, revealed on the
- * readout disc. It is an HTML `<button>` overlaid on the face rather than an SVG
- * element, so it keeps native semantics and stays outside the face's
+ * The readout control: restart, while the timer is paused or ringing, revealed on
+ * the readout disc. It is an HTML `<button>` overlaid on the face rather than an
+ * SVG element, so it keeps native semantics and stays outside the face's
  * `role="slider"` (see `ReadoutControl`). Its click surface is the whole disc,
  * so its size is the disc's diameter: the ratio comes from `dial.ts` and the
  * face's rendered side is `cqmin` (see `.stage`).
