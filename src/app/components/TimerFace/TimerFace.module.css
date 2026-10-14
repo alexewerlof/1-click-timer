@@ -92,12 +92,14 @@
 }
 
 /*
- * Hovering a numeral wears the remaining sector's colour — the same signal the
- * preview arc and the preview numeral use, since all three read `--remaining` —
- * so it reads as the one-click shortcut it is.
+ * Hovering a numeral previews it, so it wears the preview colour — the same
+ * signal the preview arc, its numeral and its ticks use, since all four read
+ * `--preview` — and reads as the one-click shortcut it is. `--preview` is the
+ * chosen Remaining colour, or the theme's red under Gradient, so the preview
+ * never follows the live sector colour.
  */
 .numeralRing text:hover {
-    fill: var(--remaining);
+    fill: var(--preview);
 }
 
 /*
@@ -138,35 +140,40 @@
 
 /* ---- preview arc ---- */
 
-/* Same colour as the remaining sector it previews, so the two cannot drift. */
+/*
+ * Wears `--preview` with the preview numeral and the ticks it covers, so the
+ * three read as one mark. Deliberately NOT the sector's `--remaining`: the
+ * preview shows the colour a timer will run in, so it stays in colour even while
+ * the sector is grey for a pause.
+ */
 .previewArc {
     fill: none;
-    stroke: var(--remaining);
+    stroke: var(--preview);
     stroke-width: var(--stroke-tick-major);
     stroke-opacity: var(--remaining-alpha);
 }
 
 /*
- * The preview numeral wears the same colour as the arc and the sector it
- * previews — the `--remaining` token, which the settings screen will write to.
- * Solid rather than the sector's `--remaining-alpha`: that alpha is for a
- * translucent overlay on the dial, and this numeral sits on the plain face.
+ * The preview numeral wears the same colour as the arc and the ticks it belongs
+ * to — `--preview`. Solid rather than the sector's `--remaining-alpha`: that
+ * alpha is for a translucent overlay on the dial, and this numeral sits on the
+ * plain face.
  *
  * `pointer-events: none` matters: it is drawn exactly over the faded ring
  * numeral, and the ring numeral must stay the hit target so hovering does not
  * flicker and clicking still starts the timer.
  */
 .previewNumeral {
-    fill: var(--remaining);
+    fill: var(--preview);
     pointer-events: none;
 }
 
 /*
- * A preview tick keeps the ticks' geometry and takes the remaining colour, like
- * the arc and the preview numeral it belongs to.
+ * A preview tick keeps the ticks' geometry and takes the preview colour, like the
+ * arc and the preview numeral it belongs to.
  */
 .tickPreview {
-    stroke: var(--remaining);
+    stroke: var(--preview);
 }
 
 /* ---- centre readout ---- */

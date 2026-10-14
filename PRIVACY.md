@@ -12,8 +12,8 @@ Two things, both of them yours:
 
 - **The timer** — when it ends, how long it was set for, and whether it is
   running, paused or finished.
-- **Your preferences** — appearance (light, dark or auto), alarm volume, chosen
-  chime, mute, and the three colours you may have picked.
+- **Your preferences** — appearance (light, dark or device), alarm volume, chosen
+  chime, mute, and the colour you picked for the remaining time.
 
 That is the complete list. The extension does not read your browsing history, the
 pages you visit, what you type, or anything else.

@@ -12,5 +12,5 @@ export function App() {
     useSettingsTheme(settingsStore)
 
     if (surface === 'settings') return <SettingsApp settingsStore={settingsStore} />
-    return <TimerApp surface={surface} runtime={timerRuntime} />
+    return <TimerApp surface={surface} runtime={timerRuntime} settingsStore={settingsStore} />
 }

@@ -1,22 +1,27 @@
 import { TimerFace } from './components/TimerFace/TimerFace'
 import { TransportControls } from './components/TransportControls/TransportControls'
 import { openSettings, toggleFullscreenSurface, type Surface } from './lib/surface'
+import type { SettingsStore } from './runtime/settings'
 import type { TimerRuntime } from './runtime/types'
+import { useRemainingColor } from './runtime/useRemainingColor'
 import { useTimerState } from './runtime/useTimerState'
 import styles from './TimerApp.module.css'
 
 export interface TimerAppProps {
     surface: Surface
     runtime: TimerRuntime
+    settingsStore: SettingsStore
 }
 
 /**
  * The whole timer: one composition shared by the popup and the fullscreen tab
  * (AGENTS.md "UI vocabulary"). All timing lives behind `runtime`, so this component is
- * pure presentation.
+ * pure presentation; the settings only feed the remaining colour, so the dial
+ * can follow the time left.
  */
-export function TimerApp({ surface, runtime }: TimerAppProps) {
+export function TimerApp({ surface, runtime, settingsStore }: TimerAppProps) {
     const state = useTimerState(runtime)
+    useRemainingColor(settingsStore, state)
 
     /**
      * Setting a timer is always one click, whether or not one is already

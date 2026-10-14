@@ -26,7 +26,7 @@ one dial face; the multi-variant experiment is over.
 | `app/main.tsx`                      | Mounts `App`; imports the global CSS.                                                 |
 | `app/TimerApp.tsx`                  | The timer composition shared by the popup and the tab.                                                      |
 | `app/components/TimerFace/`         | The dial. Geometry in `lib/dial.ts`; one component per element (`Disc`, `RemainingTime`, `PreviewArc`, `PreviewTicks`, `PreviewNumeral`, `CenterReadout`, `ReadoutControl`, `Caption`, `CreatorMark`); static chrome in `dialChrome.tsx` (`DIAL_TICKS`, `DIAL_NUMERALS`, and the `Tick` both tick groups share). `ReadoutControl` is the one non-SVG element — an HTML `<button>` overlaid on the face. |
-| `app/components/TransportControls/` | The four corner controls (mute, fullscreen, reset, and settings), soft-plastic discs pinned to the corners of the dial's square: the surface colour, lit from the top left and shaded to the bottom right, with the glyph black by default and red on hover, and sinking under a press (its rim is the surface colour, so it only shows where the press-in shadow darkens the disc around it). Icons from Lucide. The fullscreen control shows expand or shrink with the document's own fullscreen state. The settings control opens `settings.html` in a new tab (`openSettings` in `app/lib/surface.ts`); that screen's footer holds the only three ways out — the author's site, the source code and the issue tracker (`*_URL` + `openTab`, both from `app/lib/links.ts`). The group fades out while the dial is previewed, so nothing competes with the choice being made. Pause/resume and restart are the `ReadoutControl` on the readout disc. |
+| `app/components/TransportControls/` | The four corner controls (mute, fullscreen, reset, and settings), soft-plastic discs pinned to the corners of the dial's square: the surface colour, lit from the top left and shaded to the bottom right, with the glyph black by default and the accent colour on hover (the theme's red under Gradient, the calm green under a pinned Red or Green), and sinking under a press (its rim is the surface colour, so it only shows where the press-in shadow darkens the disc around it). Icons from Lucide. The fullscreen control shows expand or shrink with the document's own fullscreen state. The settings control opens `settings.html` in a new tab (`openSettings` in `app/lib/surface.ts`); that screen's footer holds the only three ways out — the author's site, the source code and the issue tracker (`*_URL` + `openTab`, both from `app/lib/links.ts`). The group fades out while the dial is previewed, so nothing competes with the choice being made. Pause/resume and restart are the `ReadoutControl` on the readout disc. |
 | `app/design/tokens.css`             | Every colour, size and stroke weight. The light palette is `:root`; `[data-theme='dark']` overrides it. The light surface is a milky off-white, so the corner controls' sheen/shade recipe (`--control-soft-shadow`) has something to shade against.      |
 | `app/design/global.css`             | Resets, body, and the popup/tab/settings sizing per `[data-surface]`.                                                |
 | `app/lib/dial.ts`                   | Dial geometry: counter-clockwise mapping, sector/arc paths, pointer → dial point/minute, disc/readout-disc regions, and the derived readout size. |
@@ -40,28 +40,30 @@ one dial face; the multi-variant experiment is over.
 | `app/runtime/runtime.ts`            | Picks the chrome runtime in the extension, the mock in a plain browser.                                                                         |
 | `app/runtime/useTimerState.ts`      | `useSyncExternalStore` binding.                                                                                           |
 | `background/index.ts`               | Service worker: the single writer of the timer record, alarms, badge/icon, the offscreen alarm, notifications, surface focus and messages. |
-| `background/badge.ts`               | The toolbar badge: whole minutes left as text, and the green→orange→red colour for the fraction of the running timer that is left. Pure (no `chrome.*`), so `npm test` covers it; the worker only applies the plan. |
+| `background/badge.ts`               | The toolbar badge: whole minutes left as text, and its colour from `shared/remainingColor.ts` (the same function the dial uses). Pure (no `chrome.*`), so `npm test` covers it; the worker only applies the plan. |
 | `background/alarm.ts`               | The toolbar's alert icon: whether the alarm is ringing now (`ringingNow`) and which art the toolbar shows (`toolbarIconFor`). Pure (no `chrome.*`), the sibling `badge.ts`. |
 | `images/`                           | The icon source art: `icon.svg` (the dial) and `icon-alert.svg` (the ringing toolbar icon). The PNGs Chrome loads are rasterised from them at build time (see "Build pipeline"). |
 | `shared/icons.ts`                   | The icon sizes (`ICON_SIZES`), the tool 19/38 split, the toolbar alert sizes (`ALERT_ICON_SIZES`), and the paths both the worker and the build resolve through `iconPathFor` / `alertIconPathFor`. |
 | `shared/offscreen.ts`               | The worker ⇄ offscreen message protocol (`ring` / `stop` / `ring-ended`) and the offscreen document's path. |
 | `shared/surfaces.ts`                | The page paths (`FULLSCREEN_PAGE`, `POPUP_PAGE`, `TIMER_PAGES`) and `revealSurface` — focus an open surface tab, else open one — used by both the worker and the UI. |
+| `shared/remainingColor.ts`          | The remaining-time colour: the green→orange→red ramp (`badgeColorFor`) and the per-status colour (`remainingColorFor`), shared by the toolbar badge and the dial so the two always agree. Pure (no `chrome.*`, no `app/`). |
 
 ### Added in Phase 3
 
 | Path                                          | Role                                                                       |
 | --------------------------------------------- | -------------------------------------------------------------------------- |
 | `settings.html`                               | Settings-screen entry. Sets `data-surface="settings"`.                     |
-| `app/App.tsx`                                 | Picks `SettingsApp` or `TimerApp`; applies the theme.                      |
-| `app/SettingsApp.tsx`                         | The settings screen (appearance, volume, chime, ring length, colours) and its icon footer: reset to defaults, plus the three ways out (the author, the source code, the bug tracker). |
-| `app/design/palette.ts`                       | The colour swatches and the custom properties each slot drives.            |
+| `app/App.tsx`                                 | Picks `SettingsApp` or `TimerApp`; applies the theme and hands each surface the settings store. |
+| `app/SettingsApp.tsx`                         | The settings screen (mode, the remaining-time colour, volume, sound, ring length) and its icon footer: reset to defaults, plus the three ways out (the author, the source code, the bug tracker). |
+| `app/design/palette.ts`                       | The remaining-colour swatches (gradient, red, green) and the CSS background each chip paints. |
 | `app/lib/chimes.ts`                           | Synthesised chimes (`Chime`/`Beep`/`Bell`/`Silent`) and audio priming.      |
 | `app/runtime/settings.ts`                     | `TimerSettings` / `SettingsStore` contract, defaults, normalization.       |
 | `app/runtime/mockSettings.ts`                 | localStorage-backed settings store for the design preview and tests.       |
 | `app/runtime/chromeSettings.ts`               | `chrome.storage.sync` settings store with a local fallback.                |
 | `app/runtime/settingsRuntime.ts`              | The settings seam (chrome vs mock).                                        |
 | `app/runtime/useSettings.ts`                  | `useSyncExternalStore` binding for settings.                               |
-| `app/runtime/useSettingsTheme.ts`             | Resolves the theme and writes the colour overrides to `<html>`.            |
+| `app/runtime/useSettingsTheme.ts`             | Resolves the theme from the mode and writes `data-theme` to `<html>`.      |
+| `app/runtime/useRemainingColor.ts`            | Publishes the dial's colours from the “Remaining” choice: `--remaining` (a fixed red/green, or the badge's ramp following the time left), `--preview` (what a click would start, so never the live grey) and `--accent` (the controls' hover and focus colour). |
 | `app/runtime/platform.ts`                     | `isExtension()` — the chrome-or-mock switch both seams use.                |
 | `app/runtime/chromeRuntime.ts`                | The `chrome.storage` + messaging `TimerRuntime`.                           |
 | `app/runtime/timerState.ts`                   | Maps a stored record to the UI `TimerState`.                               |
@@ -105,7 +107,7 @@ and the `offscreen` permission to the manifest.
   module load (`DIAL_TICKS`, `DIAL_NUMERALS`). Only the sector and the preview
   chrome are stateful: previewing fades the numeral ring out (`data-previewing`
   on the face) and draws the preview numeral and the covered ticks in the
-  remaining colour over it (AGENTS.md "Preview numeral", "Preview ticks"). The
+  preview colour over it (AGENTS.md "Preview numeral", "Preview ticks"). The
   ring is faded rather than unmounted, so the numeral under the pointer keeps the
   hit target that starts the timer — the preview numeral is `pointer-events:
   none` for the same reason. The face paints in that order — disc, ticks, sector,
@@ -120,7 +122,7 @@ and the `offscreen` permission to the manifest.
   (`handleClick` in `TimerFace`) — the pointer's position cannot identify a
   numeral because it sits off the disc.
   `pointer-events: bounding-box` (see `TimerFace.module.css`) gives each numeral
-  a solid hit area, and hovering one takes `--remaining` — the same interactive
+  a solid hit area, and hovering one takes `--preview` — the same interactive
   signal the preview arc and preview numeral use. Hovering one also previews it
   exactly as hovering the disc at that minute does (`previewMinutesAt`): the ring
   fades and the arc and preview numeral appear, so the shortcut shows what it

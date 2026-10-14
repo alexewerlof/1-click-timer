@@ -1,74 +1,50 @@
 /**
- * The colour choices the settings screen offers for the three slots from AGENTS.md
- * "Settings": the face, the ticks (the dial's ink), and the remaining time.
+ * The remaining-time colour choices the settings screen offers (AGENTS.md
+ * "Settings").
  *
- * This is the only place the swatch colours live. `Auto` is `null`: it leaves
- * the slot to the theme (light or dark), so the base palette keeps one source of
- * truth in `tokens.css`.
+ * This is the only place the swatch colours live, and they are the badge's own
+ * ramp stops (`shared/remainingColor.ts`), so the swatch, the fixed colours and
+ * the toolbar badge can never drift apart. `Gradient` — the default — leaves the
+ * colour to `useRemainingColor`, which follows the time left; the other two pin
+ * it flat. Each choice also decides the interactive accent (`accentColorFor`).
  */
 
-import type { ColorSlot } from '../runtime/settings'
+import { REMAINING_CALM, REMAINING_HALFWAY, REMAINING_URGENT } from '../../shared/remainingColor'
+import type { RemainingColor } from '../runtime/settings'
 
-export interface Swatch {
-    /** `null` is the Auto option: follow the theme's base colour. */
-    value: string | null
+export interface RemainingSwatch {
+    value: RemainingColor
     label: string
 }
 
-export const SLOT_LABELS: Record<ColorSlot, string> = {
-    face: 'Face',
-    ticks: 'Ticks',
-    remaining: 'Remaining',
+/** The choices, in display order: Gradient first, because it is the default. */
+export const REMAINING_SWATCHES: readonly RemainingSwatch[] = [
+    { value: 'gradient', label: 'Gradient' },
+    { value: 'red', label: 'Red' },
+    { value: 'green', label: 'Green' },
+]
+
+/** The ramp as a horizontal swatch: red on the left, green on the right. */
+const GRADIENT_BACKGROUND = `linear-gradient(90deg, ${REMAINING_URGENT}, ${REMAINING_HALFWAY}, ${REMAINING_CALM})`
+
+/** The colour a fixed swatch pins the remaining indicator to, or `null` for the ramp. */
+export function fixedRemainingColor(value: RemainingColor): string | null {
+    if (value === 'red') return REMAINING_URGENT
+    if (value === 'green') return REMAINING_CALM
+    return null
 }
 
 /**
- * The custom properties each slot drives. The "ticks" slot stands for the whole
- * dial ink family — ticks, numerals, the creator mark — plus the readout text,
- * the corner-control glyphs and the body text, because they read as one ink.
+ * The interactive accent a choice implies — the controls' hover and focus colour.
+ * Red and Green both take the calm green; Gradient leaves it to the theme's own
+ * red (`null`), so the accent never follows the ramp. Deliberately not the
+ * remaining colour under Red: a red timer answers in green.
  */
-export const COLOR_SLOT_PROPERTIES: Record<ColorSlot, readonly string[]> = {
-    face: ['--surface'],
-    ticks: ['--dial-mark', '--ink', '--readout', '--control-ink'],
-    remaining: ['--remaining'],
+export function accentColorFor(value: RemainingColor): string | null {
+    return value === 'gradient' ? null : REMAINING_CALM
 }
 
-export const SWATCHES: Record<ColorSlot, readonly Swatch[]> = {
-    face: [
-        { value: null, label: 'Auto' },
-        { value: '#ffffff', label: 'White' },
-        { value: '#f4f1ea', label: 'Paper' },
-        { value: '#eaf2fb', label: 'Sky' },
-        { value: '#22262e', label: 'Slate' },
-        { value: '#14161a', label: 'Charcoal' },
-    ],
-    ticks: [
-        { value: null, label: 'Auto' },
-        { value: '#14181f', label: 'Ink' },
-        { value: '#334155', label: 'Slate' },
-        { value: '#1e3a8a', label: 'Navy' },
-        { value: '#4b3621', label: 'Brown' },
-        { value: '#ffffff', label: 'White' },
-    ],
-    remaining: [
-        { value: null, label: 'Auto' },
-        { value: '#e0201b', label: 'Red' },
-        { value: '#ea580c', label: 'Orange' },
-        { value: '#d97706', label: 'Amber' },
-        { value: '#16a34a', label: 'Green' },
-        { value: '#2563eb', label: 'Blue' },
-        { value: '#7c3aed', label: 'Violet' },
-        { value: '#db2777', label: 'Pink' },
-    ],
-}
-
-/** Writes (or clears) the custom properties a colour slot drives. */
-export function applyColorSlot(slot: ColorSlot, value: string | null): void {
-    const root = document.documentElement
-    for (const property of COLOR_SLOT_PROPERTIES[slot]) {
-        if (value === null) {
-            root.style.removeProperty(property)
-        } else {
-            root.style.setProperty(property, value)
-        }
-    }
+/** The CSS `background` for a swatch chip: the ramp, or the colour it pins. */
+export function swatchBackground(value: RemainingColor): string {
+    return fixedRemainingColor(value) ?? GRADIENT_BACKGROUND
 }

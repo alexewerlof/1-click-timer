@@ -14,12 +14,18 @@ import {
 } from './lib/dial'
 import './design/global.css'
 import { SECONDS_PER_MINUTE } from './lib/time'
+import { createMockSettings } from './runtime/mockSettings'
 import { createMockRuntime } from './runtime/mockRuntime'
+import type { RemainingColor } from './runtime/settings'
 import type { TimerStatus } from './runtime/types'
 
 /** The square popup panel size from `design/global.css`. */
 const POPUP_WIDTH = 380
 const POPUP_HEIGHT = 380
+
+// The remaining colour defaults to the gradient, so the dial follows the time
+// left in these shots — the shipped appearance.
+const settings = createMockSettings()
 
 /**
  * The face is the one thing that must be judged visually, so each state gets a
@@ -38,7 +44,7 @@ for (const status of STATES) {
         // Parked, not ticking, so the screenshot is deterministic.
         runtime.forceStatus(status)
 
-        const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} />))
+        const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} settingsStore={settings} />))
 
         await expect.element(screen.getByRole('slider')).toBeVisible()
         await expect(page.elementLocator(screen.container)).toMatchScreenshot(`classic-${status}`)
@@ -55,7 +61,7 @@ test('keeps the readout inside the readout disc', async () => {
     // Parked at a running timer: the readout is blank while idle, so there would
     // be no text box to measure.
     runtime.forceStatus('running')
-    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} />))
+    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} settingsStore={settings} />))
 
     const svg = screen.getByRole('slider').element() as SVGSVGElement
     const text = svg.querySelector('text[class*="readout"]') as SVGTextElement
@@ -83,7 +89,7 @@ test('keeps the readout inside the readout disc', async () => {
 test('leaves the readout blank while the timer is idle', async () => {
     const runtime = createMockRuntime()
     runtime.forceStatus('idle')
-    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} />))
+    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} settingsStore={settings} />))
 
     const svg = screen.getByRole('slider').element() as SVGSVGElement
 
@@ -101,7 +107,7 @@ test('leaves the readout blank while the timer is idle', async () => {
 test('previews a full circle at a whole turn', async () => {
     const runtime = createMockRuntime()
     runtime.forceStatus('idle')
-    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} />))
+    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} settingsStore={settings} />))
 
     const svg = screen.getByRole('slider').element() as SVGSVGElement
     // The point a hair clockwise of 12 o'clock, whose minute rounds up to 60.
@@ -132,7 +138,7 @@ test('previews a full circle at a whole turn', async () => {
 test('draws the previewed minute as the only numeral on the face', async () => {
     const runtime = createMockRuntime()
     runtime.forceStatus('idle')
-    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} />))
+    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} settingsStore={settings} />))
 
     const svg = screen.getByRole('slider').element() as SVGSVGElement
     // Exactly on the 15-minute mark, slightly inside the rim so rounding through
@@ -156,9 +162,9 @@ test('draws the previewed minute as the only numeral on the face', async () => {
     expect(Number(numeral.getAttribute('x'))).toBeCloseTo(expected.x, 3)
     expect(Number(numeral.getAttribute('y'))).toBeCloseTo(expected.y, 3)
 
-    // It wears the remaining sector's colour — the shared `--remaining` token —
-    // rather than the numerals' ink. The arc reads the same token, so comparing
-    // the two keeps them from drifting apart.
+    // It wears the preview colour — the shared `--preview` token — rather than
+    // the numerals' ink. The arc reads the same token, so comparing the two keeps
+    // them from drifting apart.
     const arc = svg.querySelector('[class*="previewArc"]') as SVGPathElement
     const remaining = getComputedStyle(arc).stroke
     expect(getComputedStyle(numeral).fill).toBe(remaining)
@@ -200,7 +206,7 @@ test('draws the previewed minute as the only numeral on the face', async () => {
 test('previews a numeral on hover, like the disc', async () => {
     const runtime = createMockRuntime()
     runtime.forceStatus('idle')
-    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} />))
+    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} settingsStore={settings} />))
 
     const svg = screen.getByRole('slider').element() as SVGSVGElement
     await page.elementLocator(numeralElement(svg, 40)).hover()
@@ -232,7 +238,7 @@ test('previews a numeral on hover, like the disc', async () => {
 test('does not preview the 0 numeral on hover', async () => {
     const runtime = createMockRuntime()
     runtime.forceStatus('idle')
-    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} />))
+    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} settingsStore={settings} />))
 
     const svg = screen.getByRole('slider').element() as SVGSVGElement
     await page.elementLocator(numeralElement(svg, 0)).hover()
@@ -259,7 +265,7 @@ function numeralElement(svg: SVGSVGElement, minutes: number): SVGTextElement {
 test('starts a timer for the clicked numeral', async () => {
     const runtime = createMockRuntime()
     runtime.forceStatus('idle')
-    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} />))
+    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} settingsStore={settings} />))
 
     const svg = screen.getByRole('slider').element() as SVGSVGElement
     await page.elementLocator(numeralElement(svg, 55)).click()
@@ -277,7 +283,7 @@ test('starts a timer for the clicked numeral', async () => {
 test('resets the timer from the 0 numeral', async () => {
     const runtime = createMockRuntime()
     runtime.forceStatus('running')
-    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} />))
+    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} settingsStore={settings} />))
 
     const svg = screen.getByRole('slider').element() as SVGSVGElement
     await page.elementLocator(numeralElement(svg, 0)).click()
@@ -295,7 +301,7 @@ test('resets the timer from the 0 numeral', async () => {
 test('resets a ringing alarm from the 0 numeral', async () => {
     const runtime = createMockRuntime()
     runtime.forceStatus('expired')
-    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} />))
+    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} settingsStore={settings} />))
 
     const svg = screen.getByRole('slider').element() as SVGSVGElement
     await page.elementLocator(numeralElement(svg, 0)).click()
@@ -305,28 +311,64 @@ test('resets a ringing alarm from the 0 numeral', async () => {
 })
 
 /**
- * A numeral is interactive, so hovering one recolours it to the remaining
- * sector's colour — the same signal the preview arc and preview numeral use.
- * The colour is read from the sector, so the two cannot drift apart.
+ * A numeral is interactive, so hovering one recolours it to the preview colour —
+ * the same signal the preview arc and preview numeral use. The colour is read
+ * from the arc, so the two cannot drift apart.
  */
 test('recolours a numeral on hover', async () => {
     const runtime = createMockRuntime()
     // Parked at a running timer, which draws the remaining sector.
     runtime.forceStatus('running')
-    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} />))
+    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} settingsStore={settings} />))
 
     const svg = screen.getByRole('slider').element() as SVGSVGElement
-    const sector = svg.querySelector('[class*="sector"]') as SVGPathElement
-    const remaining = getComputedStyle(sector).fill
-
     const numeral = numeralElement(svg, 15)
-    expect(getComputedStyle(numeral).fill).not.toBe(remaining)
+    const ink = getComputedStyle(numeral).fill
 
     await page.elementLocator(numeral).hover()
 
-    await vi.waitFor(() => {
-        expect(getComputedStyle(numeral).fill).toBe(remaining)
+    // Hovering previews the numeral, so the arc appears and the numeral takes its
+    // colour. Read from the arc, so the two cannot drift apart.
+    const arc = await vi.waitFor(() => {
+        const preview = svg.querySelector('[class*="previewArc"]')
+        if (!preview) throw new Error('the preview arc has not appeared yet')
+        return preview
     })
+    await vi.waitFor(() => {
+        expect(getComputedStyle(numeral).fill).toBe(getComputedStyle(arc).stroke)
+    })
+    expect(getComputedStyle(numeral).fill).not.toBe(ink)
+})
+
+/**
+ * The preview shows the colour a timer will run in, so it never follows the live
+ * colour: with Gradient chosen — the default — a paused (grey) timer still
+ * previews in the theme's red. Without this the preview turned grey with the
+ * sector, which reads as "this timer is grey" rather than "this is the colour
+ * you will get".
+ */
+test('keeps the preview in the chosen colour, not the live paused grey', async () => {
+    const runtime = createMockRuntime()
+    runtime.forceStatus('paused')
+    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} settingsStore={settings} />))
+
+    const svg = screen.getByRole('slider').element() as SVGSVGElement
+    const onDisc = pointOnDial(20, DISC_RADIUS - 2)
+    const matrix = svg.getScreenCTM()
+    if (!matrix) throw new Error('the slider has no screen CTM')
+    const at = new DOMPoint(onDisc.x, onDisc.y).matrixTransform(matrix)
+    svg.dispatchEvent(new PointerEvent('pointermove', { clientX: at.x, clientY: at.y, bubbles: true }))
+
+    const arc = await vi.waitFor(() => {
+        const preview = svg.querySelector('[class*="previewArc"]')
+        if (!preview) throw new Error('the preview arc has not appeared yet')
+        return preview
+    })
+    const sector = svg.querySelector('[class*="sector"]') as SVGPathElement
+
+    // The paused sector wears the badge's grey; the preview does not.
+    expect(getComputedStyle(sector).fill).toBe('rgb(107, 114, 128)')
+    expect(getComputedStyle(arc).stroke).toBe('rgb(224, 32, 27)')
 })
 
 /**
@@ -341,7 +383,7 @@ test('paints the remaining sector over the ticks and under the numerals', async 
     const runtime = createMockRuntime()
     // Parked part-way through a run, so the sector is drawn across the ring.
     runtime.forceStatus('running')
-    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} />))
+    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} settingsStore={settings} />))
 
     const svg = screen.getByRole('slider').element() as SVGSVGElement
     const sector = svg.querySelector('[class*="sector"]')
@@ -365,7 +407,7 @@ test('paints the remaining sector over the ticks and under the numerals', async 
 test('replaces a running timer from a numeral without confirming', async () => {
     const runtime = createMockRuntime()
     runtime.forceStatus('running')
-    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} />))
+    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} settingsStore={settings} />))
 
     const svg = screen.getByRole('slider').element() as SVGSVGElement
     await page.elementLocator(numeralElement(svg, 10)).click()
@@ -381,7 +423,7 @@ test('replaces a running timer from a numeral without confirming', async () => {
 test('replaces a running timer from the dial without confirming', async () => {
     const runtime = createMockRuntime()
     runtime.forceStatus('running')
-    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} />))
+    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} settingsStore={settings} />))
 
     const svg = screen.getByRole('slider').element() as SVGSVGElement
     const onDisc = pointOnDial(20, DISC_RADIUS - 2)
@@ -412,7 +454,7 @@ const transportGroup = { name: 'Timer controls', exact: true } as const
 test('leaves pause/resume and restart out of the corner controls', async () => {
     const runtime = createMockRuntime()
     runtime.forceStatus('running')
-    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} />))
+    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} settingsStore={settings} />))
 
     const transport = screen.getByRole('group', transportGroup).element()
     const labels = [...transport.querySelectorAll('button')].map((button) => button.getAttribute('aria-label'))
@@ -431,7 +473,7 @@ test('leaves pause/resume and restart out of the corner controls', async () => {
 test('fades the corner controls out while the dial is previewed', async () => {
     const runtime = createMockRuntime()
     runtime.forceStatus('idle')
-    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} />))
+    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} settingsStore={settings} />))
 
     const svg = screen.getByRole('slider').element() as SVGSVGElement
     const transport = screen.getByRole('group', transportGroup).element()
@@ -467,7 +509,7 @@ function glyph(control: Element): string {
  */
 test('shows the volume-off glyph while the timer is muted', async () => {
     const runtime = createMockRuntime()
-    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} />))
+    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} settingsStore={settings} />))
 
     const mute = screen.getByRole('button', { name: 'Mute', exact: true }).element()
     expect(glyph(mute)).toBe('lucide-volume-2')
@@ -482,6 +524,32 @@ test('shows the volume-off glyph while the timer is muted', async () => {
 })
 
 /**
+ * The corner controls answer in the accent, and the accent follows the “Remaining”
+ * choice: the theme's red under Gradient, and the calm green under either pinned
+ * colour. It is deliberately NOT the colour the dial's sector wears, so a red
+ * timer still answers in green.
+ */
+const ACCENTS: readonly { remaining: RemainingColor; accent: string }[] = [
+    { remaining: 'gradient', accent: 'rgb(224, 32, 27)' },
+    { remaining: 'red', accent: 'rgb(11, 128, 67)' },
+    { remaining: 'green', accent: 'rgb(11, 128, 67)' },
+]
+
+for (const { remaining, accent } of ACCENTS) {
+    test(`hovers a corner control in the ${remaining} accent`, async () => {
+        const runtime = createMockRuntime()
+        runtime.forceStatus('idle')
+        const screen = await render(
+            stage(<TimerApp surface="popup" runtime={runtime} settingsStore={createMockSettings({ remaining })} />),
+        )
+
+        const mute = screen.getByRole('button', { name: 'Mute', exact: true })
+        await mute.hover()
+        await vi.waitFor(() => expect(getComputedStyle(mute.element()).color).toBe(accent))
+    })
+}
+
+/**
  * The fullscreen control says what pressing it will do: it offers fullscreen
  * while the page is normal, and swaps to the shrink glyph and the matching label
  * once the document *is* fullscreen (AGENTS.md "Full screen"). The real Fullscreen
@@ -490,7 +558,7 @@ test('shows the volume-off glyph while the timer is muted', async () => {
  */
 test('flips the fullscreen control with the document fullscreen state', async () => {
     const runtime = createMockRuntime()
-    const screen = await render(stage(<TimerApp surface="fullscreen" runtime={runtime} />))
+    const screen = await render(stage(<TimerApp surface="fullscreen" runtime={runtime} settingsStore={settings} />))
 
     const control = screen.getByRole('button', { name: 'Full screen', exact: true }).element()
     expect(glyph(control)).toBe('lucide-expand')
@@ -525,7 +593,7 @@ test('flips the fullscreen control with the document fullscreen state', async ()
 test('pins one control to each corner of the dial square, clear of the dial', async () => {
     const runtime = createMockRuntime()
     runtime.forceStatus('idle')
-    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} />))
+    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} settingsStore={settings} />))
 
     const svg = screen.getByRole('slider').element() as SVGSVGElement
     const rect = svg.getBoundingClientRect()
@@ -564,7 +632,7 @@ test('pins one control to each corner of the dial square, clear of the dial', as
 test('has no readout control while the timer is idle', async () => {
     const runtime = createMockRuntime()
     runtime.forceStatus('idle')
-    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} />))
+    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} settingsStore={settings} />))
 
     const stageElement = screen.getByRole('slider').element().parentElement
     expect(stageElement?.querySelector('button')).toBeNull()
@@ -573,7 +641,7 @@ test('has no readout control while the timer is idle', async () => {
 test('reveals the readout control on hover, hiding the readout', async () => {
     const runtime = createMockRuntime()
     runtime.forceStatus('running')
-    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} />))
+    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} settingsStore={settings} />))
 
     const svg = screen.getByRole('slider').element() as SVGSVGElement
     const readout = svg.querySelector('text[class*="readout"]') as SVGTextElement
@@ -612,7 +680,7 @@ for (const { status, label } of READOUT_CONTROL_STATES) {
     test(`shows the ${status} readout control`, async () => {
         const runtime = createMockRuntime()
         runtime.forceStatus(status)
-        const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} />))
+        const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} settingsStore={settings} />))
 
         const control = screen.getByRole('button', { name: label, exact: true })
         await control.hover()
@@ -625,7 +693,7 @@ for (const { status, label } of READOUT_CONTROL_STATES) {
 test('pauses a running timer from the readout control', async () => {
     const runtime = createMockRuntime()
     runtime.forceStatus('running')
-    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} />))
+    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} settingsStore={settings} />))
 
     await screen.getByRole('button', { name: 'Pause', exact: true }).click()
     expect(runtime.getState().status).toBe('paused')
@@ -634,7 +702,7 @@ test('pauses a running timer from the readout control', async () => {
 test('resumes a paused timer from the readout control', async () => {
     const runtime = createMockRuntime()
     runtime.forceStatus('paused')
-    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} />))
+    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} settingsStore={settings} />))
 
     await screen.getByRole('button', { name: 'Resume', exact: true }).click()
     expect(runtime.getState().status).toBe('running')
@@ -644,7 +712,7 @@ test('resumes a paused timer from the readout control', async () => {
 test('restarts the last timer from the readout control while ringing', async () => {
     const runtime = createMockRuntime()
     runtime.forceStatus('expired')
-    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} />))
+    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} settingsStore={settings} />))
 
     await screen.getByRole('button', { name: 'Restart timer', exact: true }).click()
     expect(runtime.getState().status).toBe('running')
@@ -661,7 +729,7 @@ test('restarts the last timer from the readout control while ringing', async () 
 test('draws the creator mark in the numerals’ ink', async () => {
     const runtime = createMockRuntime()
     runtime.forceStatus('idle')
-    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} />))
+    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} settingsStore={settings} />))
 
     const svg = screen.getByRole('slider').element() as SVGSVGElement
     const mark = svg.querySelector('[class*="creatorMark"]')
@@ -683,7 +751,7 @@ test('draws the creator mark in the numerals’ ink', async () => {
 test('draws no focus ring on the face when clicked', async () => {
     const runtime = createMockRuntime()
     runtime.forceStatus('idle')
-    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} />))
+    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} settingsStore={settings} />))
 
     const svg = screen.getByRole('slider').element() as SVGSVGElement
     // The readout disc at the centre starts no timer while idle, so the click

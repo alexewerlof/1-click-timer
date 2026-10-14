@@ -1,14 +1,14 @@
 import { useEffect } from 'react'
-import { applyColorSlot } from '../design/palette'
 import type { SettingsStore } from './settings'
 import { useSettings } from './useSettings'
 
 const DARK_QUERY = '(prefers-color-scheme: dark)'
 
 /**
- * Applies the settings to the document: the light/dark theme (resolving Auto
- * from the OS preference) and the three colour-slot overrides. Runs on every
- * surface, so the popup, the tab and the settings screen all share one theme.
+ * Applies the light/dark theme to the document, resolving Device from the OS
+ * preference. Runs on every surface, so the popup, the tab and the settings
+ * screen all share one theme. The remaining-time colour is applied separately by
+ * `useRemainingColor`, which also needs the timer's own state.
  */
 export function useSettingsTheme(store: SettingsStore): void {
     const settings = useSettings(store)
@@ -20,7 +20,7 @@ export function useSettingsTheme(store: SettingsStore): void {
             root.dataset.theme = dark ? 'dark' : 'light'
         }
 
-        if (settings.mode !== 'auto') {
+        if (settings.mode !== 'device') {
             applyTheme(settings.mode === 'dark')
             return undefined
         }
@@ -31,10 +31,4 @@ export function useSettingsTheme(store: SettingsStore): void {
         media.addEventListener('change', onChange)
         return () => media.removeEventListener('change', onChange)
     }, [settings.mode])
-
-    useEffect(() => {
-        applyColorSlot('face', settings.face)
-        applyColorSlot('ticks', settings.ticks)
-        applyColorSlot('remaining', settings.remaining)
-    }, [settings.face, settings.ticks, settings.remaining])
 }

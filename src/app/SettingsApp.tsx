@@ -1,17 +1,11 @@
 import type { CSSProperties, ReactNode } from 'react'
-import { Bug, RotateCcw, SquareCode, User, X } from 'lucide-react'
-import { SLOT_LABELS, SWATCHES, type Swatch } from './design/palette'
+import { Bell, Bug, Hourglass, Play, RotateCcw, SquareCode, User, X } from 'lucide-react'
+import { REMAINING_SWATCHES, swatchBackground, type RemainingSwatch } from './design/palette'
 import { ALARM_DURATION_OPTIONS, isAlarmSeconds } from './lib/alarm'
 import { CHIME_OPTIONS, previewChime, primeAudio, type ChimeId } from './lib/chimes'
 import { AUTHOR_SITE_URL, ISSUES_URL, REPOSITORY_URL, openTab } from './lib/links'
-import {
-    COLOR_SLOTS,
-    THEME_MODES,
-    type ColorSlot,
-    type SettingsStore,
-    type ThemeMode,
-    type TimerSettings,
-} from './runtime/settings'
+import { isThemeMode, THEME_MODES, type SettingsStore, type ThemeMode, type TimerSettings } from './runtime/settings'
+import { useRemainingColor } from './runtime/useRemainingColor'
 import { useSettings } from './runtime/useSettings'
 import styles from './SettingsApp.module.css'
 
@@ -20,9 +14,9 @@ export interface SettingsAppProps {
 }
 
 const MODE_LABELS: Record<ThemeMode, string> = {
-    auto: 'Auto',
     light: 'Light',
     dark: 'Dark',
+    device: 'Device',
 }
 
 function isChimeId(value: string): value is ChimeId {
@@ -30,22 +24,19 @@ function isChimeId(value: string): value is ChimeId {
 }
 
 /**
- * The settings screen (AGENTS.md "Settings"): appearance, the alarm, and the three
- * colour slots, closing with a footer of actions — reset to defaults, and the
- * three ways out (the author's site, the source code and the bug tracker). It
- * runs on its own surface (`settings.html`) opened from the face's gear control.
+ * The settings screen (AGENTS.md "Settings"): appearance (the mode and the
+ * remaining-time colour) and the alarm, closing with a footer of actions — reset
+ * to defaults, and the three ways out (the author's site, the source code and
+ * the bug tracker). It runs on its own surface (`settings.html`) opened from the
+ * face's gear control.
  */
 export function SettingsApp({ settingsStore }: SettingsAppProps) {
     const settings = useSettings(settingsStore)
+    // No timer on this surface, so the remaining colour falls back to the theme's.
+    useRemainingColor(settingsStore, null)
 
     function update(patch: Partial<TimerSettings>): void {
         settingsStore.update(patch)
-    }
-
-    function chooseColor(slot: ColorSlot, value: string | null): void {
-        const patch: Partial<TimerSettings> = {}
-        patch[slot] = value
-        update(patch)
     }
 
     function previewAlarm(): void {
@@ -72,21 +63,41 @@ export function SettingsApp({ settingsStore }: SettingsAppProps) {
                 <h2 id="appearance-title" className={styles.panelTitle}>
                     Appearance
                 </h2>
-                <div className={styles.modes} role="radiogroup" aria-label="Appearance">
-                    {THEME_MODES.map((mode) => (
-                        <button
-                            key={mode}
-                            type="button"
-                            role="radio"
-                            aria-checked={settings.mode === mode}
-                            className={styles.mode}
-                            data-selected={settings.mode === mode}
-                            onClick={() => update({ mode })}
-                        >
-                            {MODE_LABELS[mode]}
-                        </button>
-                    ))}
+                <div className={styles.fieldRow}>
+                    <label className={styles.fieldLabel} htmlFor="mode">
+                        Mode
+                    </label>
+                    <select
+                        id="mode"
+                        className={styles.select}
+                        value={settings.mode}
+                        onChange={(event) => {
+                            const value = event.target.value
+                            if (isThemeMode(value)) update({ mode: value })
+                        }}
+                    >
+                        {THEME_MODES.map((mode) => (
+                            <option key={mode} value={mode}>
+                                {MODE_LABELS[mode]}
+                            </option>
+                        ))}
+                    </select>
                 </div>
+
+                <div className={styles.fieldRow}>
+                    <span className={styles.fieldLabel}>Remaining</span>
+                    <div className={styles.swatches} role="radiogroup" aria-label="Remaining time colour">
+                        {REMAINING_SWATCHES.map((swatch) => (
+                            <SwatchButton
+                                key={swatch.value}
+                                swatch={swatch}
+                                selected={settings.remaining === swatch.value}
+                                onSelect={() => update({ remaining: swatch.value })}
+                            />
+                        ))}
+                    </div>
+                </div>
+                <p className={styles.hint}>“Gradient” follows the time left, like the toolbar badge.</p>
             </section>
 
             <section className={styles.panel} aria-labelledby="alarm-title">
@@ -115,7 +126,8 @@ export function SettingsApp({ settingsStore }: SettingsAppProps) {
 
                 <div className={styles.fieldRow}>
                     <label className={styles.fieldLabel} htmlFor="chime">
-                        Chime
+                        <Bell aria-hidden />
+                        Sound
                     </label>
                     <select
                         id="chime"
@@ -134,16 +146,19 @@ export function SettingsApp({ settingsStore }: SettingsAppProps) {
                     </select>
                     <button
                         type="button"
-                        className={styles.button}
+                        className={styles.iconButton}
                         onClick={previewAlarm}
                         disabled={settings.chime === 'silent'}
+                        aria-label="Preview"
+                        title="Preview"
                     >
-                        Preview
+                        <Play aria-hidden />
                     </button>
                 </div>
 
                 <div className={styles.fieldRow}>
                     <label className={styles.fieldLabel} htmlFor="alarm-seconds">
+                        <Hourglass aria-hidden />
                         Ring for
                     </label>
                     <select
@@ -162,28 +177,6 @@ export function SettingsApp({ settingsStore }: SettingsAppProps) {
                         ))}
                     </select>
                 </div>
-            </section>
-
-            <section className={styles.panel} aria-labelledby="colours-title">
-                <h2 id="colours-title" className={styles.panelTitle}>
-                    Colours
-                </h2>
-                {COLOR_SLOTS.map((slot) => (
-                    <div className={styles.fieldRow} key={slot}>
-                        <span className={styles.fieldLabel}>{SLOT_LABELS[slot]}</span>
-                        <div className={styles.swatches} role="radiogroup" aria-label={SLOT_LABELS[slot]}>
-                            {SWATCHES[slot].map((swatch) => (
-                                <SwatchButton
-                                    key={swatch.label}
-                                    swatch={swatch}
-                                    selected={settings[slot] === swatch.value}
-                                    onSelect={() => chooseColor(slot, swatch.value)}
-                                />
-                            ))}
-                        </div>
-                    </div>
-                ))}
-                <p className={styles.hint}>"Auto" follows the light or dark theme.</p>
             </section>
 
             <footer className={styles.footer}>
@@ -226,14 +219,13 @@ function FooterButton({ icon, label, onClick }: FooterButtonProps) {
 }
 
 interface SwatchButtonProps {
-    swatch: Swatch
+    swatch: RemainingSwatch
     selected: boolean
     onSelect: () => void
 }
 
-/** One colour choice: a chip for a colour, a pill for the Auto option. */
+/** One remaining-colour choice: a chip painted with the colour, or the ramp. */
 function SwatchButton({ swatch, selected, onSelect }: SwatchButtonProps) {
-    const auto = swatch.value === null
     return (
         <button
             type="button"
@@ -243,11 +235,8 @@ function SwatchButton({ swatch, selected, onSelect }: SwatchButtonProps) {
             title={swatch.label}
             className={styles.swatch}
             data-selected={selected}
-            data-auto={auto}
-            style={auto ? undefined : ({ '--swatch': swatch.value } as CSSProperties)}
+            style={{ '--swatch': swatchBackground(swatch.value) } as CSSProperties}
             onClick={onSelect}
-        >
-            {auto ? 'Auto' : ''}
-        </button>
+        />
     )
 }

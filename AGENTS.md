@@ -15,7 +15,9 @@ A Chrome extension that provides a one-click countdown timer with a visual dial 
 > its window), and the toolbar shows a red alert icon while the alarm rings. The UI
 > talks to the runtime through `TimerRuntime`; a plain browser (`npm run dev`) falls
 > back to the in-memory mock. A settings screen (`settings.html`) covers appearance
-> (light/dark/auto), the alarm chime and ring length, the three colours and reset.
+> (light/dark/device), the alarm chime and ring length, and the remaining-time
+> colour — red, green, or a green-to-red ramp that tracks the time left, exactly
+> like the toolbar badge — plus reset.
 
 ## Tech stack
 
@@ -59,17 +61,17 @@ face.
 | **Major tick**       | The thicker tick on each multiple of five (0, 5, 10, … 55).                                                                                                                    |
 | **Numeral**          | The number printed beside a major tick: 0, 5, 10, … 55. Each is itself a one-click shortcut to its own duration — except 0, which resets the timer, like the Reset control. Hovering one previews it exactly as hovering the disc at that minute does. |
 | **Numeral ring**     | The circle the numerals sit on, just outside the ticks.                                                                                                                        |
-| **Remaining sector** | The filled wedge. It runs from 12 o'clock counter-clockwise to the current remaining time and reaches the centre, so its size is the time left.                                 |
-| **Preview arc**      | The unfilled outline from 12 o'clock to the previewed minute. It shows what a click would start.                                                                                |
-| **Preview ticks**    | The ticks inside the preview arc's span, drawn in the **Remaining sector**'s colour so the arc, its numeral and the ticks it covers read as one mark. The rest of the ring keeps the dial's ink. |
-| **Preview numeral**  | The single numeral shown while previewing, on the numeral ring at the end of the preview arc, in the numerals' style and the remaining sector's colour. It fades the whole numeral ring out, so it is the only number on the face. A whole turn (60) is labelled where the 0 numeral sits. |
+| **Remaining sector** | The filled wedge. It runs from 12 o'clock counter-clockwise to the current remaining time and reaches the centre, so its size is the time left. Its colour is the **Remaining** setting: the toolbar badge's ramp while Gradient is chosen (grey while the timer is paused), or a pinned red or green.                                                 |
+| **Preview arc**      | The unfilled outline from 12 o'clock to the previewed minute. It shows what a click would start, in the **preview colour** — the chosen **Remaining** colour, or the theme's red under Gradient — so it never follows the live colour (a paused timer still previews in colour). |
+| **Preview ticks**    | The ticks inside the preview arc's span, drawn in the **preview colour** so the arc, its numeral and the ticks it covers read as one mark. The rest of the ring keeps the dial's ink. |
+| **Preview numeral**  | The single numeral shown while previewing, on the numeral ring at the end of the preview arc, in the numerals' style and the **preview colour**. It fades the whole numeral ring out, so it is the only number on the face. A whole turn (60) is labelled where the 0 numeral sits. |
 | **Readout**          | The digital `M:SS` in the middle of the disc, e.g. `1:05`. It always shows the remaining time, except while the timer is idle — when it is left blank, because a standing `0:00` only adds noise — and while the **Readout control** replaces it. |
 | **Readout disc**     | The small circle behind the readout, at the centre of the dial. The surface colour, raised by a soft shadow, so it reads as a layer of the face above the dial rather than a white blob or a hole in it. |
 | **Readout control**  | The round button on the readout disc, whose click surface is the whole disc. Pause while the timer runs, resume while it is paused, restart while the alarm is ringing. Revealed on hover or focus, and always shown where there is no hover. |
 | **Caption**          | The text "Made in Sweden", inscribed inside the disc on a circular path just above the bottom rim.                                                                             |
 | **Creator mark**     | The "Alex Ewerlöf" wordmark, drawn in the dial's ink, in the band between the readout disc and the 0 numeral.                                                                  |
 | **Face slot**        | The region that holds the face. The **Transport** controls overlay it, so the face gets the whole slot.                                                                         |
-| **Transport**        | The four corner controls, one per corner of the dial's square: mute (top left), fullscreen (top right), reset (bottom left) and settings (bottom right). Soft-plastic discs of the surface colour, lit along the top-left rim and shaded to the bottom-right, with the glyph black by default and red on hover, sinking under a press, and fading out while the dial is previewed. The rim is the surface colour too, so it shows only where a press-in shadow darkens the disc around it. Pause/resume and restart live on the **Readout control**. |
+| **Transport**        | The four corner controls, one per corner of the dial's square: mute (top left), fullscreen (top right), reset (bottom left) and settings (bottom right). Soft-plastic discs of the surface colour, lit along the top-left rim and shaded to the bottom-right, with the glyph black by default and the **accent** colour on hover (the theme's red under Gradient, the calm green under a pinned Red or Green), sinking under a press, and fading out while the dial is previewed. The rim is the surface colour too, so it shows only where a press-in shadow darkens the disc around it. Pause/resume and restart live on the **Readout control**. |
 | **Settings control** | The bottom-right corner control: a gear that opens the settings screen in a tab of its own.                                                                                     |
 
 Three measures run through the geometry: **disc radius**, **tick length** (how far
@@ -128,7 +130,7 @@ termination. The UI never accumulates time.
   its `:active` twin), and it is why the readout disc follows the surface
   (`--readout-surface`) rather than a hardcoded white. On a pure white face the
   sheen has nothing to lighten. The recipe is translucent white and black,
-  overridden per theme, so it holds on any face colour the settings choose.
+  overridden per theme, so it holds on whatever colour the theme gives the surface.
 - The shadows are inline SVG filters, because SVG has no `box-shadow`: the
   readout disc's `feDropShadow`, and the disc's own inner shadow, which
   subtracts an offset copy of the disc from itself. See `src/AGENTS.md` for the

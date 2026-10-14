@@ -43,7 +43,7 @@ FEATURES
 • The timer comes to the front when the time is up, so you can see and stop the alarm
 • Pause, resume and restart from the control in the middle of the dial
 • Light and dark appearance, following your system by default
-• Three colours you can change, and a choice of alarm chimes
+• A remaining-time colour you can change — red, green, or a gradient that follows the time left — and a choice of alarm chimes
 • A full-screen view for a timer you can watch from across the room
 
 HOW TO USE

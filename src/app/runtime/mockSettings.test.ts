@@ -2,12 +2,13 @@ import { describe, expect, it } from 'vitest'
 import { ALARM_DURATION_OPTIONS, DEFAULT_ALARM_SECONDS } from '../lib/alarm'
 import { CHIME_OPTIONS, DEFAULT_CHIME } from '../lib/chimes'
 import { createMockSettings } from './mockSettings'
-import { DEFAULT_SETTINGS, normalizeSettings } from './settings'
+import { DEFAULT_SETTINGS, normalizeSettings, REMAINING_COLORS } from './settings'
 
 describe('settings', () => {
     it('starts from the factory defaults', () => {
         expect(createMockSettings().getState()).toEqual(DEFAULT_SETTINGS)
-        expect(DEFAULT_SETTINGS.mode).toBe('auto')
+        expect(DEFAULT_SETTINGS.mode).toBe('device')
+        expect(DEFAULT_SETTINGS.remaining).toBe('gradient')
         expect(DEFAULT_SETTINGS.volume).toBe(1)
         expect(DEFAULT_CHIME).toBe('chime')
         expect(DEFAULT_SETTINGS.alarmSeconds).toBe(DEFAULT_ALARM_SECONDS)
@@ -28,17 +29,27 @@ describe('settings', () => {
     })
 
     it('resets to the factory settings', () => {
-        const store = createMockSettings({ mode: 'dark', volume: 0.2, remaining: '#000000' })
+        const store = createMockSettings({ mode: 'dark', volume: 0.2, remaining: 'red' })
         store.reset()
         expect(store.getState()).toEqual(DEFAULT_SETTINGS)
     })
 
     it('coerces invalid stored values back to defaults', () => {
-        const settings = normalizeSettings({ mode: 'sepia', volume: 5, chime: 'gong', face: 42 })
-        expect(settings.mode).toBe('auto')
+        const settings = normalizeSettings({ mode: 'sepia', volume: 5, chime: 'gong', remaining: 'purple' })
+        expect(settings.mode).toBe('device')
         expect(settings.volume).toBe(1)
         expect(settings.chime).toBe('chime')
-        expect(settings.face).toBeNull()
+        expect(settings.remaining).toBe('gradient')
+    })
+
+    it('resolves the retired "auto" mode to the default', () => {
+        expect(normalizeSettings({ mode: 'auto' }).mode).toBe('device')
+    })
+
+    it('accepts every remaining colour the settings screen offers', () => {
+        for (const value of REMAINING_COLORS) {
+            expect(normalizeSettings({ remaining: value }).remaining).toBe(value)
+        }
     })
 
     it('accepts every chime the settings screen offers', () => {

@@ -58,26 +58,6 @@
     color: var(--ink-soft);
 }
 
-.modes {
-    display: flex;
-    gap: 8px;
-}
-
-.mode {
-    padding: 8px 18px;
-    border-radius: 8px;
-    border: 1px solid var(--panel-border);
-    color: var(--ink);
-    transition:
-        color 160ms ease,
-        border-color 160ms ease;
-}
-
-.mode[data-selected='true'] {
-    border-color: var(--accent);
-    color: var(--accent);
-}
-
 .field {
     display: flex;
     flex-direction: column;
@@ -91,9 +71,19 @@
 }
 
 .fieldLabel {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
     min-width: 72px;
     font-weight: 600;
     font-size: 14px;
+}
+
+/* The glyph in a field label (Sound, Ring for), sized like the buttons'. */
+.fieldLabel svg {
+    flex: none;
+    inline-size: var(--size-settings-icon);
+    block-size: var(--size-settings-icon);
 }
 
 .value {
@@ -122,22 +112,11 @@
 }
 
 .swatch {
-    display: grid;
-    place-items: center;
     width: 28px;
     height: 28px;
     border-radius: 50%;
     border: 1px solid var(--panel-border);
     background: var(--swatch, transparent);
-    font-size: 11px;
-    color: var(--ink);
-}
-
-/* The Auto option has no colour of its own, so it reads as a labelled pill. */
-.swatch[data-auto='true'] {
-    width: auto;
-    padding: 0 12px;
-    border-radius: 999px;
 }
 
 .swatch[data-selected='true'] {
@@ -177,6 +156,36 @@
     cursor: default;
 }
 
+/* The icon-only Preview button (a play glyph): square, and the meaning lives in
+   `aria-label` for assistive tech and `title` for the tooltip. */
+.iconButton {
+    display: grid;
+    place-items: center;
+    inline-size: 34px;
+    block-size: 34px;
+    border-radius: 8px;
+    border: 1px solid var(--panel-border);
+    color: var(--ink);
+    transition:
+        color 160ms ease,
+        border-color 160ms ease;
+}
+
+.iconButton svg {
+    inline-size: var(--size-settings-icon);
+    block-size: var(--size-settings-icon);
+}
+
+.iconButton:hover:not(:disabled) {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.iconButton:disabled {
+    opacity: var(--disabled-opacity);
+    cursor: default;
+}
+
 .hint {
     margin: 0;
     color: var(--ink-soft);
@@ -193,8 +202,8 @@
 
 @media (prefers-reduced-motion: reduce) {
     .close,
-    .mode,
-    .button {
+    .button,
+    .iconButton {
         transition: none;
     }
 }

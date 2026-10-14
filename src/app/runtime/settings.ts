@@ -12,13 +12,14 @@ import { DEFAULT_ALARM_SECONDS, isAlarmSeconds, type AlarmSeconds } from '../lib
 import { CHIME_OPTIONS, DEFAULT_CHIME, type ChimeId } from '../lib/chimes'
 
 /** Light, dark, or follow the OS preference (the default). */
-export type ThemeMode = 'auto' | 'light' | 'dark'
+export type ThemeMode = 'light' | 'dark' | 'device'
 
-export const THEME_MODES: readonly ThemeMode[] = ['auto', 'light', 'dark']
+export const THEME_MODES: readonly ThemeMode[] = ['light', 'dark', 'device']
 
-/** The three colour slots, matching AGENTS.md "Settings". */
-export const COLOR_SLOTS = ['face', 'ticks', 'remaining'] as const
-export type ColorSlot = (typeof COLOR_SLOTS)[number]
+/** How the remaining time is coloured: the badge's ramp, or a colour pinned flat. */
+export type RemainingColor = 'gradient' | 'red' | 'green'
+
+export const REMAINING_COLORS: readonly RemainingColor[] = ['gradient', 'red', 'green']
 
 export interface TimerSettings {
     mode: ThemeMode
@@ -27,22 +28,19 @@ export interface TimerSettings {
     chime: ChimeId
     /** How long the alarm rings for, in seconds (AGENTS.md "Notification"). */
     alarmSeconds: AlarmSeconds
-    /** A hex colour for the face, or `null` to follow the theme (Auto). */
-    face: string | null
-    /** A hex colour for the dial ink — ticks, numerals, mark — or Auto. */
-    ticks: string | null
-    /** A hex colour for the remaining indicator, or Auto. */
-    remaining: string | null
+    /**
+     * The remaining indicator's colour. `gradient` (the default) follows the time
+     * left through the toolbar badge's own ramp; `red` and `green` pin it flat.
+     */
+    remaining: RemainingColor
 }
 
 export const DEFAULT_SETTINGS: TimerSettings = {
-    mode: 'auto',
+    mode: 'device',
     volume: 1,
     chime: DEFAULT_CHIME,
     alarmSeconds: DEFAULT_ALARM_SECONDS,
-    face: null,
-    ticks: null,
-    remaining: null,
+    remaining: 'gradient',
 }
 
 /** The key settings live under, in `chrome.storage.sync` (local fallback). */
@@ -66,8 +64,12 @@ export function clampVolume(value: unknown): number {
     return Math.min(1, Math.max(0, value))
 }
 
-function isThemeMode(value: unknown): value is ThemeMode {
+export function isThemeMode(value: unknown): value is ThemeMode {
     return typeof value === 'string' && (THEME_MODES as readonly string[]).includes(value)
+}
+
+export function isRemainingColor(value: unknown): value is RemainingColor {
+    return typeof value === 'string' && (REMAINING_COLORS as readonly string[]).includes(value)
 }
 
 function isChime(value: unknown): value is ChimeId {
@@ -79,10 +81,6 @@ function alarmSecondsOr(value: unknown): AlarmSeconds {
     return isAlarmSeconds(value) ? value : DEFAULT_SETTINGS.alarmSeconds
 }
 
-function colorOrNull(value: unknown): string | null {
-    return typeof value === 'string' && value.length > 0 ? value : null
-}
-
 /** Coerces anything read from storage into a complete, valid settings object. */
 export function normalizeSettings(raw: unknown): TimerSettings {
     const source = typeof raw === 'object' && raw !== null ? (raw as Record<string, unknown>) : {}
@@ -91,9 +89,7 @@ export function normalizeSettings(raw: unknown): TimerSettings {
         volume: clampVolume(source.volume),
         chime: isChime(source.chime) ? source.chime : DEFAULT_SETTINGS.chime,
         alarmSeconds: alarmSecondsOr(source.alarmSeconds),
-        face: colorOrNull(source.face),
-        ticks: colorOrNull(source.ticks),
-        remaining: colorOrNull(source.remaining),
+        remaining: isRemainingColor(source.remaining) ? source.remaining : DEFAULT_SETTINGS.remaining,
     }
 }
 
