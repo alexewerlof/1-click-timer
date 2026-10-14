@@ -16,10 +16,14 @@ export type ThemeMode = 'light' | 'dark' | 'device'
 
 export const THEME_MODES: readonly ThemeMode[] = ['light', 'dark', 'device']
 
-/** How the remaining time is coloured: the badge's ramp, or a colour pinned flat. */
-export type RemainingColor = 'gradient' | 'red' | 'green'
+/**
+ * How the remaining time is coloured. `gradient` tracks the time left through the
+ * toolbar badge's own ramp; `conic` freezes that ramp to the dial when the timer
+ * starts, so the shrinking sector reveals it; `red` and `green` pin it flat.
+ */
+export type RemainingColor = 'gradient' | 'conic' | 'red' | 'green'
 
-export const REMAINING_COLORS: readonly RemainingColor[] = ['gradient', 'red', 'green']
+export const REMAINING_COLORS: readonly RemainingColor[] = ['gradient', 'conic', 'red', 'green']
 
 export interface TimerSettings {
     mode: ThemeMode
@@ -29,8 +33,10 @@ export interface TimerSettings {
     /** How long the alarm rings for, in seconds (AGENTS.md "Notification"). */
     alarmSeconds: AlarmSeconds
     /**
-     * The remaining indicator's colour. `gradient` (the default) follows the time
-     * left through the toolbar badge's own ramp; `red` and `green` pin it flat.
+     * The remaining indicator's colour. `conic` (the default) freezes the toolbar
+     * badge's own ramp to the dial when the timer starts, so the shrinking sector
+     * reveals it; `gradient` follows the time left instead; `red` and `green` pin
+     * it flat.
      */
     remaining: RemainingColor
 }
@@ -40,7 +46,7 @@ export const DEFAULT_SETTINGS: TimerSettings = {
     volume: 1,
     chime: DEFAULT_CHIME,
     alarmSeconds: DEFAULT_ALARM_SECONDS,
-    remaining: 'gradient',
+    remaining: 'conic',
 }
 
 /** The key settings live under, in `chrome.storage.sync` (local fallback). */

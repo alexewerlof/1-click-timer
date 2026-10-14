@@ -4,6 +4,7 @@ import { openSettings, toggleFullscreenSurface, type Surface } from './lib/surfa
 import type { SettingsStore } from './runtime/settings'
 import type { TimerRuntime } from './runtime/types'
 import { useRemainingColor } from './runtime/useRemainingColor'
+import { useSettings } from './runtime/useSettings'
 import { useTimerState } from './runtime/useTimerState'
 import styles from './TimerApp.module.css'
 
@@ -22,6 +23,9 @@ export interface TimerAppProps {
 export function TimerApp({ surface, runtime, settingsStore }: TimerAppProps) {
     const state = useTimerState(runtime)
     useRemainingColor(settingsStore, state)
+    // The dial paints the remaining sector from the choice; gradient, red and
+    // green take one flat colour, conic a fixed sweep (see `RemainingTime`).
+    const remainingAppearance = useSettings(settingsStore).remaining
 
     /**
      * Setting a timer is always one click, whether or not one is already
@@ -43,6 +47,8 @@ export function TimerApp({ surface, runtime, settingsStore }: TimerAppProps) {
                     <TimerFace
                         status={state.status}
                         remainingSeconds={state.remainingSeconds}
+                        durationSeconds={state.durationSeconds}
+                        remainingAppearance={remainingAppearance}
                         onPick={startTimer}
                         onRestart={() => runtime.restart()}
                         onReset={() => runtime.reset()}

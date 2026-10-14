@@ -141,6 +141,32 @@
     opacity: var(--paused-opacity);
 }
 
+/* ---- conic remaining sector ---- */
+
+/*
+ * The Conic appearance: the same annular wedge, painted with a fixed sweep instead
+ * of one flat colour. `fill` cannot take a CSS gradient, so it is a gradient layer
+ * inside a `foreignObject` (`RemainingTime`) drawn in the sector's place in the
+ * paint order, so the ticks still cover it. Its shape is the flat sector's own
+ * path, applied as an SVG `clipPath` on the `foreignObject`, so a real geometric
+ * clip anti-aliases its edges — a gradient mask would leave the wedge's radial
+ * edges hard and stair-stepped.
+ */
+.conicClip {
+    pointer-events: none;
+}
+
+.conicSector {
+    pointer-events: none;
+    opacity: var(--remaining-alpha);
+    background: var(--sector-fill);
+}
+
+/* A paused timer keeps its shape and takes the same grey, receding like the flat sector. */
+.conicSector[data-active='false'] {
+    opacity: var(--paused-opacity);
+}
+
 /* ---- preview arc ---- */
 
 /*

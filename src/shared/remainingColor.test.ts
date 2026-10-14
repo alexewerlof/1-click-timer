@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { badgeColorFor, remainingColorFor } from './remainingColor'
+import { badgeColorFor, remainingColorFor, REMAINING_PAUSED } from './remainingColor'
 
 const GREEN = 'rgb(11, 128, 67)'
 const ORANGE = 'rgb(232, 113, 10)'
@@ -49,5 +49,16 @@ describe('remainingColorFor', () => {
     it('is red when the time is up and green while idle', () => {
         expect(remainingColorFor('expired', 0)).toBe(RED)
         expect(remainingColorFor('idle', 0)).toBe(GREEN)
+    })
+})
+
+/**
+ * The paused grey is exported as a stop of its own so the Conic sector can pin the
+ * same ink the ramp gives a pause (AGENTS.md "Remaining sector").
+ */
+describe('REMAINING_PAUSED', () => {
+    it('is the grey a paused timer wears', () => {
+        expect(REMAINING_PAUSED).toBe(GREY)
+        expect(REMAINING_PAUSED).toBe(remainingColorFor('paused', 0.5))
     })
 })

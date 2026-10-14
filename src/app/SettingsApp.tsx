@@ -97,7 +97,10 @@ export function SettingsApp({ settingsStore }: SettingsAppProps) {
                         ))}
                     </div>
                 </div>
-                <p className={styles.hint}>“Gradient” follows the time left, like the toolbar badge.</p>
+                <p className={styles.hint}>
+                    “Conic” sweeps green → orange → red as the sector shrinks; “Gradient” follows the time left, like
+                    the toolbar badge.
+                </p>
             </section>
 
             <section className={styles.panel} aria-labelledby="alarm-title">

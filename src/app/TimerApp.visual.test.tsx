@@ -11,6 +11,7 @@ import {
     NUMERAL_MINUTES,
     NUMERAL_RADIUS,
     pointOnDial,
+    remainingSectorPath,
 } from './lib/dial'
 import './design/global.css'
 import { SECONDS_PER_MINUTE } from './lib/time'
@@ -23,8 +24,8 @@ import type { TimerStatus } from './runtime/types'
 const POPUP_WIDTH = 380
 const POPUP_HEIGHT = 380
 
-// The remaining colour defaults to the gradient, so the dial follows the time
-// left in these shots — the shipped appearance.
+// The remaining colour defaults to conic, so the dial shows the fixed sweep in
+// these shots — the shipped appearance.
 const settings = createMockSettings()
 
 /**
@@ -400,15 +401,24 @@ test('recolours a numeral on hover', async () => {
 
 /**
  * The preview shows the colour a timer will run in, so it never follows the live
- * colour: with Gradient chosen — the default — a paused (grey) timer still
- * previews in the theme's red. Without this the preview turned grey with the
- * sector, which reads as "this timer is grey" rather than "this is the colour
- * you will get".
+ * colour: with Gradient chosen a paused (grey) timer still previews in the theme's
+ * red. Without this the preview turned grey with the sector, which reads as "this
+ * timer is grey" rather than "this is the colour you will get". Pinned to
+ * Gradient: the flat `<path>` it paints is where the live colour and the preview
+ * colour are two different tokens.
  */
 test('keeps the preview in the chosen colour, not the live paused grey', async () => {
     const runtime = createMockRuntime()
     runtime.forceStatus('paused')
-    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} settingsStore={settings} />))
+    const screen = await render(
+        stage(
+            <TimerApp
+                surface="popup"
+                runtime={runtime}
+                settingsStore={createMockSettings({ remaining: 'gradient' })}
+            />,
+        ),
+    )
 
     const svg = screen.getByRole('slider').element() as SVGSVGElement
     const onDisc = pointOnDial(20, DISC_RADIUS - 2)
@@ -435,16 +445,26 @@ test('keeps the preview in the chosen colour, not the live paused grey', async (
  * shadow through it while the ticks keep their full ink, and under the numerals
  * and the preview chrome. The numerals sit outside the disc (`dial.test.ts`
  * pins that), so the order is not what makes them legible today; it is what
- * keeps them legible if the disc ever grows into the numeral ring.
+ * keeps them legible if the disc ever grows into the numeral ring. Pinned to
+ * Gradient, whose sector is the flat `<path>` this asserts on; the conic layer's
+ * own place in the order is covered by `paints the conic sector ...`.
  */
 test('paints the remaining sector over the disc and under the ticks and the numerals', async () => {
     const runtime = createMockRuntime()
     // Parked part-way through a run, so the sector is drawn across the ring.
     runtime.forceStatus('running')
-    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} settingsStore={settings} />))
+    const screen = await render(
+        stage(
+            <TimerApp
+                surface="popup"
+                runtime={runtime}
+                settingsStore={createMockSettings({ remaining: 'gradient' })}
+            />,
+        ),
+    )
 
     const svg = screen.getByRole('slider').element() as SVGSVGElement
-    const sector = svg.querySelector('[class*="sector"]')
+    const sector = svg.querySelector('path[class*="sector"]')
     const ticks = svg.querySelector('[data-dial-ticks]')
     if (!sector || !ticks) throw new Error('the running timer has not drawn its ticks and its sector')
 
@@ -458,6 +478,65 @@ test('paints the remaining sector over the disc and under the ticks and the nume
     for (const numeral of numerals) {
         expect(sector.compareDocumentPosition(numeral) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
     }
+})
+
+/**
+ * The Conic appearance paints the sector with a fixed green → orange → red sweep
+ * rather than one flat colour (AGENTS.md "Remaining sector"). `fill` cannot take a
+ * CSS gradient, so it is an HTML layer inside a `foreignObject` — but it keeps the
+ * flat sector's place in the paint order, so the ticks still cover it.
+ */
+test('paints the conic sector with a fixed sweep in the sector’s place', async () => {
+    const runtime = createMockRuntime()
+    // A 30-minute timer with 12.5 minutes left, so the wedge is drawn.
+    runtime.forceStatus('running')
+    const screen = await render(
+        stage(
+            <TimerApp surface="popup" runtime={runtime} settingsStore={createMockSettings({ remaining: 'conic' })} />,
+        ),
+    )
+
+    const svg = screen.getByRole('slider').element() as SVGSVGElement
+    const sector = svg.querySelector('foreignObject > div') as HTMLElement
+    expect(sector).not.toBeNull()
+
+    // The sweep is fixed to the timer's duration — green at half a turn, orange
+    // three quarters, red at 12 o'clock — and does not move as the time runs; the
+    // clip is what shrinks. Read from the painted layer.
+    const sweep = getComputedStyle(sector as HTMLElement).backgroundImage
+    expect(sweep).toContain('conic-gradient')
+    expect(sweep).toContain('rgb(11, 128, 67)')
+    expect(sweep).toContain('rgb(232, 113, 10)')
+    expect(sweep).toContain('rgb(224, 32, 27)')
+
+    // The shape is the flat sector's own path, clipped — real geometry, so the
+    // rasteriser anti-aliases it rather than leaving a gradient mask's hard edge.
+    const clip = svg.querySelector('clipPath path')
+    expect(clip?.getAttribute('d')).toBe(remainingSectorPath(12.5 * SECONDS_PER_MINUTE))
+
+    // It holds the flat sector's place: after the disc, before the ticks.
+    const ticks = svg.querySelector('[data-dial-ticks]')
+    if (!ticks) throw new Error('the running timer has not drawn its ticks')
+    expect(sector.compareDocumentPosition(ticks) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+})
+
+/**
+ * A paused conic timer keeps its shape but takes the same grey, and recedes the
+ * same way, as a paused flat sector — so a pause reads the same in every
+ * appearance (AGENTS.md "Remaining sector").
+ */
+test('greys the conic sector while the timer is paused', async () => {
+    const runtime = createMockRuntime()
+    runtime.forceStatus('paused')
+    const screen = await render(
+        stage(
+            <TimerApp surface="popup" runtime={runtime} settingsStore={createMockSettings({ remaining: 'conic' })} />,
+        ),
+    )
+
+    const svg = screen.getByRole('slider').element() as SVGSVGElement
+    const sector = svg.querySelector('foreignObject > div') as HTMLElement
+    expect(getComputedStyle(sector).backgroundColor).toBe('rgb(107, 114, 128)')
 })
 
 /**
@@ -649,12 +728,13 @@ test('stops a ringing alarm from the corner control, resetting the timer', async
 
 /**
  * The corner controls answer in the accent, and the accent follows the “Remaining”
- * choice: the theme's red under Gradient, and the calm green under either pinned
- * colour. It is deliberately NOT the colour the dial's sector wears, so a red
- * timer still answers in green.
+ * choice: the theme's red under a ramp (Gradient and Conic), and the calm green
+ * under either pinned colour. It is deliberately NOT the colour the dial's sector
+ * wears, so a red timer still answers in green.
  */
 const ACCENTS: readonly { remaining: RemainingColor; accent: string }[] = [
     { remaining: 'gradient', accent: 'rgb(224, 32, 27)' },
+    { remaining: 'conic', accent: 'rgb(224, 32, 27)' },
     { remaining: 'red', accent: 'rgb(11, 128, 67)' },
     { remaining: 'green', accent: 'rgb(11, 128, 67)' },
 ]
@@ -768,10 +848,25 @@ for (const status of ['idle', 'running'] as const) {
     })
 }
 
+/**
+ * The readout control wears the remaining sector's colour (the shared `--remaining`
+ * token), so a paused timer's control greys with the sector. Pinned to Gradient:
+ * the flat `<path>` is the mode where the control's colour and the sector's fill
+ * are literally the same token — under Conic the sector is a fixed sweep, whose
+ * colour is the gradient's, not the control's.
+ */
 test('reveals the readout control on hover, hiding the readout', async () => {
     const runtime = createMockRuntime()
     runtime.forceStatus('paused')
-    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} settingsStore={settings} />))
+    const screen = await render(
+        stage(
+            <TimerApp
+                surface="popup"
+                runtime={runtime}
+                settingsStore={createMockSettings({ remaining: 'gradient' })}
+            />,
+        ),
+    )
 
     const svg = screen.getByRole('slider').element() as SVGSVGElement
     const readout = svg.querySelector('text[class*="readout"]') as SVGTextElement
@@ -787,8 +882,8 @@ test('reveals the readout control on hover, hiding the readout', async () => {
     expect(controlBox.top + controlBox.height / 2).toBeCloseTo(discBox.top + discBox.height / 2, 0)
 
     // It wears the remaining sector's colour — the shared `--remaining` token, so
-    // the two cannot drift apart.
-    const sector = svg.querySelector('[class*="sector"]') as SVGElement
+    // the two cannot drift apart (Gradient's flat `<path>`, see the note above).
+    const sector = svg.querySelector('path[class*="sector"]') as SVGElement
     expect(getComputedStyle(control).color).toBe(getComputedStyle(sector).fill)
 
     // Park the pointer off the disc first — on the mute control in the corner —

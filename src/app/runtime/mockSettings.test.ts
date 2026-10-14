@@ -8,7 +8,7 @@ describe('settings', () => {
     it('starts from the factory defaults', () => {
         expect(createMockSettings().getState()).toEqual(DEFAULT_SETTINGS)
         expect(DEFAULT_SETTINGS.mode).toBe('device')
-        expect(DEFAULT_SETTINGS.remaining).toBe('gradient')
+        expect(DEFAULT_SETTINGS.remaining).toBe('conic')
         expect(DEFAULT_SETTINGS.volume).toBe(1)
         expect(DEFAULT_CHIME).toBe('chime')
         expect(DEFAULT_SETTINGS.alarmSeconds).toBe(DEFAULT_ALARM_SECONDS)
@@ -39,7 +39,7 @@ describe('settings', () => {
         expect(settings.mode).toBe('device')
         expect(settings.volume).toBe(1)
         expect(settings.chime).toBe('chime')
-        expect(settings.remaining).toBe('gradient')
+        expect(settings.remaining).toBe('conic')
     })
 
     it('resolves the retired "auto" mode to the default', () => {

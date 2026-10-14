@@ -44,7 +44,7 @@ FEATURES
 • The timer comes to the front when the time is up, so you can see and stop the alarm
 • Play, pause and stop from the corner of the dial, and restart from the control in the middle
 • Light and dark appearance, following your system by default
-• A remaining-time colour you can change — red, green, or a gradient that follows the time left — and a choice of alarm chimes
+• A remaining-time colour you can change — a conic sweep frozen when the timer starts, a gradient that follows the time left, red, or green — and a choice of alarm chimes
 • A full-screen view for a timer you can watch from across the room
 
 HOW TO USE

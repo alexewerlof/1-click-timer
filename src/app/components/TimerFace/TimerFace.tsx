@@ -15,6 +15,7 @@ import {
 } from '../../lib/dial'
 import type { Point } from '../../lib/dial'
 import { SECONDS_PER_MINUTE } from '../../lib/time'
+import type { RemainingColor } from '../../runtime/settings'
 import type { TimerStatus } from '../../runtime/types'
 import { Caption } from './Caption'
 import { CenterReadout } from './CenterReadout'
@@ -41,6 +42,10 @@ const RESET_NUMERAL_MINUTES = 0
 export interface TimerFaceProps {
     status: TimerStatus
     remainingSeconds: number
+    /** The duration this countdown was started with — where the Conic sweep's green sits. */
+    durationSeconds: number
+    /** How the remaining sector is painted (AGENTS.md "Remaining sector"). */
+    remainingAppearance: RemainingColor
     /** Receives the chosen duration in seconds. */
     onPick: (seconds: number) => void
     /** Re-run the last duration, from the control the disc offers while paused or ringing. */
@@ -65,7 +70,15 @@ function clampMinutes(minutes: number): number {
  * The readout disc carries its own control (`ReadoutControl`), a real HTML button
  * overlaid on the face rather than drawn in it.
  */
-export function TimerFace({ status, remainingSeconds, onPick, onRestart, onReset }: TimerFaceProps) {
+export function TimerFace({
+    status,
+    remainingSeconds,
+    durationSeconds,
+    remainingAppearance,
+    onPick,
+    onRestart,
+    onReset,
+}: TimerFaceProps) {
     const svgRef = useRef<SVGSVGElement>(null)
     const [previewMinutes, setPreviewMinutes] = useState<number | null>(null)
 
@@ -232,7 +245,12 @@ export function TimerFace({ status, remainingSeconds, onPick, onRestart, onReset
                  * are outside the disc and so are never touched by it; the order
                  * keeps it that way if the disc grows.
                  */}
-                <RemainingTime seconds={remainingSeconds} active={status === 'running'} />
+                <RemainingTime
+                    seconds={remainingSeconds}
+                    active={status === 'running'}
+                    durationSeconds={durationSeconds}
+                    appearance={remainingAppearance}
+                />
                 {DIAL_TICKS}
                 {/*
                  * The numeral ring stays mounted while previewing, faded out by

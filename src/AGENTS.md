@@ -26,7 +26,7 @@ one dial face; the multi-variant experiment is over.
 | `app/main.tsx`                      | Mounts `App`; imports the global CSS.                                                 |
 | `app/TimerApp.tsx`                  | The timer composition shared by the popup and the tab.                                                      |
 | `app/components/TimerFace/`         | The dial. Geometry in `lib/dial.ts`; one component per element (`Disc`, `RemainingTime`, `PreviewArc`, `PreviewTicks`, `PreviewNumeral`, `CenterReadout`, `ReadoutControl`, `Caption`, `CreatorMark`); static chrome in `dialChrome.tsx` (`DIAL_TICKS`, `DIAL_NUMERALS`, and the `Tick` both tick groups share). `ReadoutControl` is the one non-SVG element — an HTML `<button>` overlaid on the face. |
-| `app/components/TransportControls/` | The four corner controls (mute, fullscreen, play/pause, and settings), soft-plastic discs pinned to the corners of the dial's square: the surface colour, lit from the top left and shaded to the bottom right, with the glyph black by default and the accent colour on hover (the theme's red under Gradient, the calm green under a pinned Red or Green), and sinking under a press (its rim is the surface colour, so it only shows where the press-in shadow darkens the disc around it). Icons from Lucide. The play/pause control pauses a running timer and resumes a paused one, and stops a ringing alarm (resetting the timer, which silences it — a Stop square glyph). The fullscreen control shows expand or shrink with the document's own fullscreen state. The settings control opens `settings.html` in a new tab (`openSettings` in `app/lib/surface.ts`); that screen's footer holds the only three ways out — the author's site, the source code and the issue tracker (`*_URL` + `openTab`, both from `app/lib/links.ts`). The group fades out while the dial is previewed, so nothing competes with the choice being made. Restart is the `ReadoutControl` on the readout disc. |
+| `app/components/TransportControls/` | The four corner controls (mute, fullscreen, play/pause, and settings), soft-plastic discs pinned to the corners of the dial's square: the surface colour, lit from the top left and shaded to the bottom right, with the glyph black by default and the accent colour on hover (the theme's red under Gradient or Conic, the calm green under a pinned Red or Green), and sinking under a press (its rim is the surface colour, so it only shows where the press-in shadow darkens the disc around it). Icons from Lucide. The play/pause control pauses a running timer and resumes a paused one, and stops a ringing alarm (resetting the timer, which silences it — a Stop square glyph). The fullscreen control shows expand or shrink with the document's own fullscreen state. The settings control opens `settings.html` in a new tab (`openSettings` in `app/lib/surface.ts`); that screen's footer holds the only three ways out — the author's site, the source code and the issue tracker (`*_URL` + `openTab`, both from `app/lib/links.ts`). The group fades out while the dial is previewed, so nothing competes with the choice being made. Restart is the `ReadoutControl` on the readout disc. |
 | `app/design/tokens.css`             | Every colour, size and stroke weight. The light palette is `:root`; `[data-theme='dark']` overrides it. The light surface is a milky off-white, so the corner controls' sheen/shade recipe (`--control-soft-shadow`) has something to shade against.      |
 | `app/design/global.css`             | Resets, body, and the popup/tab/settings sizing per `[data-surface]`.                                                |
 | `app/lib/dial.ts`                   | Dial geometry: counter-clockwise mapping, sector/arc paths, pointer → dial point/minute, disc/readout-disc regions, and the derived readout size. |
@@ -55,7 +55,7 @@ one dial face; the multi-variant experiment is over.
 | `settings.html`                               | Settings-screen entry. Sets `data-surface="settings"`.                     |
 | `app/App.tsx`                                 | Picks `SettingsApp` or `TimerApp`; applies the theme and hands each surface the settings store. |
 | `app/SettingsApp.tsx`                         | The settings screen (mode, the remaining-time colour, volume, sound, ring length) and its icon footer: reset to defaults, plus the three ways out (the author, the source code, the bug tracker). |
-| `app/design/palette.ts`                       | The remaining-colour swatches (gradient, red, green) and the CSS background each chip paints. |
+| `app/design/palette.ts`                       | The remaining-colour swatches (conic, gradient, red, green) and the CSS background each chip paints. |
 | `app/lib/chimes.ts`                           | Synthesised chimes (`Chime`/`Beep`/`Bell`/`Silent`) and audio priming.      |
 | `app/runtime/settings.ts`                     | `TimerSettings` / `SettingsStore` contract, defaults, normalization.       |
 | `app/runtime/mockSettings.ts`                 | localStorage-backed settings store for the design preview and tests.       |
@@ -117,6 +117,16 @@ and the `offscreen` permission to the manifest.
   (The sector is an annular wedge — a pie slice with the readout disc's circle cut
   out of its middle — so its inner edge is a circle and the readout disc never has
   to be painted over a sharp corner to hide it; see `SECTOR_INNER_RADIUS`.)
+- **The Conic sector is a clipped gradient, in the sector's place.** SVG `fill`
+  cannot take a CSS gradient, so under the “Remaining” choice Conic the sector is a
+  gradient layer inside an SVG `<foreignObject>` (`RemainingTime`) instead of a
+  `<path>`. It keeps the flat path's place in the paint order — so the ticks still
+  cover it — and its shape is that same path applied as an SVG `clipPath` on the
+  `foreignObject`: a real geometric clip, so the rasteriser anti-aliases the wedge's
+  edges exactly as it does the flat `<path>`. A `conic-gradient` *mask* was tried
+  first and left the radial edges hard and stair-stepped, because a gradient hard
+  stop is a per-pixel colour with no edge coverage. The clip and the path are built
+  from the same `remainingSectorPath`, so the two renderings cannot drift apart.
 - **One click sets a timer.** Clicking the disc starts the previewed duration;
   clicking a numeral starts that many minutes outright. The 0 numeral is the
   exception: it marks where a whole turn ends, so it resets the timer rather than

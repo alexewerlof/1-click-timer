@@ -51,6 +51,9 @@ export const REMAINING_CALM = css(CALM)
 export const REMAINING_HALFWAY = css(HALFWAY)
 export const REMAINING_URGENT = css(URGENT)
 
+/** The grey a paused timer wears — the same ink `remainingColorFor` gives a pause. */
+export const REMAINING_PAUSED = css(PAUSED)
+
 /** The colour as the fraction of the timer that is left runs 0…1 along the ramp. */
 export function badgeColorFor(fractionRemaining: number): string {
     const fraction = Math.min(1, Math.max(0, fractionRemaining))

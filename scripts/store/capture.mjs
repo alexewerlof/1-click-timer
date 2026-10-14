@@ -67,6 +67,13 @@ const POPUP_FRAME = `
 const DIAL_ONLY = '[aria-label="Timer controls"], [data-dial-numerals] { visibility: hidden !important; }'
 
 /**
+ * A drawn remaining sector, in either appearance: the flat `<path>` under
+ * Gradient, Red or Green, or the gradient layer inside a `foreignObject` under
+ * Conic (the default). Waiting on just the path would hang on the shipped look.
+ */
+const SECTOR = 'svg path[class*="sector"], svg foreignObject'
+
+/**
  * Chromium derives an unpacked extension's id from its path: the first 32 hex
  * digits of the SHA-256, each nibble mapped onto a–p.
  */
@@ -180,7 +187,7 @@ try {
 
     // 2 — a timer part-way through: the sector, the readout and the badge state.
     await face.locator(`text[data-numeral-minutes="${HERO_MINUTES}"]`).click()
-    await face.waitForSelector('[class*="sector"]')
+    await face.waitForSelector(SECTOR)
     await face.mouse.move(AWAY.x, AWAY.y)
     await face.waitForTimeout(400)
     await shoot(face, '02-running.png')
@@ -243,7 +250,7 @@ try {
 
     const dark = await openFace(context, id)
     await dark.waitForFunction(() => document.documentElement.dataset.theme === 'dark')
-    await dark.waitForSelector('[class*="sector"]')
+    await dark.waitForSelector(SECTOR)
     await shoot(dark, '06-dark.png')
     await dark.close()
 
@@ -254,7 +261,7 @@ try {
 
     const art = await openFace(context, id)
     await art.addStyleTag({ content: DIAL_ONLY })
-    await art.waitForSelector('[class*="sector"]')
+    await art.waitForSelector(SECTOR)
     const artwork = join(OUT, '.dial-hero.png')
     await art.screenshot({ path: artwork })
     await art.close()

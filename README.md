@@ -85,7 +85,7 @@ that tab it goes full screen. Its glyph shows which way it will go.
 
 The gear opens the settings screen in a new tab:
 
-- **Appearance** — the mode (light, dark, or device, which follows your system and is the default) and the remaining-time colour: red, green, or a gradient that follows the time left
+- **Appearance** — the mode (light, dark, or device, which follows your system and is the default) and the remaining-time colour: a conic sweep frozen when the timer starts, a gradient that follows the time left, red, or green
 - **Alarm** — the volume, a choice of chime (Chime, Beep, Bell or Silent) with a preview button, and how long the alarm rings (5 seconds to 5 minutes)
 - **Reset to defaults**
 
@@ -100,7 +100,7 @@ Your settings sync across your own Chrome profiles.
 - An alarm that rings for a length you choose and sounds even with the popup closed
 - A notification with **Stop** and **Restart** buttons, plus the timer brought to the front, so it is clear what is ringing and how to stop or repeat it
 - Light and dark appearance, following your system by default
-- A remaining-time colour of your choice — red, green, or a gradient that follows the time left
+- A remaining-time colour of your choice — a conic sweep frozen when the timer starts, a gradient that follows the time left, red, or green
 - A full-screen view for a timer you can watch from across the room
 
 The badge counts whole minutes and never seconds, because Chrome only wakes a

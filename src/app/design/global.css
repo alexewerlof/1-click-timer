@@ -51,8 +51,14 @@ button {
  * deliberately reserve the ring for the keyboard, so cancel the UA ring wherever
  * focus is not `:focus-visible` (the timer face is a `role="slider"` `<svg>`,
  * which is focused by every click on the dial).
+ *
+ * `:where()` holds this at zero specificity, so it cancels only the UA's default
+ * ring and loses to any outline a component writes for itself. The settings
+ * swatchs draw their selection ring with `outline`, and a bare
+ * `:focus:not(:focus-visible)` out-specified that rule and erased the ring for as
+ * long as the clicked swatch kept focus.
  */
-:focus:not(:focus-visible) {
+:where(:focus:not(:focus-visible)) {
     outline: none;
 }
 

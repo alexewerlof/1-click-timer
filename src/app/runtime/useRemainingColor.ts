@@ -12,18 +12,20 @@ import { useSettings } from './useSettings'
  * - `--remaining` — the live colour of the sector and the readout control. Red
  *   and Green pin it for the whole timer; Gradient tracks the time left through
  *   the same ramp the toolbar badge uses (`shared/remainingColor.ts`), so the
- *   badge and the dial always read the same moment the same way.
+ *   badge and the dial always read the same moment the same way; Conic paints the
+ *   sweep from the duration instead, so this is only the readout control's colour.
  * - `--preview` — the colour a click would start: the preview arc, its numeral,
  *   its ticks and the numeral hover. It never follows the live colour, so a
  *   paused (grey) timer still previews in colour.
  * - `--accent` — the interactive signal: the controls' hover and focus colour.
- *   It stays the theme's red under Gradient and turns the calm green under Red
- *   or Green, so it never follows the ramp — and never the grey of a pause.
+ *   It stays the theme's red under Gradient and Conic and turns the calm green
+ *   under Red or Green, so it never follows the ramp — and never the grey of a
+ *   pause.
  *
- * Red and Green take their chosen colour for the first two; Gradient leaves both
- * `--preview` and `--accent` to the theme's red. This is the only writer of the
- * three. `state` is `null` on a surface with no timer (the settings screen),
- * where `--remaining` is cleared so the theme's own colour shows through.
+ * Red and Green take their chosen colour for the first two; Gradient and Conic
+ * leave both `--preview` and `--accent` to the theme's red. This is the only
+ * writer of the three. `state` is `null` on a surface with no timer (the settings
+ * screen), where `--remaining` is cleared so the theme's own colour shows through.
  */
 export function useRemainingColor(store: SettingsStore, state: TimerState | null): void {
     const remaining = useSettings(store).remaining

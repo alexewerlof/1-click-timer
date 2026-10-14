@@ -16,8 +16,9 @@ A Chrome extension that provides a one-click countdown timer with a visual dial 
 > talks to the runtime through `TimerRuntime`; a plain browser (`npm run dev`) falls
 > back to the in-memory mock. A settings screen (`settings.html`) covers appearance
 > (light/dark/device), the alarm chime and ring length, and the remaining-time
-> colour — red, green, or a green-to-red ramp that tracks the time left, exactly
-> like the toolbar badge — plus reset.
+colour — a conic sweep frozen when the timer starts, a green-to-red ramp that
+tracks the time left, exactly like the toolbar badge, or a pinned red or green —
+plus reset.
 
 ## Tech stack
 
@@ -61,8 +62,8 @@ face.
 | **Major tick**       | The thicker tick on each multiple of five (0, 5, 10, … 55).                                                                                                                    |
 | **Numeral**          | The number printed beside a major tick: 0, 5, 10, … 55. Each is itself a one-click shortcut to its own duration — except 0, which resets the timer. Hovering one previews it exactly as hovering the disc at that minute does. |
 | **Numeral ring**     | The circle the numerals sit on, just outside the ticks.                                                                                                                        |
-| **Remaining sector** | The filled wedge. It runs from 12 o'clock counter-clockwise to the current remaining time, between the disc's rim and a circular cut-out the size of the readout disc, so its inner edge is a circle rather than a sharp corner at the centre, and its size is the time left. Its colour is the **Remaining** setting: the toolbar badge's ramp while Gradient is chosen (grey while the timer is paused), or a pinned red or green.                                                 |
-| **Preview arc**      | The unfilled outline from 12 o'clock to the previewed minute. It shows what a click would start, in the **preview colour** — the chosen **Remaining** colour, or the theme's red under Gradient — so it never follows the live colour (a paused timer still previews in colour). |
+| **Remaining sector** | The filled wedge. It runs from 12 o'clock counter-clockwise to the current remaining time, between the disc's rim and a circular cut-out the size of the readout disc, so its inner edge is a circle rather than a sharp corner at the centre, and its size is the time left. Its colour is the **Remaining** setting: the toolbar badge's ramp while Gradient is chosen (grey while the timer is paused), a fixed green→orange→red sweep while Conic is chosen (grey while the timer is paused), or a pinned red or green.                                                 |
+| **Preview arc**      | The unfilled outline from 12 o'clock to the previewed minute. It shows what a click would start, in the **preview colour** — the chosen **Remaining** colour, or the theme's red under Gradient or Conic — so it never follows the live colour (a paused timer still previews in colour). |
 | **Preview ticks**    | The ticks inside the preview arc's span, drawn in the **preview colour** so the arc, its numeral and the ticks it covers read as one mark. The rest of the ring keeps the dial's ink. |
 | **Preview numeral**  | The single numeral shown while previewing, on the numeral ring at the end of the preview arc, in the numerals' style and the **preview colour**. It fades the whole numeral ring out, so it is the only number on the face. A whole turn (60) is labelled where the 0 numeral sits. |
 | **Readout**          | The digital `M:SS` in the middle of the disc, e.g. `1:05`. It always shows the remaining time, except while the timer is idle — when it is left blank, because a standing `0:00` only adds noise — and while the **Readout control** replaces it. |
@@ -71,7 +72,7 @@ face.
 | **Caption**          | The text "Made in Sweden", inscribed inside the disc on a circular path just above the bottom rim.                                                                             |
 | **Creator mark**     | The "Alex Ewerlöf" wordmark, drawn in the dial's ink, in the band between the readout disc and the 0 numeral. It fades out while the timer runs and returns when it stops: a countdown on a projector is the room's instrument, so only the remaining sector should hold the eye.                                                    |
 | **Face slot**        | The region that holds the face. The **Transport** controls overlay it, so the face gets the whole slot.                                                                         |
-| **Transport**        | The four corner controls, one per corner of the dial's square: mute (top left), fullscreen (top right), play/pause (bottom left) and settings (bottom right). Soft-plastic discs of the surface colour, lit along the top-left rim and shaded to the bottom-right, with the glyph black by default and the **accent** colour on hover (the theme's red under Gradient, the calm green under a pinned Red or Green), sinking under a press, and fading out while the dial is previewed. The rim is the surface colour too, so it shows only where a press-in shadow darkens the disc around it. The bottom-left control pauses a running timer, resumes a paused one, and — while the alarm rings — stops the timer (resetting it, which silences the ring); restart lives on the **Readout control**. |
+| **Transport**        | The four corner controls, one per corner of the dial's square: mute (top left), fullscreen (top right), play/pause (bottom left) and settings (bottom right). Soft-plastic discs of the surface colour, lit along the top-left rim and shaded to the bottom-right, with the glyph black by default and the **accent** colour on hover (the theme's red under Gradient or Conic, the calm green under a pinned Red or Green), sinking under a press, and fading out while the dial is previewed. The rim is the surface colour too, so it shows only where a press-in shadow darkens the disc around it. The bottom-left control pauses a running timer, resumes a paused one, and — while the alarm rings — stops the timer (resetting it, which silences the ring); restart lives on the **Readout control**. |
 | **Settings control** | The bottom-right corner control: a gear that opens the settings screen in a tab of its own.                                                                                     |
 
 Three measures run through the geometry: **disc radius**, **tick length** (how far
@@ -137,6 +138,15 @@ termination. The UI never accumulates time.
   two settings that are easy to get wrong (`sRGB` interpolation, and a filter
   region wide enough not to clip). The disc has no outline — the inner shadow is
   what draws its edge.
+- **SVG `fill` cannot take a CSS gradient**, so the Conic appearance paints the
+  remaining sector as a gradient layer inside an SVG `<foreignObject>` rather than
+  a `<path>` (`components/TimerFace/RemainingTime.tsx`). It keeps the flat path's
+  place in the paint order, so the ticks still cover it, and its shape is that very
+  path applied as an SVG `clipPath` — a real geometric clip, which anti-aliases the
+  wedge's edges. A `conic-gradient` mask would instead leave them hard and
+  stair-stepped, because a gradient hard stop is a per-pixel colour with no edge
+  coverage. The clip and the flat path come from the same `remainingSectorPath` in
+  `lib/dial.ts`, so the two renderings cannot drift apart.
 - The readout disc carries its own restart control (`ReadoutControl`) — the
   only HTML element in the face. It is a `<button>` overlaid on the SVG (never
   *in* it), sized from `READOUT_DISC_DIAMETER_RATIO` × `cqmin`, revealed on
@@ -164,10 +174,14 @@ termination. The UI never accumulates time.
 - **Focus rings are keyboard-only.** The face is a `role="slider"` `<svg>` with
   `tabindex=0`, so every click focuses it. `design/global.css` draws a ring on
   `:focus-visible` only and cancels the browser's own default ring with
-  `:focus:not(:focus-visible) { outline: none }` — without that, a mouse click drew
-  the UA's unrounded amber rectangle around the face, on top of the app's rounded
-  accent ring the dial defines in `TimerFace.module.css`. The visual suite pins it
-  (`draws no focus ring on the face when clicked`).
+  `:where(:focus:not(:focus-visible)) { outline: none }` — without it, a mouse click
+  drew the UA's unrounded amber rectangle around the face, on top of the app's
+  rounded accent ring the dial defines in `TimerFace.module.css`. The `:where()`
+  keeps the reset at zero specificity, so it cancels only the UA ring and loses to
+  any outline a component writes for itself; a bare `:focus:not(:focus-visible)`
+  out-specified the settings swatch's selection ring and erased it while the
+  clicked swatch kept focus. The visual suite pins the face case (`draws no focus
+  ring on the face when clicked`).
 - **Two runtimes behind one seam.** `runtime.ts` picks `createChromeRuntime()`
   when `isExtension()` (see `app/runtime/platform.ts`) and the mock otherwise;
   `settingsRuntime.ts` does the same for settings. Build the chrome runtimes
