@@ -431,13 +431,13 @@ test('keeps the preview in the chosen colour, not the live paused grey', async (
 
 /**
  * The face's stacking order is deliberate: the remaining sector is painted over
- * the ticks, so its translucent fill tints the ticks it swallows — the
- * physical-timer look — and under the numerals and the preview chrome. The
- * numerals sit outside the disc (`dial.test.ts` pins that), so the order is not
- * what makes them legible today; it is what keeps them legible if the disc ever
- * grows into the numeral ring.
+ * the disc and under the ticks, so its translucent fill reads the disc's edge
+ * shadow through it while the ticks keep their full ink, and under the numerals
+ * and the preview chrome. The numerals sit outside the disc (`dial.test.ts`
+ * pins that), so the order is not what makes them legible today; it is what
+ * keeps them legible if the disc ever grows into the numeral ring.
  */
-test('paints the remaining sector over the ticks and under the numerals', async () => {
+test('paints the remaining sector over the disc and under the ticks and the numerals', async () => {
     const runtime = createMockRuntime()
     // Parked part-way through a run, so the sector is drawn across the ring.
     runtime.forceStatus('running')
@@ -451,8 +451,10 @@ test('paints the remaining sector over the ticks and under the numerals', async 
     const numerals = Array.from(svg.querySelectorAll('text[data-numeral-minutes]'))
     expect(numerals).toHaveLength(NUMERAL_MINUTES.length)
 
-    // PRECEDING means the other element is painted first.
-    expect(sector.compareDocumentPosition(ticks) & Node.DOCUMENT_POSITION_PRECEDING).toBeTruthy()
+    // PRECEDING/FOLLOWING are relative to the sector: the ticks follow it, so
+    // they paint over it, while the numerals follow it too (the fill stays under
+    // them).
+    expect(sector.compareDocumentPosition(ticks) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
     for (const numeral of numerals) {
         expect(sector.compareDocumentPosition(numeral) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
     }

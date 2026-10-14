@@ -227,15 +227,16 @@ export function TimerFace({ status, remainingSeconds, onPick, onTogglePause, onR
                 onKeyDown={handleKeyDown}
             >
                 {DISC}
-                {DIAL_TICKS}
                 {/*
-                 * The remaining sector sits over the ticks and under everything
-                 * else. It is slightly translucent, so it tints the ticks it
-                 * swallows — the way the plastic overlay on a physical timer
-                 * does. The numerals are outside the disc and so are never
-                 * touched by it; the order keeps it that way if the disc grows.
+                 * The remaining sector sits over the disc and under the ticks.
+                 * It is slightly translucent, so the disc's edge shadow reads
+                 * through it, but the ticks are painted after it and so keep
+                 * their full ink rather than being tinted by it. The numerals
+                 * are outside the disc and so are never touched by it; the order
+                 * keeps it that way if the disc grows.
                  */}
                 <RemainingTime seconds={remainingSeconds} active={status === 'running'} />
+                {DIAL_TICKS}
                 {/*
                  * The numeral ring stays mounted while previewing, faded out by
                  * `data-previewing` on the face (see the CSS). It is not swapped

@@ -110,10 +110,10 @@ and the `offscreen` permission to the manifest.
   preview colour over it (AGENTS.md "Preview numeral", "Preview ticks"). The
   ring is faded rather than unmounted, so the numeral under the pointer keeps the
   hit target that starts the timer — the preview numeral is `pointer-events:
-  none` for the same reason. The face paints in that order — disc, ticks, sector,
+  none` for the same reason. The face paints in that order — disc, sector, ticks,
   numerals, the preview chrome over the faded ring, arc, readout, mark — so the
-  translucent sector tints the ticks it swallows and stops there: the numerals
-  sit outside the disc, on their own ring, so the fill can never reach them.
+  ticks sit over the translucent sector and keep their full ink, while the
+  numerals (outside the disc, on their own ring) are never reached by the fill.
   (The sector is an annular wedge — a pie slice with the readout disc's circle cut
   out of its middle — so its inner edge is a circle and the readout disc never has
   to be painted over a sharp corner to hide it; see `SECTOR_INNER_RADIUS`.)

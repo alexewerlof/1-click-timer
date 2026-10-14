@@ -127,7 +127,10 @@
 
 /* ---- remaining time ---- */
 
-/* Faintly translucent, so the ticks it covers stay just visible underneath. */
+/*
+ * Faintly translucent, so the disc's edge shadow reads through it. The ticks
+ * are painted over it (see `TimerFace`), so the fill never dims their ink.
+ */
 .sector {
     fill: var(--remaining);
     fill-opacity: var(--remaining-alpha);

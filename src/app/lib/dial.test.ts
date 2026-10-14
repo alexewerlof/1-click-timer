@@ -222,8 +222,7 @@ describe('dial geometry constants', () => {
     it('keeps the numerals outside the disc, where the sector cannot reach them', () => {
         // The remaining sector fills the disc and nothing more (see
         // `remainingSectorPath`), while the numerals sit beyond the ticks on
-        // their own ring. That gap is what keeps the translucent fill off a
-        // numeral's ink — the sector tints the ticks it swallows and stops there.
+        // their own ring. That gap is what keeps the fill off a numeral's ink.
         expect(NUMERAL_RADIUS - NUMERAL_GLYPH_HALF_WIDTH).toBeGreaterThan(DISC_RADIUS)
     })
 
