@@ -103,13 +103,15 @@ and the `offscreen` permission to the manifest.
   resolve custom properties on presentation attributes.
 - **Static SVG is hoisted.** The tick and numeral rings are built once at
   module load (`DIAL_TICKS`, `DIAL_NUMERALS`). Only the sector and the preview
-  chrome are stateful: previewing swaps the numeral ring for the preview numeral
-  and redraws the covered ticks in the remaining colour, over the untouched ring
-  (AGENTS.md "Preview numeral", "Preview ticks"). The face paints in that
-  order — disc, ticks, sector, numerals or the preview chrome, arc, readout,
-  mark — so the translucent sector tints the ticks it swallows and stops there:
-  the numerals sit outside the disc, on their own ring, so the fill can never
-  reach them.
+  chrome are stateful: previewing fades the numeral ring out (`data-previewing`
+  on the face) and draws the preview numeral and the covered ticks in the
+  remaining colour over it (AGENTS.md "Preview numeral", "Preview ticks"). The
+  ring is faded rather than unmounted, so the numeral under the pointer keeps the
+  hit target that starts the timer — the preview numeral is `pointer-events:
+  none` for the same reason. The face paints in that order — disc, ticks, sector,
+  numerals, the preview chrome over the faded ring, arc, readout, mark — so the
+  translucent sector tints the ticks it swallows and stops there: the numerals
+  sit outside the disc, on their own ring, so the fill can never reach them.
 - **One click sets a timer.** Clicking the disc starts the previewed duration;
   clicking a numeral starts that many minutes outright. The 0 numeral is the
   exception: it marks where a whole turn ends, so it resets the timer — the same
@@ -119,8 +121,11 @@ and the `offscreen` permission to the manifest.
   numeral because it sits off the disc.
   `pointer-events: bounding-box` (see `TimerFace.module.css`) gives each numeral
   a solid hit area, and hovering one takes `--remaining` — the same interactive
-  signal the preview arc and preview numeral use. Nothing asks for confirmation,
-  even when a timer is already running.
+  signal the preview arc and preview numeral use. Hovering one also previews it
+  exactly as hovering the disc at that minute does (`previewMinutesAt`): the ring
+  fades and the arc and preview numeral appear, so the shortcut shows what it
+  will set before it is clicked. Nothing asks for confirmation, even when a timer
+  is already running.
 - **The readout control is HTML, not SVG.** Pause/resume (and restart, while
   ringing) is a real `<button>` (`ReadoutControl`) overlaid on the readout disc as
   a *sibling* of the `<svg>` — a `<button>` is not valid in the SVG namespace, and
@@ -138,7 +143,7 @@ and the `offscreen` permission to the manifest.
   to each. It takes the pointer only on its buttons, so the dial underneath keeps
   the rest. The group fades out while the dial is previewed — keyed off the
   face's `data-pickable` attribute with `:has()`, the same signal that drives the
-  cursor and the numeral swap — and fades back when the pointer leaves the disc.
+  cursor and the numeral fade — and fades back when the pointer leaves the disc.
   The sizes are `cqmin` tokens (`--size-corner-control`, `--size-corner-icon`),
   so the glyphs keep their weight against the dial instead of staying a fixed
   18px on a large fullscreen face; the icon is a percentage of the control,

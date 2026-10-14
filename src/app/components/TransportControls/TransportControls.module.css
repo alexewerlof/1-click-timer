@@ -21,12 +21,13 @@
  * While the dial is being previewed the corner controls fade out with the
  * numeral ring, so the face shows nothing but the choice being made (AGENTS.md
  * "Set a custom timer"). `data-pickable` is the signal the face already sets to
- * swap the numeral ring for the preview numeral and to change its cursor, so
- * keying off it here keeps the three from drifting apart. The pointer can only
- * reach a control after it has left the disc — which is exactly when
- * `data-pickable` goes false — so the controls always fade back before a click
- * can land. A control that holds keyboard focus stays put, so the group is never
- * hidden out from under the keyboard.
+ * change its cursor and to fade these controls (the ring itself fades off
+ * `data-previewing`), so keying off it here keeps the two from drifting apart.
+ * The pointer can only reach a control after it has left the disc — and the
+ * numeral ring beyond it — which is exactly when `data-pickable` goes false, so
+ * the controls always fade back before a click can land. A control that holds
+ * keyboard focus stays put, so the group is never hidden out from under the
+ * keyboard.
  */
 *:has([data-pickable='true']) + .corners:not(:has(:focus-visible)) {
     opacity: 0;

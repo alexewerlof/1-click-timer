@@ -145,10 +145,9 @@ test('draws the previewed minute as the only numeral on the face', async () => {
     svg.dispatchEvent(new PointerEvent('pointermove', { clientX: at.x, clientY: at.y, bubbles: true }))
 
     const numeral = await vi.waitFor(() => {
-        const numerals = svg.querySelectorAll('text[class*="numeral"]')
-        const only = numerals.length === 1 ? numerals[0] : undefined
-        if (!only) throw new Error('the numeral ring has not stepped aside yet')
-        return only
+        const preview = svg.querySelector('text[class*="previewNumeral"]')
+        if (!preview) throw new Error('the preview numeral has not appeared yet')
+        return preview
     })
 
     expect(numeral.textContent).toBe('15')
@@ -163,6 +162,17 @@ test('draws the previewed minute as the only numeral on the face', async () => {
     const arc = svg.querySelector('[class*="previewArc"]') as SVGPathElement
     const remaining = getComputedStyle(arc).stroke
     expect(getComputedStyle(numeral).fill).toBe(remaining)
+
+    // The whole ring fades out, so the preview numeral is the only *visible*
+    // number on the face — but the ring stays in the tree, faded, so the numeral
+    // under the pointer keeps the hit target that starts the timer.
+    await vi.waitFor(() => {
+        const ring = svg.querySelector('g[data-dial-numerals]') as SVGGElement
+        expect(getComputedStyle(ring).opacity).toBe('0')
+    })
+    expect(svg.querySelectorAll('g[data-dial-numerals] text[data-numeral-minutes]')).toHaveLength(
+        NUMERAL_MINUTES.length,
+    )
 
     // The ticks the arc covers are redrawn in that colour too — and only those.
     // The span is closed, so it runs through the 15-minute tick inclusive.
@@ -179,6 +189,58 @@ test('draws the previewed minute as the only numeral on the face', async () => {
     // The readout never previews the minute; while idle it is blank, because
     // there is no remaining time to report.
     expect(svg.querySelector('text[class*="readout"]')).toBeNull()
+})
+
+/**
+ * Hovering a numeral previews it exactly as hovering the disc at that minute
+ * does: the ring fades and the arc and preview numeral appear. The numeral is the
+ * same one-click shortcut, so it now shows what it will set before it is clicked
+ * (AGENTS.md "Preview numeral").
+ */
+test('previews a numeral on hover, like the disc', async () => {
+    const runtime = createMockRuntime()
+    runtime.forceStatus('idle')
+    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} />))
+
+    const svg = screen.getByRole('slider').element() as SVGSVGElement
+    await page.elementLocator(numeralElement(svg, 40)).hover()
+
+    const previewNumeral = await vi.waitFor(() => {
+        const preview = svg.querySelector('text[class*="previewNumeral"]')
+        if (!preview) throw new Error('the preview numeral has not appeared yet')
+        return preview
+    })
+    expect(previewNumeral.textContent).toBe('40')
+
+    // The ring fades out, so the preview numeral is the only visible number.
+    await vi.waitFor(() => {
+        const ring = svg.querySelector('g[data-dial-numerals]') as SVGGElement
+        expect(getComputedStyle(ring).opacity).toBe('0')
+    })
+
+    // The arc runs from 12 o'clock to the numeral's minute, and the ticks it
+    // covers are redrawn in the remaining colour — one per minute, 0 through 40.
+    expect(svg.querySelector('[class*="previewArc"]')).not.toBeNull()
+    expect(svg.querySelectorAll('line[class*="tickPreview"]')).toHaveLength(41)
+})
+
+/**
+ * The 0 numeral is the reset control, not a duration, so hovering it previews
+ * nothing — the ring stays put and no arc is drawn (AGENTS.md "Set a custom
+ * timer").
+ */
+test('does not preview the 0 numeral on hover', async () => {
+    const runtime = createMockRuntime()
+    runtime.forceStatus('idle')
+    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} />))
+
+    const svg = screen.getByRole('slider').element() as SVGSVGElement
+    await page.elementLocator(numeralElement(svg, 0)).hover()
+
+    expect(svg.querySelector('text[class*="previewNumeral"]')).toBeNull()
+    expect(svg.querySelector('[class*="previewArc"]')).toBeNull()
+    const ring = svg.querySelector('g[data-dial-numerals]') as SVGGElement
+    expect(getComputedStyle(ring).opacity).toBe('1')
 })
 
 /** The numeral for `minutes`, or a clear failure if the ring does not have one. */

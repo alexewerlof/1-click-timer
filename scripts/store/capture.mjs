@@ -161,8 +161,8 @@ try {
     await face.waitForTimeout(400)
     await shoot(face, '02-running.png')
 
-    // 3 — previewing: the arc to the minute under the pointer, the ring swapped
-    // for that one numeral, and the corner controls faded out.
+    // 3 — previewing: the arc to the minute under the pointer, the numeral ring
+    // faded out around that one numeral, and the corner controls faded out.
     const atPreview = await face.evaluate((minutes) => {
         const svg = document.querySelector('svg')
         const disc = svg.querySelector('circle[class*="disc"]')

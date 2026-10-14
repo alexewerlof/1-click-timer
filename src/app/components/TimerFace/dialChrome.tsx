@@ -6,10 +6,11 @@
  * depends on state — so it is built once at module load and reused
  * (`rendering-hoist-jsx`, `js-cache-function-results`).
  *
- * Ticks and numerals are separate exports because the face shows either the
- * whole numeral ring or the single preview numeral, never both. The tick
- * element itself lives in `Tick.tsx`, so `PreviewTicks` can redraw the covered
- * ticks without duplicating it.
+ * Ticks and numerals are separate exports because the face fades the whole
+ * numeral ring out while a duration is previewed, leaving the single preview
+ * numeral as the only number on it (see `PreviewNumeral`). The tick element
+ * itself lives in `Tick.tsx`, so `PreviewTicks` can redraw the covered ticks
+ * without duplicating it.
  */
 
 import { DIAL_TICKS as TICK_GEOMETRY, NUMERAL_MINUTES, NUMERAL_RADIUS, pointOnDial } from '../../lib/dial'

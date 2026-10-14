@@ -100,7 +100,24 @@
     fill: var(--remaining);
 }
 
+/*
+ * While a duration is previewed the whole ring fades out, so the preview numeral
+ * is the only number on the face (AGENTS.md "Preview numeral"). It is faded, not
+ * unmounted: the numeral under the pointer has to keep its hit target, or the
+ * preview would flicker and the click that starts the timer would miss it.
+ * `data-previewing` is set by the face only when an arc is actually drawn, so
+ * hovering the 0 numeral leaves the ring alone.
+ */
+.numeralRing {
+    transition: opacity 120ms ease;
+}
+
+.face[data-previewing='true'] .numeralRing {
+    opacity: 0;
+}
+
 @media (prefers-reduced-motion: reduce) {
+    .numeralRing,
     .numeralRing text {
         transition: none;
     }
@@ -134,9 +151,14 @@
  * previews — the `--remaining` token, which the settings screen will write to.
  * Solid rather than the sector's `--remaining-alpha`: that alpha is for a
  * translucent overlay on the dial, and this numeral sits on the plain face.
+ *
+ * `pointer-events: none` matters: it is drawn exactly over the faded ring
+ * numeral, and the ring numeral must stay the hit target so hovering does not
+ * flicker and clicking still starts the timer.
  */
 .previewNumeral {
     fill: var(--remaining);
+    pointer-events: none;
 }
 
 /*

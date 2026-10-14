@@ -12,8 +12,10 @@ interface PreviewNumeralProps {
  * arc's own label rather than another numeral.
  *
  * While previewing it is the *only* numeral on the face: the whole ring is
- * hidden, because showing 0, 5, … 55 beside it would compete with the one number
- * that matters (AGENTS.md "Preview numeral").
+ * faded out, because showing 0, 5, … 55 beside it would compete with the one
+ * number that matters (AGENTS.md "Preview numeral"). The ring is faded rather
+ * than unmounted, so the numeral under the pointer keeps the hit target that
+ * starts the timer — which is why this numeral is `pointer-events: none`.
  *
  * `pointOnDial` maps 60 back onto 12 o'clock, so a whole turn is labelled where
  * the 0 numeral sits.

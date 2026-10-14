@@ -101,8 +101,24 @@ export function TimerFace({ status, remainingSeconds, onPick, onTogglePause, onR
         return Number(label)
     }
 
+    /**
+     * The minute a pointer position previews: the numeral under the pointer when
+     * it is over one, or the dial point otherwise. A numeral sits outside the
+     * disc, so the pointer's position alone cannot identify it — but it is the
+     * same choice a click would make there, so hovering a numeral shows exactly
+     * what hovering the disc at that minute shows (AGENTS.md "Preview numeral").
+     *
+     * The 0 numeral is the reset control, not a duration, so hovering it previews
+     * nothing — matching the click (see `handleClick`).
+     */
+    function previewMinutesAt(event: PointerEventType<SVGSVGElement>): number | null {
+        const numeral = numeralMinutesAt(event.target)
+        if (numeral !== null) return numeral === RESET_NUMERAL_MINUTES ? null : numeral
+        return durationAt(pointAt(event.clientX, event.clientY))
+    }
+
     function handlePointerMove(event: PointerEventType<SVGSVGElement>) {
-        setPreviewMinutes(durationAt(pointAt(event.clientX, event.clientY)))
+        setPreviewMinutes(previewMinutesAt(event))
     }
 
     function handlePointerLeave() {
@@ -184,6 +200,7 @@ export function TimerFace({ status, remainingSeconds, onPick, onTogglePause, onR
                 className={styles.face}
                 viewBox={DIAL_VIEWBOX}
                 data-pickable={previewing}
+                data-previewing={previewNumeral !== null}
                 role="slider"
                 tabIndex={0}
                 aria-label="Timer duration"
@@ -207,15 +224,18 @@ export function TimerFace({ status, remainingSeconds, onPick, onTogglePause, onR
                  */}
                 <RemainingTime seconds={remainingSeconds} active={status === 'running'} />
                 {/*
-                 * The numeral ring and the preview's own chrome are mutually
-                 * exclusive: while previewing, the ring is swapped for the single
-                 * numeral the arc points at, and the ticks the arc covers are
-                 * redrawn in the remaining colour — so the arc, its numeral and
-                 * those ticks read as one mark.
+                 * The numeral ring stays mounted while previewing, faded out by
+                 * `data-previewing` on the face (see the CSS). It is not swapped
+                 * for the preview numeral: keeping it in the tree is what lets the
+                 * numeral under the pointer keep its hit target, so the hover does
+                 * not flicker and the click that starts the timer still lands on
+                 * it. The preview's own chrome is drawn over the faded ring — the
+                 * ticks the arc covers in the remaining colour, and the single
+                 * numeral the arc points at — so the arc, its numeral and those
+                 * ticks read as one mark.
                  */}
-                {previewNumeral === null ? (
-                    DIAL_NUMERALS
-                ) : (
+                {DIAL_NUMERALS}
+                {previewNumeral !== null && (
                     <>
                         <PreviewTicks minutes={previewNumeral} />
                         <PreviewNumeral minutes={previewNumeral} />
