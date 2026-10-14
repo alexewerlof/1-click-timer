@@ -799,6 +799,34 @@ test('draws the creator mark in the numerals’ ink', async () => {
 })
 
 /**
+ * The mark belongs to the maker, not to the timer: while a timer counts down the
+ * remaining sector is the only thing that should hold the eye — on a classroom
+ * projector above all — so the branding steps aside and comes back when the timer
+ * stops. It is faded rather than unmounted, so neither move pops.
+ */
+test('hides the creator mark while the timer runs', async () => {
+    const runtime = createMockRuntime()
+    runtime.forceStatus('idle')
+    const screen = await render(stage(<TimerApp surface="popup" runtime={runtime} settingsStore={settings} />))
+
+    const svg = screen.getByRole('slider').element() as SVGSVGElement
+    const mark = svg.querySelector('[class*="creatorMark"]') as SVGElement
+    if (!mark) throw new Error('the creator mark is not on the face')
+
+    // Idle: the mark is showing.
+    expect(getComputedStyle(mark).opacity).toBe('1')
+
+    runtime.forceStatus('running')
+    await vi.waitFor(() => expect(getComputedStyle(mark).opacity).toBe('0'))
+
+    // Still in the tree while hidden — the fade needs it there.
+    expect(svg.querySelector('[class*="creatorMark"]')).not.toBeNull()
+
+    runtime.forceStatus('idle')
+    await vi.waitFor(() => expect(getComputedStyle(mark).opacity).toBe('1'))
+})
+
+/**
  * Clicking the dial focuses the face (it is a `role="slider"` with `tabindex=0`),
  * and focus alone must not draw a ring. The `<svg>` used to get the browser's own
  * default outline — an unrounded amber rectangle, distinct from the app's rounded

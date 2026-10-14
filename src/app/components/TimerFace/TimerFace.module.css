@@ -261,6 +261,25 @@
 .creatorMark {
     fill: var(--dial-mark);
     pointer-events: none;
+    transition: opacity 120ms ease;
+}
+
+/*
+ * The mark is the maker's, not the timer's, so it steps aside while the timer
+ * runs: on a projector the remaining sector is what the room is watching, and
+ * branding beside a countdown is noise (AGENTS.md "Creator mark"). Faded rather
+ * than unmounted, so it neither pops in nor pops out when a timer starts or
+ * stops; `data-running` is set by the face from the timer status, the same way
+ * `data-previewing` drives the numeral ring.
+ */
+.face[data-running='true'] .creatorMark {
+    opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .creatorMark {
+        transition: none;
+    }
 }
 
 .caption {

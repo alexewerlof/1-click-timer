@@ -207,6 +207,13 @@ export function TimerFace({ status, remainingSeconds, onPick, onTogglePause, onR
                 viewBox={DIAL_VIEWBOX}
                 data-pickable={previewing}
                 data-previewing={previewNumeral !== null}
+                /*
+                 * While the timer counts down the face is someone else's
+                 * instrument — a projector, most often — so the branding steps
+                 * aside and the remaining sector is the only thing to read
+                 * (AGENTS.md "Creator mark").
+                 */
+                data-running={status === 'running'}
                 role="slider"
                 tabIndex={0}
                 aria-label="Timer duration"
@@ -249,6 +256,7 @@ export function TimerFace({ status, remainingSeconds, onPick, onTogglePause, onR
                 )}
                 <PreviewArc previewMinutes={previewMinutes} />
                 <CenterReadout status={status} remainingSeconds={remainingSeconds} />
+                {/* Faded out while running, not unmounted — see `.creatorMark`. */}
                 <CreatorMark />
                 <Caption />
             </svg>

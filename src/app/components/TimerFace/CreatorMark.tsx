@@ -23,6 +23,9 @@ import styles from './TimerFace.module.css'
  * (no-op) clip path and its hard-coded colours. The nested `viewBox` is the art's
  * own canvas, and 25 units of padding sit on every side, so a mark at the box's
  * edge cannot be clipped by the nested viewport.
+ *
+ * The face hides it while the timer runs, so a countdown leaves the remaining
+ * sector alone with the eye (see `.creatorMark` in `TimerFace.module.css`).
  */
 export function CreatorMark() {
     return (

@@ -179,7 +179,11 @@ and the `offscreen` permission to the manifest.
   them with `--dial-mark`, so it recolours with the numerals and ticks. Filled,
   not stroked: the source is a hairline outline that would vanish on the popup.
   It is placed by `CREATOR_MARK_*` in `lib/dial.ts`, in the band between the
-  readout disc and the 0 numeral.
+  readout disc and the 0 numeral. It steps aside while the timer runs: the face
+  carries `data-running` from the timer status and `.creatorMark` fades to zero
+  opacity on it, so a countdown on a projector shows the remaining sector and no
+  branding. Faded rather than unmounted, so it returns without a pop when the
+  timer stops.
 - **Service worker logs** are prefixed `[1-click-timer:sw]`.
 - **The worker is the single writer.** Every action is a `TimerRequest` message;
   the worker applies `reduceTimer` (in `shared/timer.ts`), persists to
