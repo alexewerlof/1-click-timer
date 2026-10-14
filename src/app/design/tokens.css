@@ -96,7 +96,7 @@
        white: it leaves the corner controls room to catch a lighter light along
        one rim and fall into shade along the other (`--control-soft-shadow`),
        which is what gives them their soft, raised look. */
-    --surface: #f2eee5;
+    --surface: #e2dccf;
     /* The face is the page background; only the disc is drawn. */
     --face: transparent;
 
@@ -149,7 +149,7 @@
  */
 [data-theme='dark'] {
     color-scheme: dark;
-    --surface: #101216;
+    --surface: #1d1b17;
     --ink: #e8eaee;
     --ink-soft: rgb(232 234 238 / 55%);
     --dial-mark: #e8eaee;
