@@ -25,6 +25,8 @@ import {
     pointToMinutes,
     remainingArcPath,
     remainingSectorPath,
+    SECTOR_INNER_RADIUS,
+    SECTOR_OUTER_RADIUS,
     ticksWithinPreview,
 } from './dial'
 import { MAX_SECONDS, SECONDS_PER_MINUTE } from './time'
@@ -109,13 +111,22 @@ describe('remainingSectorPath', () => {
         expect(remainingSectorPath(0)).toBe('')
     })
 
-    it('draws nothing for a whole turn, because an arc cannot close', () => {
-        expect(remainingSectorPath(MAX_SECONDS)).toBe('')
+    it('starts on the outer rim at 12 o’clock, never at the centre', () => {
+        const rim = pointOnDial(0, SECTOR_OUTER_RADIUS)
+        const path = remainingSectorPath(10 * SECONDS_PER_MINUTE)
+        expect(path.startsWith(`M ${rim.x} ${rim.y} A `)).toBe(true)
+        expect(path).not.toContain(`M ${DIAL_CENTER_X} ${DIAL_CENTER_Y}`)
     })
 
-    it('starts at the centre and 12 o’clock', () => {
+    it('cuts a circular hole the size of the readout disc instead of a sharp corner', () => {
+        // The inner edge's two radial ends sit on the readout disc's rim, so the
+        // shape matches the visible wedge and the disc no longer has to cover a
+        // corner that reached the centre.
         const path = remainingSectorPath(10 * SECONDS_PER_MINUTE)
-        expect(path.startsWith(`M ${DIAL_CENTER_X} ${DIAL_CENTER_Y} L `)).toBe(true)
+        const innerTo = pointOnDial(10, SECTOR_INNER_RADIUS)
+        const innerFrom = pointOnDial(0, SECTOR_INNER_RADIUS)
+        expect(path).toContain(`L ${innerTo.x} ${innerTo.y}`)
+        expect(path).toContain(`A ${SECTOR_INNER_RADIUS} ${SECTOR_INNER_RADIUS} 0 0 1 ${innerFrom.x} ${innerFrom.y}`)
     })
 
     it('sets the large-arc flag once more than half the dial is left', () => {
@@ -129,6 +140,15 @@ describe('remainingSectorPath', () => {
         const quarter = pointOnDial(15, DISC_RADIUS)
         expect(quarter.x).toBeLessThan(DIAL_CENTER_X)
         expect(remainingSectorPath(15 * SECONDS_PER_MINUTE)).toContain(`${quarter.x} ${quarter.y}`)
+    })
+
+    it('makes a whole turn a ring, leaving the readout disc’s hole empty', () => {
+        const path = remainingSectorPath(MAX_SECONDS)
+        const outerTop = pointOnDial(0, SECTOR_OUTER_RADIUS)
+        const innerTop = pointOnDial(0, SECTOR_INNER_RADIUS)
+        expect(path.startsWith(`M ${outerTop.x} ${outerTop.y} A `)).toBe(true)
+        expect(path).toContain(`L ${innerTop.x} ${innerTop.y}`)
+        expect(path).not.toContain(`M ${DIAL_CENTER_X} ${DIAL_CENTER_Y}`)
     })
 })
 

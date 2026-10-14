@@ -337,24 +337,75 @@ function minutesOfSeconds(seconds: number): number {
 }
 
 /**
- * Pie slice from 12 o'clock counter-clockwise to the remaining time — the red
- * area that shrinks towards the top as the timer runs. Empty when time is up,
- * and for a whole turn (an arc cannot close on itself).
+ * The remaining sector is an *annular* wedge: a pie slice with the readout disc
+ * cut out of its middle, so its inner edge is a circle rather than the sharp
+ * corner that used to point at the centre. That way the shape that is drawn is
+ * the shape that is seen — nothing has to be painted over the corner to hide it
+ * (AGENTS.md "Remaining sector").
+ *
+ * The radii are named so a gap can be dialled in later: drop `SECTOR_INNER_RADIUS`
+ * inwards (or `SECTOR_OUTER_RADIUS` inwards from the rim) and the filled wedge
+ * steps back from the readout disc without touching the path maths.
+ */
+export const SECTOR_INNER_RADIUS = READOUT_DISC_RADIUS
+export const SECTOR_OUTER_RADIUS = DISC_RADIUS
+
+/**
+ * Annular wedge from 12 o'clock counter-clockwise to `minutes`: the outer arc, a
+ * radial step inwards, the inner arc back, and the radial edge closing it at 12
+ * o'clock. Both arcs sweep the same span, so they share the large-arc flag; the
+ * inner one runs the other way (clockwise) to retrace.
+ */
+function annularSectorPath(minutes: number): string {
+    const largeArc = minutes > MINUTES_PER_TURN / 2 ? 1 : 0
+    const outerFrom = pointOnDial(0, SECTOR_OUTER_RADIUS)
+    const outerTo = pointOnDial(minutes, SECTOR_OUTER_RADIUS)
+    const innerTo = pointOnDial(minutes, SECTOR_INNER_RADIUS)
+    const innerFrom = pointOnDial(0, SECTOR_INNER_RADIUS)
+
+    return [
+        `M ${outerFrom.x} ${outerFrom.y}`,
+        `A ${SECTOR_OUTER_RADIUS} ${SECTOR_OUTER_RADIUS} 0 ${largeArc} 0 ${outerTo.x} ${outerTo.y}`,
+        `L ${innerTo.x} ${innerTo.y}`,
+        `A ${SECTOR_INNER_RADIUS} ${SECTOR_INNER_RADIUS} 0 ${largeArc} 1 ${innerFrom.x} ${innerFrom.y}`,
+        'Z',
+    ].join(' ')
+}
+
+/**
+ * A whole turn: an annular wedge of 360°, which is a ring — the disc with the
+ * readout disc's hole in it. Two half-turn arcs make each circle, because a
+ * single arc cannot close on itself (its ends would coincide and SVG draws
+ * nothing).
+ */
+function fullRingPath(): string {
+    const outerTop = pointOnDial(0, SECTOR_OUTER_RADIUS)
+    const outerBottom = pointOnDial(MINUTES_PER_TURN / 2, SECTOR_OUTER_RADIUS)
+    const innerTop = pointOnDial(0, SECTOR_INNER_RADIUS)
+    const innerBottom = pointOnDial(MINUTES_PER_TURN / 2, SECTOR_INNER_RADIUS)
+
+    return [
+        `M ${outerTop.x} ${outerTop.y}`,
+        `A ${SECTOR_OUTER_RADIUS} ${SECTOR_OUTER_RADIUS} 0 1 0 ${outerBottom.x} ${outerBottom.y}`,
+        `A ${SECTOR_OUTER_RADIUS} ${SECTOR_OUTER_RADIUS} 0 1 0 ${outerTop.x} ${outerTop.y}`,
+        `L ${innerTop.x} ${innerTop.y}`,
+        `A ${SECTOR_INNER_RADIUS} ${SECTOR_INNER_RADIUS} 0 1 1 ${innerBottom.x} ${innerBottom.y}`,
+        `A ${SECTOR_INNER_RADIUS} ${SECTOR_INNER_RADIUS} 0 1 1 ${innerTop.x} ${innerTop.y}`,
+        'Z',
+    ].join(' ')
+}
+
+/**
+ * The red area that shrinks towards the top as the timer runs: an annular wedge
+ * from 12 o'clock counter-clockwise to the remaining time, from the readout
+ * disc's rim out to the disc's rim. Empty when the time is up; a whole turn is
+ * a ring.
  */
 export function remainingSectorPath(seconds: number): string {
     const minutes = minutesOfSeconds(seconds)
-    if (minutes <= 0 || minutes >= MINUTES_PER_TURN) return ''
-
-    const from = pointOnDial(0, DISC_RADIUS)
-    const to = pointOnDial(minutes, DISC_RADIUS)
-    const largeArc = minutes > MINUTES_PER_TURN / 2 ? 1 : 0
-
-    return [
-        `M ${DIAL_CENTER_X} ${DIAL_CENTER_Y}`,
-        `L ${from.x} ${from.y}`,
-        `A ${DISC_RADIUS} ${DISC_RADIUS} 0 ${largeArc} 0 ${to.x} ${to.y}`,
-        'Z',
-    ].join(' ')
+    if (minutes <= 0) return ''
+    if (minutes >= MINUTES_PER_TURN) return fullRingPath()
+    return annularSectorPath(minutes)
 }
 
 /** Unfilled arc used for the preliminary (hover) indicator. */

@@ -114,6 +114,9 @@ and the `offscreen` permission to the manifest.
   numerals, the preview chrome over the faded ring, arc, readout, mark — so the
   translucent sector tints the ticks it swallows and stops there: the numerals
   sit outside the disc, on their own ring, so the fill can never reach them.
+  (The sector is an annular wedge — a pie slice with the readout disc's circle cut
+  out of its middle — so its inner edge is a circle and the readout disc never has
+  to be painted over a sharp corner to hide it; see `SECTOR_INNER_RADIUS`.)
 - **One click sets a timer.** Clicking the disc starts the previewed duration;
   clicking a numeral starts that many minutes outright. The 0 numeral is the
   exception: it marks where a whole turn ends, so it resets the timer — the same
